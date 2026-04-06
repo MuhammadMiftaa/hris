@@ -270,7 +270,7 @@ export function SearchableSelect({
           <ChevronDown
             size={14}
             className={cn(
-              "shrink-0 text-(--muted-foreground) transition-transform",
+              "shrink-0 text-(--muted-foreground) transition-transform ml-2",
               isOpen && "rotate-180",
             )}
           />

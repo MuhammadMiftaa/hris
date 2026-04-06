@@ -1,342 +1,397 @@
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User,
-  Camera,
-  Trash2,
   ArrowLeft,
-  Save,
-  Loader2,
+  Phone,
   Mail,
-  Calendar,
+  MapPin,
+  Network,
+  Briefcase,
+  Building2,
+  IdCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useProfile } from "@/hooks/useProfile";
-import { useAuth } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import {
+  useEmployeeProfile,
+  useEmployeeProfileContacts,
+} from "@/hooks/useEmployeeProfile";
+import {
+  GENDER_LABELS,
+  MARITAL_STATUS_LABELS,
+  CONTACT_TYPE_LABELS,
+} from "@/types/employee";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+
+// ════════════════════════════════════════════
+// TAB NAV
+// ════════════════════════════════════════════
+
+function TabNav({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: number;
+  setActiveTab: (tab: number) => void;
+}) {
+  const tabs = [
+    { label: "Info Pribadi", icon: User },
+    { label: "Data Pekerjaan", icon: Briefcase },
+    { label: "Kontak", icon: Phone },
+  ];
+
+  return (
+    <div className="flex gap-1 overflow-x-auto border-b border-(--border)">
+      {tabs.map((tab, index) => (
+        <button
+          key={tab.label}
+          onClick={() => setActiveTab(index)}
+          className={cn(
+            "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap",
+            activeTab === index
+              ? "border-(--primary) text-(--primary)"
+              : "border-transparent text-(--muted-foreground) hover:text-(--foreground)",
+          )}
+        >
+          <tab.icon size={16} />
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// INFO ITEM
+// ════════════════════════════════════════════
+
+function InfoItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null | undefined;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="text-xs text-(--muted-foreground)">{label}</div>
+      <div className="text-sm font-medium text-(--foreground)">
+        {value || "-"}
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// MAIN PAGE
+// ════════════════════════════════════════════
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const {
-    data: profile,
-    loading,
-    update,
-    uploadPhoto,
-    removePhoto,
-  } = useProfile();
+  const { data: profile, loading: profileLoading } = useEmployeeProfile();
+  const { data: contacts, loading: contactsLoading } =
+    useEmployeeProfileContacts();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [fullname, setFullname] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
-  // Initialize fullname when profile loads
-  useState(() => {
-    if (profile?.fullname) {
-      setFullname(profile.fullname);
-    }
-  });
+  const loading = profileLoading || contactsLoading;
 
-  const handleSave = async () => {
-    if (!fullname.trim()) {
-      toast.error("Fullname cannot be empty");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await update(fullname);
-      setIsEditing(false);
-      toast.success("Profile updated successfully");
-    } catch {
-      toast.error("Failed to update profile");
-    } finally {
-      setIsSaving(false);
-    }
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
-  const handlePhotoSelect = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select an image file");
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size must be less than 5MB");
-        return;
-      }
-
-      setIsUploading(true);
-      try {
-        // Convert to base64
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const base64 = reader.result as string;
-          try {
-            await uploadPhoto(base64);
-            toast.success("Profile photo uploaded successfully");
-          } catch {
-            toast.error("Failed to upload profile photo");
-          } finally {
-            setIsUploading(false);
-          }
-        };
-        reader.onerror = () => {
-          toast.error("Failed to read image file");
-          setIsUploading(false);
-        };
-        reader.readAsDataURL(file);
-      } catch {
-        toast.error("Failed to process image");
-        setIsUploading(false);
-      }
-
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
-    [uploadPhoto],
-  );
-
-  const handleRemovePhoto = async () => {
-    if (!profile?.photo_url) return;
-
-    setIsUploading(true);
-    try {
-      await removePhoto();
-      toast.success("Profile photo removed");
-    } catch {
-      toast.error("Failed to remove profile photo");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const initials = profile?.fullname
-    ? profile.fullname
+  const initials = profile?.full_name
+    ? profile.full_name
         .split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)
-    : user?.email?.slice(0, 2).toUpperCase() || "AU";
+    : "??";
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <MainLayout>
+        <div className="flex flex-col items-center justify-center p-6 pt-16 min-h-[50vh] md:pt-6">
+          <EmptyState
+            title="Profil tidak ditemukan"
+            description="Data profil Anda tidak tersedia saat ini"
+            icon={<User className="h-12 w-12" />}
+          />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="mx-auto max-w-2xl px-4 py-6 md:px-6 md:py-8">
+      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
         {/* Header */}
-        <div className="mb-6 flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-(--border) bg-(--card) text-(--muted-foreground) transition hover:text-(--foreground)"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-(--foreground) md:text-2xl">
-              Profile
-            </h1>
-            <p className="text-sm text-(--muted-foreground)">
-              Manage your personal information
-            </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white"
+              style={{
+                background:
+                  "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
+              }}
+            >
+              {profile.photo_url ? (
+                <img
+                  src={profile.photo_url}
+                  alt="Profile"
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                initials
+              )}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-(--foreground)">
+                {profile.full_name}
+              </h1>
+              <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                <p className="text-sm text-(--muted-foreground)">
+                  {profile.employee_number}
+                  {profile.job_position_title
+                    ? ` · ${profile.job_position_title}`
+                    : ""}
+                </p>
+                {profile.department_name && (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--secondary)/50 px-2 py-0.5 text-xs font-medium text-(--muted-foreground)">
+                    <Network size={10} />
+                    {profile.department_name}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-gold-400" />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Profile Photo Card */}
-            <div className="rounded-xl border border-(--border) bg-(--card) p-6">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-(--muted-foreground)">
-                Profile Photo
-              </h2>
-              <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                {/* Photo */}
-                <div className="relative">
-                  <div
-                    className={cn(
-                      "flex h-24 w-24 items-center justify-center overflow-hidden rounded-full text-2xl font-bold",
-                      profile?.photo_url ? "bg-(--muted)" : "text-black",
-                    )}
-                    style={
-                      !profile?.photo_url
-                        ? {
-                            background:
-                              "linear-gradient(135deg, #ffd700 0%, #daa520 60%, #c5961e 100%)",
-                            boxShadow: "0 0 16px 3px rgba(218,165,32,0.5)",
-                          }
+        {/* Tabs */}
+        <TabNav activeTab={activeTab} setActiveTab={setActiveTab} />
+
+        {/* Tab Content */}
+        <div className="min-h-75">
+          {/* Tab: Info Pribadi */}
+          {activeTab === 0 && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Data Dasar */}
+              <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <IdCard size={18} className="text-(--primary)" />
+                  <h3 className="font-semibold text-(--foreground)">
+                    Data Dasar
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoItem
+                    label="Nomor Pegawai"
+                    value={profile.employee_number}
+                  />
+                  <InfoItem label="Nama Lengkap" value={profile.full_name} />
+                  <InfoItem
+                    label="Tanggal Lahir"
+                    value={formatDate(profile.birth_date)}
+                  />
+                  <InfoItem label="Tempat Lahir" value={profile.birth_place} />
+                  <InfoItem
+                    label="Jenis Kelamin"
+                    value={
+                      profile.gender ? GENDER_LABELS[profile.gender] : undefined
+                    }
+                  />
+                  <InfoItem label="Agama" value={profile.religion} />
+                </div>
+              </div>
+
+              {/* Data Kependudukan */}
+              <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <User size={18} className="text-(--primary)" />
+                  <h3 className="font-semibold text-(--foreground)">
+                    Data Kependudukan
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoItem label="NIK" value={profile.nik} />
+                  <InfoItem label="NPWP" value={profile.npwp} />
+                  <InfoItem label="Nomor KK" value={profile.kk_number} />
+                  <InfoItem
+                    label="Status Pernikahan"
+                    value={
+                      profile.marital_status
+                        ? MARITAL_STATUS_LABELS[profile.marital_status]
                         : undefined
                     }
-                  >
-                    {profile?.photo_url ? (
-                      <img
-                        src={profile.photo_url}
-                        alt="Profile"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      initials
-                    )}
-                  </div>
-                  {isUploading && (
-                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-                      <Loader2 className="h-6 w-6 animate-spin text-white" />
-                    </div>
-                  )}
+                  />
+                  <InfoItem label="Golongan Darah" value={profile.blood_type} />
+                  <InfoItem
+                    label="Kewarganegaraan"
+                    value={profile.nationality}
+                  />
+                  <InfoItem
+                    label="Tinggi/Berat Badan"
+                    value={
+                      profile.height || profile.weight
+                        ? `${profile.height || "-"} cm / ${profile.weight || "-"} kg`
+                        : undefined
+                    }
+                  />
                 </div>
+              </div>
+            </div>
+          )}
 
-                {/* Actions */}
-                <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
-                  <p className="text-sm text-(--muted-foreground)">
-                    Upload a photo to personalize your profile. Max size: 5MB.
-                    Supported formats: JPG, PNG, WebP.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handlePhotoSelect}
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-gold-400 disabled:opacity-50"
+          {/* Tab: Data Pekerjaan */}
+          {activeTab === 1 && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Penempatan */}
+              <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Building2 size={18} className="text-(--primary)" />
+                  <h3 className="font-semibold text-(--foreground)">
+                    Penempatan
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <InfoItem label="Cabang" value={profile.branch_name} />
+                  <InfoItem
+                    label="Departemen"
+                    value={profile.department_name}
+                  />
+                </div>
+              </div>
+
+              {/* Jabatan */}
+              <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Briefcase size={18} className="text-(--primary)" />
+                  <h3 className="font-semibold text-(--foreground)">
+                    Jabatan & Role
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <InfoItem
+                    label="Jabatan"
+                    value={profile.job_position_title}
+                  />
+                  <InfoItem label="Role" value={profile.role_name} />
+                </div>
+              </div>
+
+              {/* Info Tambahan */}
+              <div className="rounded-xl border border-(--border) bg-(--card) p-5 lg:col-span-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <IdCard size={18} className="text-(--primary)" />
+                  <h3 className="font-semibold text-(--foreground)">
+                    Informasi Tambahan
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <InfoItem
+                    label="Bergabung Sejak"
+                    value={formatDate(profile.created_at)}
+                  />
+                  <InfoItem
+                    label="Terakhir Diperbarui"
+                    value={formatDate(profile.updated_at)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab: Kontak */}
+          {activeTab === 2 && (
+            <div className="space-y-4">
+              {!contacts || contacts.length === 0 ? (
+                <EmptyState
+                  title="Belum ada data kontak"
+                  description="Data kontak Anda belum tersedia"
+                  icon={<Phone className="h-10 w-10" />}
+                />
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {contacts.map((contact) => (
+                    <div
+                      key={contact.id}
+                      className="flex items-start gap-3 rounded-xl border border-(--border) bg-(--card) p-4"
                     >
-                      <Camera size={16} />
-                      {profile?.photo_url ? "Change Photo" : "Upload Photo"}
-                    </button>
-                    {profile?.photo_url && (
-                      <button
-                        onClick={handleRemovePhoto}
-                        disabled={isUploading}
-                        className="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 px-4 py-2 text-sm font-medium text-rose-400 transition hover:bg-rose-500/10 disabled:opacity-50"
+                      <div
+                        className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+                          contact.contact_type === "phone" &&
+                            "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+                          contact.contact_type === "email" &&
+                            "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+                          contact.contact_type === "address" &&
+                            "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+                        )}
                       >
-                        <Trash2 size={16} />
-                        Remove
-                      </button>
-                    )}
-                  </div>
+                        {contact.contact_type === "phone" && (
+                          <Phone size={18} />
+                        )}
+                        {contact.contact_type === "email" && <Mail size={18} />}
+                        {contact.contact_type === "address" && (
+                          <MapPin size={18} />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-(--muted-foreground)">
+                            {CONTACT_TYPE_LABELS[contact.contact_type]}
+                            {contact.contact_label &&
+                              ` · ${contact.contact_label}`}
+                          </span>
+                          {contact.is_primary && (
+                            <span className="rounded-full bg-(--primary)/10 px-2 py-0.5 text-xs font-medium text-(--primary)">
+                              Utama
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 text-sm font-medium text-(--foreground) break-all">
+                          {contact.contact_value}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
-
-            {/* Personal Info Card */}
-            <div className="rounded-xl border border-(--border) bg-(--card) p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-(--muted-foreground)">
-                  Personal Information
-                </h2>
-                {!isEditing && (
-                  <button
-                    onClick={() => {
-                      setFullname(profile?.fullname || "");
-                      setIsEditing(true);
-                    }}
-                    className="text-sm font-medium text-gold-400 transition hover:text-gold-300"
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                {/* Fullname */}
-                <div>
-                  <label className="mb-1 flex items-center gap-2 text-xs font-medium text-(--muted-foreground)">
-                    <User size={12} />
-                    Full Name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={fullname}
-                      onChange={(e) => setFullname(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="w-full rounded-lg border border-(--border) bg-(--background) px-4 py-2.5 text-sm text-(--foreground) placeholder:text-(--muted-foreground) focus:border-gold-500 focus:outline-none focus:ring-1 focus:ring-gold-500"
-                    />
-                  ) : (
-                    <p className="text-sm text-(--foreground)">
-                      {profile?.fullname || (
-                        <span className="italic text-(--muted-foreground)">
-                          Not set
-                        </span>
-                      )}
-                    </p>
-                  )}
-                </div>
-
-                {/* Email (read-only) */}
-                <div>
-                  <label className="mb-1 flex items-center gap-2 text-xs font-medium text-(--muted-foreground)">
-                    <Mail size={12} />
-                    Email Address
-                  </label>
-                  <p className="text-sm text-(--foreground)">{user?.email}</p>
-                </div>
-
-                {/* Member Since (read-only) */}
-                <div>
-                  <label className="mb-1 flex items-center gap-2 text-xs font-medium text-(--muted-foreground)">
-                    <Calendar size={12} />
-                    Member Since
-                  </label>
-                  <p className="text-sm text-(--foreground)">
-                    {formatDate(profile?.created_at || "")}
-                  </p>
-                </div>
-
-                {/* Edit Actions */}
-                {isEditing && (
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-gold-400 disabled:opacity-50"
-                    >
-                      {isSaving ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <Save size={16} />
-                      )}
-                      Save Changes
-                    </button>
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      disabled={isSaving}
-                      className="rounded-lg border border-(--border) px-4 py-2 text-sm font-medium text-(--muted-foreground) transition hover:text-(--foreground) disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </MainLayout>
   );

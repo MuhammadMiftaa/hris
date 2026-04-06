@@ -2,31 +2,77 @@
 // SHIFT & SCHEDULE TYPES
 // ════════════════════════════════════════════
 
-export interface ShiftTemplate {
+export type DayOfWeek =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export const DAY_OF_WEEK_OPTIONS: { value: DayOfWeek; label: string }[] = [
+  { value: "monday", label: "Senin" },
+  { value: "tuesday", label: "Selasa" },
+  { value: "wednesday", label: "Rabu" },
+  { value: "thursday", label: "Kamis" },
+  { value: "friday", label: "Jum'at" },
+  { value: "saturday", label: "Sabtu" },
+  { value: "sunday", label: "Minggu" },
+];
+
+export interface ShiftTemplateDetail {
   id: number;
-  name: string;
-  clock_in_start: string; // "07:30" format HH:mm
-  clock_in_end: string; // "08:10"
-  clock_out_start: string; // "15:30"
-  clock_out_end: string; // "16:30"
-  break_duration_minutes: number;
-  is_flexible: boolean;
+  shift_template_id: number;
+  day_of_week: DayOfWeek;
+  is_working_day: boolean;
+  clock_in_start: string | null; // "07:30" format HH:mm, null jika libur
+  clock_in_end: string | null;
+  break_dhuhr_start: string | null; // Opsional — boleh kosong
+  break_dhuhr_end: string | null; // Opsional — boleh kosong
+  break_asr_start: string | null; // Opsional — boleh kosong
+  break_asr_end: string | null; // Opsional — boleh kosong
+  clock_out_start: string | null;
+  clock_out_end: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 }
 
-export interface CreateShiftPayload {
+export interface ShiftTemplate {
+  id: number;
   name: string;
-  clock_in_start: string;
-  clock_in_end: string;
-  clock_out_start: string;
-  clock_out_end: string;
-  break_duration_minutes?: number;
-  is_flexible?: boolean;
+  is_flexible: boolean;
+  details: ShiftTemplateDetail[]; // child records per hari
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
-export interface UpdateShiftPayload extends Partial<CreateShiftPayload> {}
+export interface CreateShiftDetailPayload {
+  day_of_week: DayOfWeek;
+  is_working_day: boolean;
+  clock_in_start?: string | null;
+  clock_in_end?: string | null;
+  break_dhuhr_start?: string | null; // opsional
+  break_dhuhr_end?: string | null; // opsional
+  break_asr_start?: string | null; // opsional
+  break_asr_end?: string | null; // opsional
+  clock_out_start?: string | null;
+  clock_out_end?: string | null;
+}
+
+export interface CreateShiftPayload {
+  name: string;
+  is_flexible?: boolean;
+  details: CreateShiftDetailPayload[]; // 7 entries (Sen–Min)
+}
+
+export interface UpdateShiftPayload {
+  name?: string;
+  is_flexible?: boolean;
+  details?: CreateShiftDetailPayload[]; // partial update
+}
 
 export interface EmployeeSchedule {
   id: number;

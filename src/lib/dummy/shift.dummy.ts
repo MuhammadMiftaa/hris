@@ -1,7 +1,9 @@
 import type {
   ShiftTemplate,
+  ShiftTemplateDetail,
   EmployeeSchedule,
   ScheduleListParams,
+  DayOfWeek,
 } from "@/types/shift";
 import { DUMMY_EMPLOYEES } from "./employee.dummy";
 
@@ -9,16 +11,221 @@ import { DUMMY_EMPLOYEES } from "./employee.dummy";
 // SHIFT TEMPLATE DUMMY DATA
 // ════════════════════════════════════════════
 
+interface DetailConfig {
+  id: number;
+  shiftTemplateId: number;
+  dayOfWeek: DayOfWeek;
+  isWorkingDay: boolean;
+  clockInStart: string | null;
+  clockInEnd: string | null;
+  clockOutStart: string | null;
+  clockOutEnd: string | null;
+  breakDhuhrStart?: string | null;
+  breakDhuhrEnd?: string | null;
+  breakAsrStart?: string | null;
+  breakAsrEnd?: string | null;
+}
+
+// Helper function to create shift template detail
+function createDetail(config: DetailConfig): ShiftTemplateDetail {
+  return {
+    id: config.id,
+    shift_template_id: config.shiftTemplateId,
+    day_of_week: config.dayOfWeek,
+    is_working_day: config.isWorkingDay,
+    clock_in_start: config.clockInStart,
+    clock_in_end: config.clockInEnd,
+    break_dhuhr_start: config.breakDhuhrStart ?? null,
+    break_dhuhr_end: config.breakDhuhrEnd ?? null,
+    break_asr_start: config.breakAsrStart ?? null,
+    break_asr_end: config.breakAsrEnd ?? null,
+    clock_out_start: config.clockOutStart,
+    clock_out_end: config.clockOutEnd,
+    created_at: "2024-01-01T00:00:00Z",
+    updated_at: "2024-01-01T00:00:00Z",
+    deleted_at: null,
+  };
+}
+
+// Shift Reguler (id: 1) details
+const SHIFT_REGULER_DETAILS: ShiftTemplateDetail[] = [
+  // Senin - Kamis: working day, break Dzuhur 12:00-12:30, Ashar kosong
+  createDetail({
+    id: 1,
+    shiftTemplateId: 1,
+    dayOfWeek: "monday",
+    isWorkingDay: true,
+    clockInStart: "07:30",
+    clockInEnd: "08:10",
+    clockOutStart: "15:30",
+    clockOutEnd: "16:30",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "12:30",
+  }),
+  createDetail({
+    id: 2,
+    shiftTemplateId: 1,
+    dayOfWeek: "tuesday",
+    isWorkingDay: true,
+    clockInStart: "07:30",
+    clockInEnd: "08:10",
+    clockOutStart: "15:30",
+    clockOutEnd: "16:30",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "12:30",
+  }),
+  createDetail({
+    id: 3,
+    shiftTemplateId: 1,
+    dayOfWeek: "wednesday",
+    isWorkingDay: true,
+    clockInStart: "07:30",
+    clockInEnd: "08:10",
+    clockOutStart: "15:30",
+    clockOutEnd: "16:30",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "12:30",
+  }),
+  createDetail({
+    id: 4,
+    shiftTemplateId: 1,
+    dayOfWeek: "thursday",
+    isWorkingDay: true,
+    clockInStart: "07:30",
+    clockInEnd: "08:10",
+    clockOutStart: "15:30",
+    clockOutEnd: "16:30",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "12:30",
+  }),
+  // Jum'at: working day, break Dzuhur lebih lama (shalat Jumat)
+  createDetail({
+    id: 5,
+    shiftTemplateId: 1,
+    dayOfWeek: "friday",
+    isWorkingDay: true,
+    clockInStart: "07:30",
+    clockInEnd: "08:10",
+    clockOutStart: "15:30",
+    clockOutEnd: "16:30",
+    breakDhuhrStart: "11:30",
+    breakDhuhrEnd: "13:00",
+  }),
+  // Sabtu & Minggu: libur
+  createDetail({
+    id: 6,
+    shiftTemplateId: 1,
+    dayOfWeek: "saturday",
+    isWorkingDay: false,
+    clockInStart: null,
+    clockInEnd: null,
+    clockOutStart: null,
+    clockOutEnd: null,
+  }),
+  createDetail({
+    id: 7,
+    shiftTemplateId: 1,
+    dayOfWeek: "sunday",
+    isWorkingDay: false,
+    clockInStart: null,
+    clockInEnd: null,
+    clockOutStart: null,
+    clockOutEnd: null,
+  }),
+];
+
+// Shift Fleksibel (id: 2) details
+const SHIFT_FLEKSIBEL_DETAILS: ShiftTemplateDetail[] = [
+  // Senin - Jum'at: working day, break Dzuhur 12:00-13:00, Ashar kosong
+  createDetail({
+    id: 8,
+    shiftTemplateId: 2,
+    dayOfWeek: "monday",
+    isWorkingDay: true,
+    clockInStart: "07:00",
+    clockInEnd: "09:00",
+    clockOutStart: "15:00",
+    clockOutEnd: "18:00",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "13:00",
+  }),
+  createDetail({
+    id: 9,
+    shiftTemplateId: 2,
+    dayOfWeek: "tuesday",
+    isWorkingDay: true,
+    clockInStart: "07:00",
+    clockInEnd: "09:00",
+    clockOutStart: "15:00",
+    clockOutEnd: "18:00",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "13:00",
+  }),
+  createDetail({
+    id: 10,
+    shiftTemplateId: 2,
+    dayOfWeek: "wednesday",
+    isWorkingDay: true,
+    clockInStart: "07:00",
+    clockInEnd: "09:00",
+    clockOutStart: "15:00",
+    clockOutEnd: "18:00",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "13:00",
+  }),
+  createDetail({
+    id: 11,
+    shiftTemplateId: 2,
+    dayOfWeek: "thursday",
+    isWorkingDay: true,
+    clockInStart: "07:00",
+    clockInEnd: "09:00",
+    clockOutStart: "15:00",
+    clockOutEnd: "18:00",
+    breakDhuhrStart: "12:00",
+    breakDhuhrEnd: "13:00",
+  }),
+  createDetail({
+    id: 12,
+    shiftTemplateId: 2,
+    dayOfWeek: "friday",
+    isWorkingDay: true,
+    clockInStart: "07:00",
+    clockInEnd: "09:00",
+    clockOutStart: "15:00",
+    clockOutEnd: "18:00",
+    breakDhuhrStart: "11:30",
+    breakDhuhrEnd: "13:00",
+  }),
+  // Sabtu & Minggu: libur
+  createDetail({
+    id: 13,
+    shiftTemplateId: 2,
+    dayOfWeek: "saturday",
+    isWorkingDay: false,
+    clockInStart: null,
+    clockInEnd: null,
+    clockOutStart: null,
+    clockOutEnd: null,
+  }),
+  createDetail({
+    id: 14,
+    shiftTemplateId: 2,
+    dayOfWeek: "sunday",
+    isWorkingDay: false,
+    clockInStart: null,
+    clockInEnd: null,
+    clockOutStart: null,
+    clockOutEnd: null,
+  }),
+];
+
 export const DUMMY_SHIFT_TEMPLATES: ShiftTemplate[] = [
   {
     id: 1,
     name: "Shift Reguler",
-    clock_in_start: "07:30",
-    clock_in_end: "08:10",
-    clock_out_start: "15:30",
-    clock_out_end: "16:30",
-    break_duration_minutes: 60,
     is_flexible: false,
+    details: SHIFT_REGULER_DETAILS,
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
     deleted_at: null,
@@ -26,12 +233,8 @@ export const DUMMY_SHIFT_TEMPLATES: ShiftTemplate[] = [
   {
     id: 2,
     name: "Shift Fleksibel",
-    clock_in_start: "07:00",
-    clock_in_end: "09:00",
-    clock_out_start: "15:00",
-    clock_out_end: "18:00",
-    break_duration_minutes: 60,
     is_flexible: true,
+    details: SHIFT_FLEKSIBEL_DETAILS,
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
     deleted_at: null,
@@ -46,6 +249,13 @@ export function getDummyShiftTemplateById(
   id: number,
 ): ShiftTemplate | undefined {
   return DUMMY_SHIFT_TEMPLATES.find((shift) => shift.id === id);
+}
+
+export function getDummyShiftDetailsByTemplateId(
+  templateId: number,
+): ShiftTemplateDetail[] {
+  const template = DUMMY_SHIFT_TEMPLATES.find((s) => s.id === templateId);
+  return template?.details || [];
 }
 
 // ════════════════════════════════════════════

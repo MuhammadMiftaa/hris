@@ -58,6 +58,7 @@ export {
   DUMMY_EMPLOYEE_SCHEDULES,
   getDummyShiftTemplates,
   getDummyShiftTemplateById,
+  getDummyShiftDetailsByTemplateId,
   getDummyEmployeeSchedules,
   getDummyEmployeeScheduleById,
 } from "./shift.dummy";
@@ -68,3 +69,11 @@ export {
   getDummyHolidays,
   getDummyHolidayById,
 } from "./holiday.dummy";
+
+// Profile (Employee Profile for demo mode)
+export {
+  DUMMY_EMPLOYEE_PROFILE,
+  DUMMY_PROFILE_CONTACTS,
+  getDummyEmployeeProfile,
+  getDummyProfileContacts,
+} from "./profile.dummy";

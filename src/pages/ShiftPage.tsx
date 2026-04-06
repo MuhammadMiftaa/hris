@@ -7,9 +7,12 @@ import {
   Clock,
   Calendar,
   Users,
-  Coffee,
   Zap,
   Search,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -26,12 +29,16 @@ import {
 import { useEmployeeList } from "@/hooks/useEmployee";
 import type {
   ShiftTemplate,
+  ShiftTemplateDetail,
   CreateShiftPayload,
   UpdateShiftPayload,
+  CreateShiftDetailPayload,
   EmployeeSchedule,
   CreateSchedulePayload,
   UpdateSchedulePayload,
+  DayOfWeek,
 } from "@/types/shift";
+import { DAY_OF_WEEK_OPTIONS } from "@/types/shift";
 
 // ════════════════════════════════════════════
 // MODAL WRAPPER
@@ -169,8 +176,368 @@ function Toggle({
 }
 
 // ════════════════════════════════════════════
+// DAY SHIFT CONFIG COMPONENT
+// ════════════════════════════════════════════
+
+function DayShiftConfig({
+  dayLabel,
+  dayIndex,
+  config,
+  onChange,
+  onCopyFromMonday,
+  errors,
+  isExpanded,
+  onToggleExpand,
+}: {
+  dayLabel: string;
+  dayIndex: number;
+  config: CreateShiftDetailPayload;
+  onChange: (updated: CreateShiftDetailPayload) => void;
+  onCopyFromMonday?: () => void;
+  errors?: Record<string, string>;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+}) {
+  const handleChange = (
+    field: keyof CreateShiftDetailPayload,
+    value: string | boolean | null,
+  ) => {
+    onChange({ ...config, [field]: value });
+  };
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border transition-colors",
+        config.is_working_day
+          ? "border-(--border) bg-(--card)"
+          : "border-(--border)/50 bg-(--muted)/30",
+      )}
+    >
+      {/* Header - Collapsible */}
+      <button
+        type="button"
+        onClick={onToggleExpand}
+        className="w-full flex items-center justify-between px-4 py-3"
+      >
+        <div className="flex items-center gap-3">
+          <span className="font-medium text-(--foreground)">{dayLabel}</span>
+          {config.is_working_day ? (
+            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              Hari Kerja
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+              Libur
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {dayIndex > 0 && onCopyFromMonday && config.is_working_day && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopyFromMonday();
+              }}
+              className="rounded-lg p-1.5 text-xs text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+              title="Salin dari Senin"
+            >
+              <Copy size={14} />
+            </button>
+          )}
+          {isExpanded ? (
+            <ChevronUp size={16} className="text-(--muted-foreground)" />
+          ) : (
+            <ChevronDown size={16} className="text-(--muted-foreground)" />
+          )}
+        </div>
+      </button>
+
+      {/* Content */}
+      {isExpanded && (
+        <div className="border-t border-(--border) px-4 py-4 space-y-4">
+          {/* Toggle Hari Kerja */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div
+              className={cn(
+                "relative h-6 w-11 rounded-full transition-colors",
+                config.is_working_day ? "bg-(--primary)" : "bg-(--muted)",
+              )}
+              onClick={() =>
+                handleChange("is_working_day", !config.is_working_day)
+              }
+            >
+              <div
+                className={cn(
+                  "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                  config.is_working_day ? "translate-x-5" : "translate-x-0.5",
+                )}
+              />
+            </div>
+            <span className="text-sm text-(--foreground)">Hari Kerja</span>
+          </label>
+
+          {config.is_working_day && (
+            <>
+              {/* Jam Masuk */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-(--foreground) opacity-80">
+                  Window Jam Masuk
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-(--muted-foreground) mb-1">
+                      Paling Awal
+                    </label>
+                    <input
+                      type="time"
+                      value={config.clock_in_start || ""}
+                      onChange={(e) =>
+                        handleChange("clock_in_start", e.target.value || null)
+                      }
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.clock_in_start && "border-red-500",
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-(--muted-foreground) mb-1">
+                      Paling Akhir
+                    </label>
+                    <input
+                      type="time"
+                      value={config.clock_in_end || ""}
+                      onChange={(e) =>
+                        handleChange("clock_in_end", e.target.value || null)
+                      }
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.clock_in_end && "border-red-500",
+                      )}
+                    />
+                  </div>
+                </div>
+                {(errors?.clock_in_start || errors?.clock_in_end) && (
+                  <p className="text-xs text-red-500">
+                    {errors.clock_in_start || errors.clock_in_end}
+                  </p>
+                )}
+              </div>
+
+              {/* Jam Pulang */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-(--foreground) opacity-80">
+                  Window Jam Pulang
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-(--muted-foreground) mb-1">
+                      Paling Awal
+                    </label>
+                    <input
+                      type="time"
+                      value={config.clock_out_start || ""}
+                      onChange={(e) =>
+                        handleChange("clock_out_start", e.target.value || null)
+                      }
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.clock_out_start && "border-red-500",
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-(--muted-foreground) mb-1">
+                      Paling Akhir
+                    </label>
+                    <input
+                      type="time"
+                      value={config.clock_out_end || ""}
+                      onChange={(e) =>
+                        handleChange("clock_out_end", e.target.value || null)
+                      }
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.clock_out_end && "border-red-500",
+                      )}
+                    />
+                  </div>
+                </div>
+                {(errors?.clock_out_start || errors?.clock_out_end) && (
+                  <p className="text-xs text-red-500">
+                    {errors.clock_out_start || errors.clock_out_end}
+                  </p>
+                )}
+              </div>
+
+              {/* Break Shalat (Opsional) */}
+              <div className="pt-2 border-t border-(--border)/50">
+                <p className="text-sm font-medium text-(--foreground) opacity-80 mb-3">
+                  Break Shalat{" "}
+                  <span className="text-(--muted-foreground) font-normal">
+                    (opsional)
+                  </span>
+                </p>
+
+                {/* Break Dzuhur */}
+                <div className="space-y-2 mb-3">
+                  <label className="block text-xs text-(--muted-foreground)">
+                    Dzuhur
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="time"
+                      value={config.break_dhuhr_start || ""}
+                      onChange={(e) =>
+                        handleChange(
+                          "break_dhuhr_start",
+                          e.target.value || null,
+                        )
+                      }
+                      placeholder="Mulai"
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.break_dhuhr && "border-red-500",
+                      )}
+                    />
+                    <input
+                      type="time"
+                      value={config.break_dhuhr_end || ""}
+                      onChange={(e) =>
+                        handleChange("break_dhuhr_end", e.target.value || null)
+                      }
+                      placeholder="Selesai"
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.break_dhuhr && "border-red-500",
+                      )}
+                    />
+                  </div>
+                  {errors?.break_dhuhr && (
+                    <p className="text-xs text-red-500">{errors.break_dhuhr}</p>
+                  )}
+                </div>
+
+                {/* Break Ashar */}
+                <div className="space-y-2">
+                  <label className="block text-xs text-(--muted-foreground)">
+                    Ashar
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="time"
+                      value={config.break_asr_start || ""}
+                      onChange={(e) =>
+                        handleChange("break_asr_start", e.target.value || null)
+                      }
+                      placeholder="Mulai"
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.break_asr && "border-red-500",
+                      )}
+                    />
+                    <input
+                      type="time"
+                      value={config.break_asr_end || ""}
+                      onChange={(e) =>
+                        handleChange("break_asr_end", e.target.value || null)
+                      }
+                      placeholder="Selesai"
+                      className={cn(
+                        "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+                        "border-(--border) transition-colors duration-200",
+                        "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+                        errors?.break_asr && "border-red-500",
+                      )}
+                    />
+                  </div>
+                  {errors?.break_asr && (
+                    <p className="text-xs text-red-500">{errors.break_asr}</p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
 // SHIFT TEMPLATE FORM
 // ════════════════════════════════════════════
+
+const DEFAULT_WORKING_DAY_CONFIG: CreateShiftDetailPayload = {
+  day_of_week: "monday",
+  is_working_day: true,
+  clock_in_start: "07:30",
+  clock_in_end: "08:10",
+  clock_out_start: "15:30",
+  clock_out_end: "16:30",
+  break_dhuhr_start: null,
+  break_dhuhr_end: null,
+  break_asr_start: null,
+  break_asr_end: null,
+};
+
+const DEFAULT_NON_WORKING_DAY_CONFIG: CreateShiftDetailPayload = {
+  day_of_week: "saturday",
+  is_working_day: false,
+  clock_in_start: null,
+  clock_in_end: null,
+  clock_out_start: null,
+  clock_out_end: null,
+  break_dhuhr_start: null,
+  break_dhuhr_end: null,
+  break_asr_start: null,
+  break_asr_end: null,
+};
+
+function createDefaultDetails(): CreateShiftDetailPayload[] {
+  return DAY_OF_WEEK_OPTIONS.map((day, index) => {
+    const isWeekend = index >= 5;
+    return {
+      ...(isWeekend
+        ? DEFAULT_NON_WORKING_DAY_CONFIG
+        : DEFAULT_WORKING_DAY_CONFIG),
+      day_of_week: day.value,
+    };
+  });
+}
+
+function convertDetailToPayload(
+  detail: ShiftTemplateDetail,
+): CreateShiftDetailPayload {
+  return {
+    day_of_week: detail.day_of_week,
+    is_working_day: detail.is_working_day,
+    clock_in_start: detail.clock_in_start,
+    clock_in_end: detail.clock_in_end,
+    clock_out_start: detail.clock_out_start,
+    clock_out_end: detail.clock_out_end,
+    break_dhuhr_start: detail.break_dhuhr_start,
+    break_dhuhr_end: detail.break_dhuhr_end,
+    break_asr_start: detail.break_asr_start,
+    break_asr_end: detail.break_asr_end,
+  };
+}
 
 function ShiftForm({
   onClose,
@@ -183,34 +550,132 @@ function ShiftForm({
   editShift?: ShiftTemplate;
   isLoading?: boolean;
 }) {
-  const [formData, setFormData] = useState({
-    name: editShift?.name || "",
-    clock_in_start: editShift?.clock_in_start || "07:30",
-    clock_in_end: editShift?.clock_in_end || "08:10",
-    clock_out_start: editShift?.clock_out_start || "15:30",
-    clock_out_end: editShift?.clock_out_end || "16:30",
-    break_duration_minutes: editShift?.break_duration_minutes ?? 60,
-    is_flexible: editShift?.is_flexible ?? false,
+  const [name, setName] = useState(editShift?.name || "");
+  const [isFlexible, setIsFlexible] = useState(editShift?.is_flexible ?? false);
+  const [details, setDetails] = useState<CreateShiftDetailPayload[]>(() => {
+    if (editShift?.details && editShift.details.length > 0) {
+      // Sort by day order and convert
+      const sortedDetails = [...editShift.details].sort((a, b) => {
+        const dayOrder = DAY_OF_WEEK_OPTIONS.map((d) => d.value);
+        return (
+          dayOrder.indexOf(a.day_of_week) - dayOrder.indexOf(b.day_of_week)
+        );
+      });
+      return sortedDetails.map(convertDetailToPayload);
+    }
+    return createDefaultDetails();
+  });
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(() => {
+    // Default: expand weekdays that are working days, collapse weekends
+    const expanded = new Set<number>();
+    expanded.add(0); // Always expand Monday
+    return expanded;
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: string, value: string | number | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: "" }));
+  const handleDetailChange = (
+    index: number,
+    updated: CreateShiftDetailPayload,
+  ) => {
+    setDetails((prev) => {
+      const newDetails = [...prev];
+      newDetails[index] = updated;
+      return newDetails;
+    });
+    // Clear errors for this day
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      Object.keys(newErrors).forEach((key) => {
+        if (key.startsWith(`day_${index}_`)) {
+          delete newErrors[key];
+        }
+      });
+      return newErrors;
+    });
   };
 
-  const validate = () => {
+  const handleCopyFromMonday = (targetIndex: number) => {
+    const mondayConfig = details[0];
+    if (!mondayConfig) return;
+    setDetails((prev) => {
+      const newDetails = [...prev];
+      newDetails[targetIndex] = {
+        ...mondayConfig,
+        day_of_week: prev[targetIndex].day_of_week,
+      };
+      return newDetails;
+    });
+  };
+
+  const toggleExpand = (index: number) => {
+    setExpandedDays((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Nama shift wajib diisi";
-    if (!formData.clock_in_start)
-      newErrors.clock_in_start = "Jam masuk awal wajib diisi";
-    if (!formData.clock_in_end)
-      newErrors.clock_in_end = "Jam masuk akhir wajib diisi";
-    if (!formData.clock_out_start)
-      newErrors.clock_out_start = "Jam pulang awal wajib diisi";
-    if (!formData.clock_out_end)
-      newErrors.clock_out_end = "Jam pulang akhir wajib diisi";
+
+    if (!name.trim()) {
+      newErrors.name = "Nama shift wajib diisi";
+    }
+
+    details.forEach((detail, index) => {
+      if (detail.is_working_day) {
+        if (!detail.clock_in_start) {
+          newErrors[`day_${index}_clock_in_start`] =
+            "Jam masuk awal wajib diisi";
+        }
+        if (!detail.clock_in_end) {
+          newErrors[`day_${index}_clock_in_end`] =
+            "Jam masuk akhir wajib diisi";
+        }
+        if (!detail.clock_out_start) {
+          newErrors[`day_${index}_clock_out_start`] =
+            "Jam pulang awal wajib diisi";
+        }
+        if (!detail.clock_out_end) {
+          newErrors[`day_${index}_clock_out_end`] =
+            "Jam pulang akhir wajib diisi";
+        }
+        // Break validation: if start is filled, end must be filled too (and vice versa)
+        if (
+          (detail.break_dhuhr_start && !detail.break_dhuhr_end) ||
+          (!detail.break_dhuhr_start && detail.break_dhuhr_end)
+        ) {
+          newErrors[`day_${index}_break_dhuhr`] =
+            "Jika break Dzuhur diisi, start dan end harus lengkap";
+        }
+        if (
+          (detail.break_asr_start && !detail.break_asr_end) ||
+          (!detail.break_asr_start && detail.break_asr_end)
+        ) {
+          newErrors[`day_${index}_break_asr`] =
+            "Jika break Ashar diisi, start dan end harus lengkap";
+        }
+      }
+    });
+
     setErrors(newErrors);
+
+    // Expand days with errors
+    if (Object.keys(newErrors).length > 0) {
+      const daysWithErrors = new Set<number>();
+      Object.keys(newErrors).forEach((key) => {
+        const match = key.match(/^day_(\d+)_/);
+        if (match) {
+          daysWithErrors.add(parseInt(match[1]));
+        }
+      });
+      setExpandedDays((prev) => new Set([...prev, ...daysWithErrors]));
+    }
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -219,139 +684,82 @@ function ShiftForm({
     if (!validate()) return;
 
     const payload: CreateShiftPayload = {
-      name: formData.name.trim(),
-      clock_in_start: formData.clock_in_start,
-      clock_in_end: formData.clock_in_end,
-      clock_out_start: formData.clock_out_start,
-      clock_out_end: formData.clock_out_end,
-      break_duration_minutes: formData.break_duration_minutes,
-      is_flexible: formData.is_flexible,
+      name: name.trim(),
+      is_flexible: isFlexible,
+      details: details,
     };
 
     onSubmit(payload);
   };
 
+  const getErrorsForDay = (index: number): Record<string, string> => {
+    const dayErrors: Record<string, string> = {};
+    Object.entries(errors).forEach(([key, value]) => {
+      if (key.startsWith(`day_${index}_`)) {
+        const fieldName = key.replace(`day_${index}_`, "");
+        dayErrors[fieldName] = value;
+      }
+    });
+    return dayErrors;
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        id="name"
-        label="Nama Shift"
-        value={formData.name}
-        onChange={(e) => handleChange("name", e.target.value)}
-        placeholder="Contoh: Shift Reguler"
-        error={errors.name}
-      />
-
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-(--foreground) opacity-80">
-          Window Jam Masuk
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs text-(--muted-foreground) mb-1">
-              Paling Awal
-            </label>
-            <input
-              type="time"
-              value={formData.clock_in_start}
-              onChange={(e) => handleChange("clock_in_start", e.target.value)}
-              className={cn(
-                "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
-                "border-(--border) transition-colors duration-200",
-                "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-                errors.clock_in_start && "border-red-500",
-              )}
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-(--muted-foreground) mb-1">
-              Paling Akhir
-            </label>
-            <input
-              type="time"
-              value={formData.clock_in_end}
-              onChange={(e) => handleChange("clock_in_end", e.target.value)}
-              className={cn(
-                "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
-                "border-(--border) transition-colors duration-200",
-                "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-                errors.clock_in_end && "border-red-500",
-              )}
-            />
-          </div>
-        </div>
-        {(errors.clock_in_start || errors.clock_in_end) && (
-          <p className="text-xs text-red-500">
-            {errors.clock_in_start || errors.clock_in_end}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-(--foreground) opacity-80">
-          Window Jam Pulang
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs text-(--muted-foreground) mb-1">
-              Paling Awal
-            </label>
-            <input
-              type="time"
-              value={formData.clock_out_start}
-              onChange={(e) => handleChange("clock_out_start", e.target.value)}
-              className={cn(
-                "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
-                "border-(--border) transition-colors duration-200",
-                "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-                errors.clock_out_start && "border-red-500",
-              )}
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-(--muted-foreground) mb-1">
-              Paling Akhir
-            </label>
-            <input
-              type="time"
-              value={formData.clock_out_end}
-              onChange={(e) => handleChange("clock_out_end", e.target.value)}
-              className={cn(
-                "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
-                "border-(--border) transition-colors duration-200",
-                "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-                errors.clock_out_end && "border-red-500",
-              )}
-            />
-          </div>
-        </div>
-        {(errors.clock_out_start || errors.clock_out_end) && (
-          <p className="text-xs text-red-500">
-            {errors.clock_out_start || errors.clock_out_end}
-          </p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+      {/* Header: Name + Flexible toggle */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input
-          id="break_duration"
-          label="Durasi Istirahat (menit)"
-          type="number"
-          value={String(formData.break_duration_minutes)}
-          onChange={(e) =>
-            handleChange(
-              "break_duration_minutes",
-              parseInt(e.target.value) || 0,
-            )
-          }
-          min={0}
+          id="name"
+          label="Nama Shift"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            setErrors((prev) => ({ ...prev, name: "" }));
+          }}
+          placeholder="Contoh: Shift Reguler"
+          error={errors.name}
         />
         <div className="flex items-end pb-1">
-          <Toggle
-            checked={formData.is_flexible}
-            onChange={(checked) => handleChange("is_flexible", checked)}
-            label="Fleksibel"
-          />
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div
+              className={cn(
+                "relative h-6 w-11 rounded-full transition-colors",
+                isFlexible ? "bg-(--primary)" : "bg-(--muted)",
+              )}
+              onClick={() => setIsFlexible(!isFlexible)}
+            >
+              <div
+                className={cn(
+                  "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                  isFlexible ? "translate-x-5" : "translate-x-0.5",
+                )}
+              />
+            </div>
+            <span className="text-sm text-(--foreground)">Fleksibel</span>
+          </label>
+        </div>
+      </div>
+
+      {/* Day configurations */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-(--foreground) opacity-80">
+          Konfigurasi Jam Per Hari
+        </p>
+        <div className="space-y-2 max-h-100 overflow-y-auto pr-1">
+          {DAY_OF_WEEK_OPTIONS.map((day, index) => (
+            <DayShiftConfig
+              key={day.value}
+              dayLabel={day.label}
+              dayIndex={index}
+              config={details[index]}
+              onChange={(updated) => handleDetailChange(index, updated)}
+              onCopyFromMonday={
+                index > 0 ? () => handleCopyFromMonday(index) : undefined
+              }
+              errors={getErrorsForDay(index)}
+              isExpanded={expandedDays.has(index)}
+              onToggleExpand={() => toggleExpand(index)}
+            />
+          ))}
         </div>
       </div>
 
@@ -554,9 +962,10 @@ function SkeletonShiftTable() {
             <tr className="border-b border-(--border) bg-(--muted)/50">
               {[
                 "Nama Shift",
+                "Hari Kerja",
                 "Jam Masuk",
                 "Jam Pulang",
-                "Istirahat",
+                "Break",
                 "Fleksibel",
                 "Aksi",
               ].map((h) => (
@@ -573,19 +982,23 @@ function SkeletonShiftTable() {
                   <Skeleton className="h-4 w-32" />
                 </td>
                 <td className="px-5 py-4">
-                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-24" />
                 </td>
                 <td className="px-5 py-4">
                   <Skeleton className="h-4 w-28" />
                 </td>
                 <td className="px-5 py-4">
-                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-28" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-32" />
                 </td>
                 <td className="px-5 py-4">
                   <Skeleton className="h-5 w-12 rounded-full" />
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-1">
+                    <Skeleton className="h-8 w-8 rounded-lg" />
                     <Skeleton className="h-8 w-8 rounded-lg" />
                     <Skeleton className="h-8 w-8 rounded-lg" />
                   </div>
@@ -667,7 +1080,7 @@ function TabSelector({
   onTabChange: (tab: TabType) => void;
 }) {
   return (
-    <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50">
+    <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50 w-fit">
       <button
         onClick={() => onTabChange("templates")}
         className={cn(
@@ -697,10 +1110,154 @@ function TabSelector({
 }
 
 // ════════════════════════════════════════════
+// SHIFT DETAIL MODAL
+// ════════════════════════════════════════════
+
+function ShiftDetailModal({
+  shift,
+  onClose,
+}: {
+  shift: ShiftTemplate;
+  onClose: () => void;
+}) {
+  // Sort details by day order
+  const sortedDetails = useMemo(() => {
+    if (!shift.details) return [];
+    return [...shift.details].sort((a, b) => {
+      const dayOrder = DAY_OF_WEEK_OPTIONS.map((d) => d.value);
+      return dayOrder.indexOf(a.day_of_week) - dayOrder.indexOf(b.day_of_week);
+    });
+  }, [shift.details]);
+
+  const getDayLabel = (day: DayOfWeek) => {
+    return DAY_OF_WEEK_OPTIONS.find((d) => d.value === day)?.label || day;
+  };
+
+  const formatTimeWindow = (start: string | null, end: string | null) => {
+    if (!start || !end) return "—";
+    return `${start} – ${end}`;
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-(--border) bg-(--card) my-8"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          boxShadow:
+            "0 0 40px rgba(212,21,140,0.1), 0 25px 50px rgba(0,0,0,0.5)",
+        }}
+      >
+        <div className="flex items-center justify-between border-b border-(--border) px-5 py-3">
+          <div>
+            <h3 className="text-sm font-bold text-(--foreground)">
+              Detail {shift.name}
+            </h3>
+            <p className="text-xs text-(--muted-foreground)">
+              Konfigurasi jam per hari
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-(--muted-foreground) transition hover:text-(--foreground)"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <div className="max-h-[70vh] overflow-y-auto p-5">
+          <div className="space-y-3">
+            {sortedDetails.map((detail) => (
+              <div
+                key={detail.id}
+                className={cn(
+                  "rounded-xl border p-4",
+                  detail.is_working_day
+                    ? "border-(--border) bg-(--card)"
+                    : "border-(--border)/50 bg-(--muted)/30",
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-(--foreground)">
+                    {getDayLabel(detail.day_of_week)}
+                  </span>
+                  {detail.is_working_day ? (
+                    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      Hari Kerja
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                      Libur
+                    </span>
+                  )}
+                </div>
+                {detail.is_working_day && (
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-(--muted-foreground)">Masuk:</span>{" "}
+                      <span className="text-(--foreground)">
+                        {formatTimeWindow(
+                          detail.clock_in_start,
+                          detail.clock_in_end,
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-(--muted-foreground)">Pulang:</span>{" "}
+                      <span className="text-(--foreground)">
+                        {formatTimeWindow(
+                          detail.clock_out_start,
+                          detail.clock_out_end,
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-(--muted-foreground)">Dzuhur:</span>{" "}
+                      <span className="text-(--foreground)">
+                        {formatTimeWindow(
+                          detail.break_dhuhr_start,
+                          detail.break_dhuhr_end,
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-(--muted-foreground)">Ashar:</span>{" "}
+                      <span className="text-(--foreground)">
+                        {formatTimeWindow(
+                          detail.break_asr_start,
+                          detail.break_asr_end,
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex justify-end border-t border-(--border) px-5 py-3">
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Tutup
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
 // TEMPLATE SHIFT TAB
 // ════════════════════════════════════════════
 
-function TemplateShiftTab() {
+function TemplateShiftTab({
+  showForm,
+  setShowForm,
+}: {
+  showForm: boolean;
+  setShowForm: (show: boolean) => void;
+}) {
   const { data: shifts, loading, refetch } = useShiftList();
   const {
     loading: mutationLoading,
@@ -709,9 +1266,9 @@ function TemplateShiftTab() {
     deleteShift,
   } = useShiftMutations(refetch);
 
-  const [showForm, setShowForm] = useState(false);
   const [editShift, setEditShift] = useState<ShiftTemplate | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ShiftTemplate | null>(null);
+  const [detailShift, setDetailShift] = useState<ShiftTemplate | null>(null);
 
   const handleCreate = async (
     payload: CreateShiftPayload | UpdateShiftPayload,
@@ -737,27 +1294,48 @@ function TemplateShiftTab() {
     if (result) setDeleteTarget(null);
   };
 
-  // Format time window display
-  const formatTimeWindow = (start: string, end: string) => `${start} – ${end}`;
+  // Helper functions for display
+  const getWorkingDaysCount = (shift: ShiftTemplate) => {
+    if (!shift.details) return 0;
+    return shift.details.filter((d) => d.is_working_day).length;
+  };
+
+  const getWorkingDaysSummary = (shift: ShiftTemplate) => {
+    const count = getWorkingDaysCount(shift);
+    if (count === 5) return "5 hari (Sen–Jum)";
+    if (count === 6) return "6 hari (Sen–Sab)";
+    if (count === 7) return "7 hari";
+    return `${count} hari`;
+  };
+
+  const getMondayDetail = (shift: ShiftTemplate) => {
+    return shift.details?.find((d) => d.day_of_week === "monday");
+  };
+
+  const formatTimeWindow = (start: string | null, end: string | null) => {
+    if (!start || !end) return "—";
+    return `${start} – ${end}`;
+  };
+
+  const getBreakSummary = (shift: ShiftTemplate) => {
+    const monday = getMondayDetail(shift);
+    if (!monday) return "—";
+
+    const parts: string[] = [];
+    if (monday.break_dhuhr_start && monday.break_dhuhr_end) {
+      parts.push(
+        `Dzuhur ${monday.break_dhuhr_start}–${monday.break_dhuhr_end}`,
+      );
+    }
+    if (monday.break_asr_start && monday.break_asr_end) {
+      parts.push(`Ashar ${monday.break_asr_start}–${monday.break_asr_end}`);
+    }
+
+    return parts.length > 0 ? parts.join(", ") : "—";
+  };
 
   return (
     <>
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-(--muted-foreground)">
-          Template shift menentukan window jam masuk dan pulang pegawai
-        </p>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setShowForm(true)}
-          className="self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          Tambah Template
-        </Button>
-      </div>
-
       {/* Content */}
       {loading ? (
         <SkeletonShiftTable />
@@ -789,13 +1367,16 @@ function TemplateShiftTab() {
                       Nama Shift
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
+                      Hari Kerja
+                    </th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
                       Jam Masuk
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
                       Jam Pulang
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
-                      Istirahat
+                      Break
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
                       Fleksibel
@@ -806,44 +1387,110 @@ function TemplateShiftTab() {
                   </tr>
                 </thead>
                 <tbody>
-                  {shifts.map((shift, index) => (
-                    <tr
-                      key={shift.id}
-                      className={cn(
-                        "border-b border-(--border) last:border-b-0",
-                        index % 2 === 0 ? "bg-(--card)" : "bg-(--muted)/20",
-                      )}
-                    >
-                      <td className="px-5 py-4">
-                        <span className="font-medium text-(--foreground)">
+                  {shifts.map((shift, index) => {
+                    const monday = getMondayDetail(shift);
+                    return (
+                      <tr
+                        key={shift.id}
+                        className={cn(
+                          "border-b border-(--border) last:border-b-0",
+                          index % 2 === 0 ? "bg-(--card)" : "bg-(--muted)/20",
+                        )}
+                      >
+                        <td className="px-5 py-4">
+                          <span className="font-medium text-(--foreground)">
+                            {shift.name}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-sm text-(--muted-foreground)">
+                            {getWorkingDaysSummary(shift)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center gap-1.5 text-sm text-(--muted-foreground)">
+                            <Clock size={14} className="text-(--primary)" />
+                            {formatTimeWindow(
+                              monday?.clock_in_start ?? null,
+                              monday?.clock_in_end ?? null,
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center gap-1.5 text-sm text-(--muted-foreground)">
+                            <Clock size={14} className="text-orange-500" />
+                            {formatTimeWindow(
+                              monday?.clock_out_start ?? null,
+                              monday?.clock_out_end ?? null,
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-sm text-(--muted-foreground)">
+                            {getBreakSummary(shift)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                              shift.is_flexible
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+                            )}
+                          >
+                            {shift.is_flexible && <Zap size={12} />}
+                            {shift.is_flexible ? "Ya" : "Tidak"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() => setDetailShift(shift)}
+                              className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+                              title="Lihat Detail"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button
+                              onClick={() => setEditShift(shift)}
+                              className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(shift)}
+                              className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-red-500/10 hover:text-red-500"
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {shifts.map((shift) => {
+              const monday = getMondayDetail(shift);
+              return (
+                <div
+                  key={shift.id}
+                  className="rounded-xl border border-(--border) bg-(--card) p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="font-semibold text-(--foreground)">
                           {shift.name}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-sm text-(--muted-foreground)">
-                          <Clock size={14} className="text-(--primary)" />
-                          {formatTimeWindow(
-                            shift.clock_in_start,
-                            shift.clock_in_end,
-                          )}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-sm text-(--muted-foreground)">
-                          <Clock size={14} className="text-orange-500" />
-                          {formatTimeWindow(
-                            shift.clock_out_start,
-                            shift.clock_out_end,
-                          )}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-sm text-(--muted-foreground)">
-                          <Coffee size={14} />
-                          {shift.break_duration_minutes} menit
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
+                        </p>
                         <span
                           className={cn(
                             "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
@@ -853,99 +1500,55 @@ function TemplateShiftTab() {
                           )}
                         >
                           {shift.is_flexible && <Zap size={12} />}
-                          {shift.is_flexible ? "Ya" : "Tidak"}
+                          {shift.is_flexible ? "Fleksibel" : "Tetap"}
                         </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex justify-end gap-1">
-                          <button
-                            onClick={() => setEditShift(shift)}
-                            className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
-                            title="Edit"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(shift)}
-                            className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-red-500/10 hover:text-red-500"
-                            title="Hapus"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Mobile Cards */}
-          <div className="flex flex-col gap-3 md:hidden">
-            {shifts.map((shift) => (
-              <div
-                key={shift.id}
-                className="rounded-xl border border-(--border) bg-(--card) p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-(--foreground)">
-                        {shift.name}
+                      </div>
+                      <p className="text-xs text-(--muted-foreground) mb-2">
+                        {getWorkingDaysSummary(shift)}
                       </p>
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                          shift.is_flexible
-                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-                        )}
+                      <div className="grid grid-cols-2 gap-2 text-xs text-(--muted-foreground)">
+                        <div className="flex items-center gap-1">
+                          <Clock size={12} className="text-(--primary)" />
+                          Masuk:{" "}
+                          {formatTimeWindow(
+                            monday?.clock_in_start ?? null,
+                            monday?.clock_in_end ?? null,
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock size={12} className="text-orange-500" />
+                          Pulang:{" "}
+                          {formatTimeWindow(
+                            monday?.clock_out_start ?? null,
+                            monday?.clock_out_end ?? null,
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setDetailShift(shift)}
+                        className="mt-2 text-xs text-(--primary) hover:underline"
                       >
-                        {shift.is_flexible && <Zap size={12} />}
-                        {shift.is_flexible ? "Fleksibel" : "Tetap"}
-                      </span>
+                        Lihat detail →
+                      </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-(--muted-foreground)">
-                      <div className="flex items-center gap-1">
-                        <Clock size={12} className="text-(--primary)" />
-                        Masuk:{" "}
-                        {formatTimeWindow(
-                          shift.clock_in_start,
-                          shift.clock_in_end,
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock size={12} className="text-orange-500" />
-                        Pulang:{" "}
-                        {formatTimeWindow(
-                          shift.clock_out_start,
-                          shift.clock_out_end,
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 col-span-2">
-                        <Coffee size={12} />
-                        Istirahat: {shift.break_duration_minutes} menit
-                      </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setEditShift(shift)}
+                        className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(shift)}
+                        className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-red-500/10 hover:text-red-500"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setEditShift(shift)}
-                      className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(shift)}
-                      className="rounded-lg p-2 text-(--muted-foreground) transition hover:bg-red-500/10 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
@@ -979,6 +1582,14 @@ function TemplateShiftTab() {
         )}
       </Modal>
 
+      {/* Detail Modal */}
+      {detailShift && (
+        <ShiftDetailModal
+          shift={detailShift}
+          onClose={() => setDetailShift(null)}
+        />
+      )}
+
       {/* Delete Confirmation */}
       <ConfirmDialog
         open={!!deleteTarget}
@@ -996,7 +1607,13 @@ function TemplateShiftTab() {
 // JADWAL PEGAWAI TAB
 // ════════════════════════════════════════════
 
-function ScheduleTab() {
+function ScheduleTab({
+  showForm,
+  setShowForm,
+}: {
+  showForm: boolean;
+  setShowForm: (show: boolean) => void;
+}) {
   const { data: employees } = useEmployeeList({ is_active: true });
   const { data: shifts } = useShiftList();
 
@@ -1021,7 +1638,6 @@ function ScheduleTab() {
     deleteSchedule,
   } = useScheduleMutations(refetch);
 
-  const [showForm, setShowForm] = useState(false);
   const [editSchedule, setEditSchedule] = useState<EmployeeSchedule | null>(
     null,
   );
@@ -1087,24 +1703,8 @@ function ScheduleTab() {
 
   return (
     <>
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-(--muted-foreground)">
-          Assign template shift ke pegawai dengan periode berlaku
-        </p>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setShowForm(true)}
-          className="self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          Assign Shift
-        </Button>
-      </div>
-
       {/* Filter Bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
         <div className="relative flex-1 max-w-sm">
           <Search
             size={16}
@@ -1187,7 +1787,8 @@ function ScheduleTab() {
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden md:block overflow-hidden rounded-xl border border-(--border)">
+          <div className="hidden md:block overflow-hidden rounded-xl border border-(--border) mt-5
+          ">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -1400,25 +2001,60 @@ function ScheduleTab() {
 
 export function ShiftPage() {
   const [activeTab, setActiveTab] = useState<TabType>("templates");
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
 
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
+      <header className="sticky top-0 z-40 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 flex justify-between items-center gap-5">
         <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-base">
+          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
             Shift & Jadwal Kerja
           </h1>
           <p className="text-[10px] text-(--muted-foreground) md:text-xs">
             Kelola template shift dan jadwal kerja pegawai
           </p>
         </div>
-        <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="w-fit ml-auto">
+          <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
+        <div className="flex items-center gap-2 w-40 justify-end">
+          {activeTab === "templates" ? (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowTemplateForm(true)}
+            >
+              <Plus size={16} />
+              Tambah Template
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowScheduleForm(true)}
+            >
+              <Plus size={16} />
+              Assign Shift
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Tab Content */}
-        {activeTab === "templates" ? <TemplateShiftTab /> : <ScheduleTab />}
+        {activeTab === "templates" ? (
+          <TemplateShiftTab
+            showForm={showTemplateForm}
+            setShowForm={setShowTemplateForm}
+          />
+        ) : (
+          <ScheduleTab
+            showForm={showScheduleForm}
+            setShowForm={setShowScheduleForm}
+          />
+        )}
       </div>
     </MainLayout>
   );

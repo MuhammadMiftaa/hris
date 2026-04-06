@@ -1,5 +1,6 @@
 import type {
   ShiftTemplate,
+  ShiftTemplateDetail,
   CreateShiftPayload,
   UpdateShiftPayload,
   EmployeeSchedule,
@@ -84,6 +85,16 @@ export async function updateShiftTemplate(
 export async function deleteShiftTemplate(token: string, id: number) {
   return bffCall<{ message: string }>(`/shifts/${id}`, {
     method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/** GET /shifts/:id/details — Get details for a shift template */
+export async function fetchShiftTemplateDetails(
+  token: string,
+  shiftId: number,
+) {
+  return bffCall<ShiftTemplateDetail[]>(`/shifts/${shiftId}/details`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
