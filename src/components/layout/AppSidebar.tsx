@@ -160,7 +160,7 @@ export function AppSidebar() {
             <div className="font-heading font-bold tracking-wide text-primary-gradient">
               Wafa Indonesia
             </div>
-            <div className="text-[10px] text-(--muted-foreground)">
+            <div className="text-[10px] text-(--muted-foreground) line-clamp-1">
               Human Resource Information System
             </div>
           </div>

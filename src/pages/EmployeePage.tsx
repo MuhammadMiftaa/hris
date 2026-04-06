@@ -239,24 +239,16 @@ function EmployeeForm({
               error={errors.birth_date}
             />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-(--foreground) opacity-80">
-                Jenis Kelamin *
-              </label>
-              <select
+              <SearchableSelect
+                label="Jenis Kelamin *"
                 value={formData.gender}
-                onChange={(e) => handleChange("gender", e.target.value)}
-                className={cn(
-                  "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
-                  "border-(--border) transition-colors duration-200",
-                  "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-                )}
-              >
-                {Object.entries(GENDER_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => handleChange("gender", val)}
+                options={Object.entries(GENDER_LABELS).map(([value, label]) => ({
+                  value,
+                  label,
+                }))}
+                placeholder="Pilih jenis kelamin"
+              />
               {errors.gender && (
                 <p className="text-xs text-(--destructive)">{errors.gender}</p>
               )}
@@ -526,30 +518,30 @@ export function EmployeePage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
-        {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-(--foreground) md:text-2xl">
-              Pegawai
-            </h1>
-            <p className="text-sm text-(--muted-foreground)">
-              Kelola data pegawai beserta kontak &amp; kontrak kerja
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
-          >
-            <Plus size={16} />
-            Tambah Pegawai
-          </Button>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-base">
+            Pegawai
+          </h1>
+          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
+            Kelola data pegawai beserta kontak &amp; kontrak kerja
+          </p>
         </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowForm(true)}
+          className="self-start sm:self-auto"
+        >
+          <Plus size={16} />
+          Tambah Pegawai
+        </Button>
+      </header>
 
+      <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Filter Bar */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search
               size={16}
@@ -569,55 +561,44 @@ export function EmployeePage() {
             />
           </div>
 
-          <select
+          <SearchableSelect
             value={filterBranch}
-            onChange={(e) => setFilterBranch(e.target.value)}
-            className={cn(
-              "rounded-lg border bg-(--input) px-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) transition-colors duration-200",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          >
-            <option value="">Semua Cabang</option>
-            {branches?.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {branch.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFilterBranch(val)}
+            options={[
+              { value: "", label: "Semua Cabang" },
+              ...(branches?.map((branch) => ({
+                value: String(branch.id),
+                label: branch.name,
+              })) || []),
+            ]}
+            placeholder="Filter cabang..."
+            searchPlaceholder="Cari cabang..."
+          />
 
-          <select
+          <SearchableSelect
             value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className={cn(
-              "rounded-lg border bg-(--input) px-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) transition-colors duration-200",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          >
-            <option value="">Semua Departemen</option>
-            {departments?.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFilterDepartment(val)}
+            options={[
+              { value: "", label: "Semua Departemen" },
+              ...(departments?.map((dept) => ({
+                value: String(dept.id),
+                label: dept.name,
+              })) || []),
+            ]}
+            placeholder="Filter departemen..."
+            searchPlaceholder="Cari departemen..."
+          />
 
-          <select
+          <SearchableSelect
             value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value as "" | "active" | "inactive")
-            }
-            className={cn(
-              "rounded-lg border bg-(--input) px-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) transition-colors duration-200",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          >
-            <option value="">Semua Status</option>
-            <option value="active">Aktif</option>
-            <option value="inactive">Nonaktif</option>
-          </select>
+            onChange={(val) => setFilterStatus(val as "" | "active" | "inactive")}
+            options={[
+              { value: "", label: "Semua Status" },
+              { value: "active", label: "Aktif" },
+              { value: "inactive", label: "Nonaktif" },
+            ]}
+            placeholder="Filter status..."
+          />
         </div>
 
         {/* Content */}

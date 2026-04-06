@@ -529,28 +529,28 @@ export function RolePage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
-        {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-(--foreground) md:text-2xl">
-              Role & Akses
-            </h1>
-            <p className="text-sm text-(--muted-foreground)">
-              Kelola role dan permission per module
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
-          >
-            <Plus size={16} />
-            Tambah Role
-          </Button>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-base">
+            Role & Akses
+          </h1>
+          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
+            Kelola role dan permission per module
+          </p>
         </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowForm(true)}
+          className="self-start sm:self-auto"
+        >
+          <Plus size={16} />
+          Tambah Role
+        </Button>
+      </header>
 
+      <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Content */}
         {loading ? (
           <SkeletonCards />

@@ -389,30 +389,30 @@ export function DepartmentPage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
-        {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-(--foreground) md:text-2xl">
-              Departemen
-            </h1>
-            <p className="text-sm text-(--muted-foreground)">
-              Kelola unit organisasi di dalam cabang
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
-          >
-            <Plus size={16} />
-            Tambah Departemen
-          </Button>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-base">
+            Departemen
+          </h1>
+          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
+            Kelola unit organisasi di dalam cabang
+          </p>
         </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowForm(true)}
+          className="self-start sm:self-auto"
+        >
+          <Plus size={16} />
+          Tambah Departemen
+        </Button>
+      </header>
 
+      <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Filter Bar */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 max-w-sm">
             <Search
               size={16}
@@ -432,38 +432,30 @@ export function DepartmentPage() {
             />
           </div>
 
-          <select
+          <SearchableSelect
             value={filterBranch}
-            onChange={(e) => setFilterBranch(e.target.value)}
-            className={cn(
-              "rounded-lg border bg-(--input) px-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) transition-colors duration-200",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          >
-            <option value="">Semua Cabang</option>
-            {branches?.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFilterBranch(val)}
+            options={[
+              { value: "", label: "Semua Cabang" },
+              ...(branches?.map((b) => ({
+                value: String(b.id),
+                label: b.name,
+              })) || []),
+            ]}
+            placeholder="Filter cabang..."
+            searchPlaceholder="Cari cabang..."
+          />
 
-          <select
+          <SearchableSelect
             value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value as "" | "active" | "inactive")
-            }
-            className={cn(
-              "rounded-lg border bg-(--input) px-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) transition-colors duration-200",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          >
-            <option value="">Semua Status</option>
-            <option value="active">Aktif</option>
-            <option value="inactive">Nonaktif</option>
-          </select>
+            onChange={(val) => setFilterStatus(val as "" | "active" | "inactive")}
+            options={[
+              { value: "", label: "Semua Status" },
+              { value: "active", label: "Aktif" },
+              { value: "inactive", label: "Nonaktif" },
+            ]}
+            placeholder="Filter status..."
+          />
         </div>
 
         {/* Content */}

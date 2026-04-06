@@ -281,46 +281,43 @@ export function PositionPage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
-        {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-(--foreground) md:text-2xl">
-              Jabatan
-            </h1>
-            <p className="text-sm text-(--muted-foreground)">
-              Kelola data jabatan/posisi organisasi
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
-          >
-            <Plus size={16} />
-            Tambah Jabatan
-          </Button>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-base">
+            Jabatan
+          </h1>
+          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
+            Kelola data jabatan/posisi organisasi
+          </p>
         </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowForm(true)}
+          className="self-start sm:self-auto"
+        >
+          <Plus size={16} />
+          Tambah Jabatan
+        </Button>
+      </header>
 
+      <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Filter */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <select
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <SearchableSelect
             value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className={cn(
-              "rounded-lg border bg-(--input) px-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) transition-colors duration-200",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          >
-            <option value="">Semua Departemen</option>
-            {departments?.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFilterDepartment(val)}
+            options={[
+              { value: "", label: "Semua Departemen" },
+              ...(departments?.map((d) => ({
+                value: String(d.id),
+                label: d.name,
+              })) || []),
+            ]}
+            placeholder="Filter departemen..."
+            searchPlaceholder="Cari departemen..."
+          />
           {filterDepartment && (
             <span className="text-xs text-(--muted-foreground)">
               {filtered.length} jabatan ditemukan
