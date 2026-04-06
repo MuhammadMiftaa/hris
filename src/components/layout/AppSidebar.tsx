@@ -79,7 +79,7 @@ export function AppSidebar() {
         )}
       >
         <img
-          className="h-10 w-10"
+          className="h-10 w-10 object-contain"
           src="/images/icons/logo.png"
           alt="Wafa Logo"
         />
@@ -313,7 +313,7 @@ export function AppSidebar() {
         </button>
         <div className="flex items-center gap-2">
           <img
-            className="h-7 w-7"
+            className="h-7 w-7 object-contain"
             src="/images/icons/logo.png"
             alt="Wafa Logo"
           />
