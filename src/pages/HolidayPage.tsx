@@ -1,5 +1,13 @@
 import { useState, useMemo } from "react";
-import { Plus, Pencil, Trash2, X, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -94,7 +102,12 @@ function ConfirmDialog({
           <p className="mt-2 text-sm text-(--muted-foreground)">{message}</p>
         </div>
         <div className="flex justify-end gap-2 border-t border-(--border) px-5 py-3">
-          <Button variant="ghost" size="sm" onClick={onCancel} disabled={isLoading}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Batal
           </Button>
           <Button
@@ -276,7 +289,12 @@ function HolidayForm({
       )}
 
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           Batal
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
@@ -292,8 +310,18 @@ function HolidayForm({
 // ════════════════════════════════════════════
 
 const MONTH_NAMES = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 
 const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
@@ -533,7 +561,9 @@ function ListView({
                   </td>
                   <td className="px-5 py-4">
                     <div>
-                      <p className="font-medium text-(--foreground)">{holiday.name}</p>
+                      <p className="font-medium text-(--foreground)">
+                        {holiday.name}
+                      </p>
                       {holiday.description && (
                         <p className="text-xs text-(--muted-foreground) truncate max-w-xs">
                           {holiday.description}
@@ -591,7 +621,9 @@ function ListView({
                     </span>
                   )}
                 </div>
-                <p className="font-semibold text-(--foreground)">{holiday.name}</p>
+                <p className="font-semibold text-(--foreground)">
+                  {holiday.name}
+                </p>
                 <p className="text-xs text-(--muted-foreground) mt-0.5">
                   {formatDate(holiday.date)}
                 </p>
@@ -631,7 +663,10 @@ function SkeletonCalendar() {
   return (
     <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-(--border) bg-(--card) p-3 space-y-2">
+        <div
+          key={i}
+          className="rounded-xl border border-(--border) bg-(--card) p-3 space-y-2"
+        >
           <Skeleton className="h-3 w-16 mx-auto" />
           <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: 35 }).map((_, j) => (
@@ -661,10 +696,18 @@ function SkeletonTable() {
           <tbody>
             {Array.from({ length: 6 }).map((_, i) => (
               <tr key={i} className="border-b border-(--border)">
-                <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-4 w-48" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-40" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-48" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-28" />
+                </td>
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-1">
                     <Skeleton className="h-8 w-8 rounded-lg" />
@@ -707,16 +750,19 @@ export function HolidayPage() {
   const params = { year, type: filterType || undefined };
   const { data: holidays, loading, refetch } = useHolidayList(params);
   const { data: branches } = useBranchList();
-  const { loading: mutationLoading, createHoliday, updateHoliday, deleteHoliday } =
-    useHolidayMutations(refetch);
+  const {
+    loading: mutationLoading,
+    createHoliday,
+    updateHoliday,
+    deleteHoliday,
+  } = useHolidayMutations(refetch);
 
   // Client-side filter by branch
   const filtered = useMemo(() => {
     if (!holidays) return [];
     if (!filterBranch) return holidays;
     return holidays.filter(
-      (h) =>
-        h.branch_id === null || String(h.branch_id) === filterBranch,
+      (h) => h.branch_id === null || String(h.branch_id) === filterBranch,
     );
   }, [holidays, filterBranch]);
 
@@ -747,7 +793,8 @@ export function HolidayPage() {
     if (result) setDeleteTarget(null);
   };
 
-  const branchOptions = branches?.map((b) => ({ id: b.id, name: b.name })) || [];
+  const branchOptions =
+    branches?.map((b) => ({ id: b.id, name: b.name })) || [];
 
   return (
     <MainLayout>
@@ -778,7 +825,9 @@ export function HolidayPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <div className="rounded-xl border border-(--border) bg-(--card) px-4 py-3">
               <p className="text-xs text-(--muted-foreground)">Total</p>
-              <p className="text-2xl font-bold text-(--foreground)">{filtered.length}</p>
+              <p className="text-2xl font-bold text-(--foreground)">
+                {filtered.length}
+              </p>
               <p className="text-xs text-(--muted-foreground)">hari libur</p>
             </div>
             {(Object.keys(HOLIDAY_TYPE_LABELS) as HolidayType[]).map((type) => {
@@ -797,8 +846,12 @@ export function HolidayPage() {
                   <p className={cn("text-xs font-medium", colors.text)}>
                     {HOLIDAY_TYPE_LABELS[type]}
                   </p>
-                  <p className={cn("text-2xl font-bold", colors.text)}>{count}</p>
-                  <p className={cn("text-xs", colors.text, "opacity-70")}>hari</p>
+                  <p className={cn("text-2xl font-bold", colors.text)}>
+                    {count}
+                  </p>
+                  <p className={cn("text-xs", colors.text, "opacity-70")}>
+                    hari
+                  </p>
                 </div>
               );
             })}
@@ -814,12 +867,12 @@ export function HolidayPage() {
               onChange={(val) => setFilterType(val as HolidayType | "")}
               options={[
                 { value: "", label: "Semua Tipe" },
-                ...(Object.entries(HOLIDAY_TYPE_LABELS) as [HolidayType, string][]).map(
-                  ([value, label]) => ({
-                    value,
-                    label,
-                  }),
-                ),
+                ...(
+                  Object.entries(HOLIDAY_TYPE_LABELS) as [HolidayType, string][]
+                ).map(([value, label]) => ({
+                  value,
+                  label,
+                })),
               ]}
               placeholder="Filter tipe..."
             />
@@ -887,7 +940,11 @@ export function HolidayPage() {
 
         {/* Content */}
         {loading ? (
-          viewMode === "calendar" ? <SkeletonCalendar /> : <SkeletonTable />
+          viewMode === "calendar" ? (
+            <SkeletonCalendar />
+          ) : (
+            <SkeletonTable />
+          )
         ) : viewMode === "calendar" ? (
           <CalendarView
             year={year}
@@ -904,7 +961,8 @@ export function HolidayPage() {
             }
             icon={<Calendar className="h-12 w-12" />}
             action={
-              !filterType && !filterBranch && (
+              !filterType &&
+              !filterBranch && (
                 <Button
                   variant="primary"
                   size="sm"

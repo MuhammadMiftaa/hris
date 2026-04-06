@@ -103,7 +103,12 @@ function ConfirmDialog({
           <p className="mt-2 text-sm text-(--muted-foreground)">{message}</p>
         </div>
         <div className="flex justify-end gap-2 border-t border-(--border) px-5 py-3">
-          <Button variant="ghost" size="sm" onClick={onCancel} disabled={isLoading}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Batal
           </Button>
           <Button
@@ -167,7 +172,9 @@ function DepartmentForm({
   isLoading,
 }: {
   onClose: () => void;
-  onSubmit: (payload: CreateDepartmentPayload | UpdateDepartmentPayload) => void;
+  onSubmit: (
+    payload: CreateDepartmentPayload | UpdateDepartmentPayload,
+  ) => void;
   editDepartment?: Department;
   branches: { id: number; name: string }[];
   isLoading?: boolean;
@@ -175,7 +182,9 @@ function DepartmentForm({
   const [formData, setFormData] = useState({
     code: editDepartment?.code || "",
     name: editDepartment?.name || "",
-    branch_id: editDepartment?.branch_id ? String(editDepartment.branch_id) : "",
+    branch_id: editDepartment?.branch_id
+      ? String(editDepartment.branch_id)
+      : "",
     description: editDepartment?.description || "",
     is_active: editDepartment?.is_active ?? true,
   });
@@ -271,7 +280,12 @@ function DepartmentForm({
       )}
 
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           Batal
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
@@ -293,21 +307,33 @@ function SkeletonTable() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-(--border) bg-(--muted)/50">
-              {["Kode", "Nama", "Cabang", "Deskripsi", "Status", "Aksi"].map((h) => (
-                <th key={h} className="px-5 py-3 text-left">
-                  <Skeleton className="h-3 w-16" />
-                </th>
-              ))}
+              {["Kode", "Nama", "Cabang", "Deskripsi", "Status", "Aksi"].map(
+                (h) => (
+                  <th key={h} className="px-5 py-3 text-left">
+                    <Skeleton className="h-3 w-16" />
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody>
             {Array.from({ length: 5 }).map((_, i) => (
               <tr key={i} className="border-b border-(--border)">
-                <td className="px-5 py-4"><Skeleton className="h-4 w-16" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-4 w-48" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-4 w-64" /></td>
-                <td className="px-5 py-4"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-16" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-48" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-32" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-4 w-64" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </td>
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-1">
                     <Skeleton className="h-8 w-8 rounded-lg" />
@@ -332,7 +358,9 @@ export function DepartmentPage() {
 
   // Filter state
   const [filterBranch, setFilterBranch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"" | "active" | "inactive">("");
+  const [filterStatus, setFilterStatus] = useState<"" | "active" | "inactive">(
+    "",
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   const params = {
@@ -358,24 +386,32 @@ export function DepartmentPage() {
   const [deleteTarget, setDeleteTarget] = useState<Department | null>(null);
 
   // Client-side search filter
-  const filtered = departments?.filter((d) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      d.code.toLowerCase().includes(q) ||
-      d.name.toLowerCase().includes(q) ||
-      (d.description?.toLowerCase().includes(q) ?? false)
-    );
-  }) ?? [];
+  const filtered =
+    departments?.filter((d) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        d.code.toLowerCase().includes(q) ||
+        d.name.toLowerCase().includes(q) ||
+        (d.description?.toLowerCase().includes(q) ?? false)
+      );
+    }) ?? [];
 
-  const handleCreate = async (payload: CreateDepartmentPayload | UpdateDepartmentPayload) => {
+  const handleCreate = async (
+    payload: CreateDepartmentPayload | UpdateDepartmentPayload,
+  ) => {
     const result = await createDepartment(payload as CreateDepartmentPayload);
     if (result) setShowForm(false);
   };
 
-  const handleUpdate = async (payload: CreateDepartmentPayload | UpdateDepartmentPayload) => {
+  const handleUpdate = async (
+    payload: CreateDepartmentPayload | UpdateDepartmentPayload,
+  ) => {
     if (!editDepartment) return;
-    const result = await updateDepartment(editDepartment.id, payload as UpdateDepartmentPayload);
+    const result = await updateDepartment(
+      editDepartment.id,
+      payload as UpdateDepartmentPayload,
+    );
     if (result) setEditDepartment(null);
   };
 
@@ -385,7 +421,8 @@ export function DepartmentPage() {
     if (result) setDeleteTarget(null);
   };
 
-  const branchOptions = branches?.map((b) => ({ id: b.id, name: b.name })) || [];
+  const branchOptions =
+    branches?.map((b) => ({ id: b.id, name: b.name })) || [];
 
   return (
     <MainLayout>
@@ -448,7 +485,9 @@ export function DepartmentPage() {
 
           <SearchableSelect
             value={filterStatus}
-            onChange={(val) => setFilterStatus(val as "" | "active" | "inactive")}
+            onChange={(val) =>
+              setFilterStatus(val as "" | "active" | "inactive")
+            }
             options={[
               { value: "", label: "Semua Status" },
               { value: "active", label: "Aktif" },
@@ -605,7 +644,9 @@ export function DepartmentPage() {
                           {dept.is_active ? "Aktif" : "Nonaktif"}
                         </span>
                       </div>
-                      <p className="font-semibold text-(--foreground)">{dept.name}</p>
+                      <p className="font-semibold text-(--foreground)">
+                        {dept.name}
+                      </p>
                       <div className="mt-1 flex items-center gap-1 text-xs text-(--muted-foreground)">
                         <Building2 size={12} />
                         {dept.branch_name || "Semua Cabang"}

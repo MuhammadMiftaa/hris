@@ -132,7 +132,11 @@ function EmployeeForm({
 
   // Reset jabatan when department changes
   const handleDepartmentChange = (val: string) => {
-    setFormData((prev) => ({ ...prev, department_id: val, job_positions_id: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      department_id: val,
+      job_positions_id: "",
+    }));
     setErrors((prev) => ({ ...prev, department_id: "" }));
   };
 
@@ -243,10 +247,12 @@ function EmployeeForm({
                 label="Jenis Kelamin *"
                 value={formData.gender}
                 onChange={(val) => handleChange("gender", val)}
-                options={Object.entries(GENDER_LABELS).map(([value, label]) => ({
-                  value,
-                  label,
-                }))}
+                options={Object.entries(GENDER_LABELS).map(
+                  ([value, label]) => ({
+                    value,
+                    label,
+                  }),
+                )}
                 placeholder="Pilih jenis kelamin"
               />
               {errors.gender && (
@@ -591,7 +597,9 @@ export function EmployeePage() {
 
           <SearchableSelect
             value={filterStatus}
-            onChange={(val) => setFilterStatus(val as "" | "active" | "inactive")}
+            onChange={(val) =>
+              setFilterStatus(val as "" | "active" | "inactive")
+            }
             options={[
               { value: "", label: "Semua Status" },
               { value: "active", label: "Aktif" },
