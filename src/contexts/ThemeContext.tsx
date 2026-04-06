@@ -15,15 +15,16 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_KEY = "aurify_theme";
+const THEME_KEY = "wafa_theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(THEME_KEY) as Theme | null;
-      return stored ?? "dark";
+      // Default to "light" for Wafa Indonesia (light mode first)
+      return stored ?? "light";
     }
-    return "dark";
+    return "light";
   });
 
   useEffect(() => {

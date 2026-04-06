@@ -3,10 +3,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ThemeToggle } from "@/components/ui/FormElements";
 import { Link } from "react-router-dom";
 
-/**
- * Auth layout — centered card with branding.
- * Logo placeholder uses a gold "A" monogram.
- */
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
 
@@ -37,12 +33,12 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         {/* Footer */}
         <div className="flex flex-col items-center align-center mt-8">
           <Link to="/">
-            <h1 className="font-heading text-3xl font-semibold tracking-tight text-gold-gradient sm:text-4xl">
-              Aurify
+            <h1 className="font-heading text-3xl font-semibold tracking-tight text-primary-gradient sm:text-4xl">
+              Wafa Indonesia
             </h1>
           </Link>
           <p className="mt-6 text-center text-xs text-(--muted-foreground)">
-            © {new Date().getFullYear()} Aurify. All rights reserved.
+            © {new Date().getFullYear()} Wafa Indonesia. All rights reserved.
           </p>
         </div>
       </div>

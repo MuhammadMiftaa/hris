@@ -67,7 +67,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const variants = {
       primary:
-        "bg-gold-btn text-dark font-semibold hover:opacity-90 disabled:opacity-50",
+        "bg-primary-btn text-white font-semibold hover:opacity-90 disabled:opacity-50",
       secondary:
         "bg-(--secondary) text-(--foreground) border border-(--border) hover:bg-(--muted)",
       ghost: "bg-transparent text-(--foreground) hover:bg-(--secondary)",
@@ -126,13 +126,13 @@ Button.displayName = "Button";
 export function Divider({ text }: { text?: string }) {
   return (
     <div className="relative flex items-center py-4">
-      <div className="flex-1 gold-line" />
+      <div className="flex-1 primary-line" />
       {text && (
         <span className="mx-4 text-xs font-medium uppercase tracking-wider text-(--muted-foreground)">
           {text}
         </span>
       )}
-      <div className="flex-1 gold-line" />
+      <div className="flex-1 primary-line" />
     </div>
   );
 }
