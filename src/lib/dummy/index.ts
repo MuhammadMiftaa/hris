@@ -77,3 +77,58 @@ export {
   getDummyEmployeeProfile,
   getDummyProfileContacts,
 } from "./profile.dummy";
+
+// ════════════════════════════════════════════
+// ATTENDANCE & PENGAJUAN DUMMY EXPORTS
+// ════════════════════════════════════════════
+
+// Attendance
+export {
+  DUMMY_ATTENDANCE_LOGS,
+  getDummyAttendanceLogs,
+  getDummyAttendanceLogById,
+  getDummyAttendanceSummary,
+} from "./attendance.dummy";
+
+export {
+  DUMMY_ATTENDANCE_OVERRIDES,
+  getDummyAttendanceOverrides,
+  getDummyAttendanceOverrideById,
+} from "./attendance-override.dummy";
+
+// Pengajuan
+export {
+  DUMMY_PERMISSION_REQUESTS,
+  getDummyPermissionRequests,
+  getDummyPermissionRequestById,
+} from "./permission-request.dummy";
+
+export {
+  DUMMY_LEAVE_TYPES,
+  DUMMY_LEAVE_BALANCES,
+  DUMMY_LEAVE_REQUESTS,
+  DUMMY_LEAVE_APPROVALS,
+  getDummyLeaveTypes,
+  getDummyLeaveTypeById,
+  getDummyLeaveBalances,
+  getDummyLeaveRequests,
+  getDummyLeaveRequestById,
+} from "./leave.dummy";
+
+export {
+  DUMMY_BUSINESS_TRIPS,
+  getDummyBusinessTrips,
+  getDummyBusinessTripById,
+} from "./business-trip.dummy";
+
+export {
+  DUMMY_OVERTIME_REQUESTS,
+  getDummyOvertimeRequests,
+  getDummyOvertimeRequestById,
+} from "./overtime.dummy";
+
+export {
+  DUMMY_DAILY_REPORTS,
+  getDummyDailyReports,
+  getDummyDailyReportById,
+} from "./daily-report.dummy";
