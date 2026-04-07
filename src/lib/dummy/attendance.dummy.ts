@@ -2,7 +2,6 @@ import type {
   AttendanceLog,
   AttendanceListParams,
   AttendanceStatus,
-  ClockMethod,
 } from "@/types/attendance";
 
 // ════════════════════════════════════════════

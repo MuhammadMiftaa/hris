@@ -21,6 +21,10 @@ import {
   Shield,
   Calendar,
   Clock,
+  ClipboardCheck,
+  CalendarOff,
+  Send,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,6 +59,16 @@ const MASTER_DATA_NAV: NavItem[] = [
 const JADWAL_NAV: NavItem[] = [
   { icon: Clock, label: "Shift", path: "/shifts" },
   { icon: Calendar, label: "Hari Libur", path: "/holidays" },
+];
+
+const KEHADIRAN_NAV: NavItem[] = [
+  { icon: ClipboardCheck, label: "Presensi", path: "/attendance" },
+  { icon: CalendarOff, label: "Cuti", path: "/leave" },
+];
+
+const PENGAJUAN_NAV: NavItem[] = [
+  { icon: Send, label: "Pengajuan", path: "/requests" },
+  { icon: FileText, label: "Laporan Harian", path: "/daily-reports" },
 ];
 
 export function AppSidebar() {
@@ -197,6 +211,12 @@ export function AppSidebar() {
 
         {/* Jadwal */}
         {renderSection("Jadwal", JADWAL_NAV)}
+
+        {/* Kehadiran */}
+        {renderSection("Kehadiran", KEHADIRAN_NAV)}
+
+        {/* Pengajuan */}
+        {renderSection("Pengajuan", PENGAJUAN_NAV)}
       </nav>
 
       {/* Bottom Section */}

@@ -18,6 +18,10 @@ import { PositionPage } from "./pages/PositionPage";
 import { RolePage } from "./pages/RolePage";
 import { ShiftPage } from "./pages/ShiftPage";
 import { HolidayPage } from "./pages/HolidayPage";
+import { AttendancePage } from "./pages/AttendancePage";
+import { LeavePage } from "./pages/LeavePage";
+import { RequestPage } from "./pages/RequestPage";
+import { DailyReportPage } from "./pages/DailyReportPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isLoading } = useAuth();
@@ -161,6 +165,42 @@ function App() {
         element={
           <PrivateRoute>
             <HolidayPage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Kehadiran Routes */}
+      <Route
+        path="/attendance"
+        element={
+          <PrivateRoute>
+            <AttendancePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/leave"
+        element={
+          <PrivateRoute>
+            <LeavePage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Pengajuan Routes */}
+      <Route
+        path="/requests"
+        element={
+          <PrivateRoute>
+            <RequestPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/daily-reports"
+        element={
+          <PrivateRoute>
+            <DailyReportPage />
           </PrivateRoute>
         }
       />
