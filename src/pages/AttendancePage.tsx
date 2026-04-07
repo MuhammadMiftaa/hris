@@ -3,8 +3,6 @@ import {
   ClipboardCheck,
   Plus,
   Search,
-  Filter,
-  Clock,
   X,
   CheckCircle2,
   AlertCircle,
@@ -13,6 +11,7 @@ import {
   Plane,
   CalendarDays,
   Edit2,
+  UserPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -24,6 +23,7 @@ import {
   useAttendanceList,
   useOverrideList,
   useOverrideMutations,
+  useManualAttendanceMutations,
 } from "@/hooks/useAttendance";
 import { useEmployeeList } from "@/hooks/useEmployee";
 import { useBranchList } from "@/hooks/useBranch";
@@ -31,6 +31,7 @@ import {
   ATTENDANCE_STATUS_OPTIONS,
   type AttendanceStatus,
   type AttendanceLog,
+  type CreateManualAttendancePayload,
 } from "@/types/attendance";
 import {
   OVERRIDE_TYPE_OPTIONS,
@@ -61,8 +62,7 @@ const STATUS_CONFIG: Record<
   absent: {
     label: "Absen",
     icon: XCircle,
-    className:
-      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   },
   half_day: {
     label: "Setengah Hari",
@@ -85,8 +85,7 @@ const STATUS_CONFIG: Record<
   holiday: {
     label: "Libur",
     icon: CalendarDays,
-    className:
-      "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+    className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
   },
 };
 
@@ -295,11 +294,169 @@ function OverrideForm({
       </div>
 
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           Batal
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
           Ajukan Koreksi
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+// ════════════════════════════════════════════
+// MANUAL ATTENDANCE FORM
+// ════════════════════════════════════════════
+
+interface ManualAttendanceFormProps {
+  onClose: () => void;
+  onSubmit: (payload: CreateManualAttendancePayload) => void;
+  employees: Array<{ id: number; full_name: string }>;
+  isLoading?: boolean;
+}
+
+function ManualAttendanceForm({
+  onClose,
+  onSubmit,
+  employees,
+  isLoading,
+}: ManualAttendanceFormProps) {
+  const today = new Date().toISOString().split("T")[0];
+  const [formData, setFormData] = useState({
+    employee_id: "",
+    attendance_date: today,
+    clock_in_at: "",
+    clock_out_at: "",
+    notes: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.employee_id) newErrors.employee_id = "Pegawai wajib dipilih";
+    if (!formData.attendance_date)
+      newErrors.attendance_date = "Tanggal wajib diisi";
+    if (formData.attendance_date > today)
+      newErrors.attendance_date = "Tanggal tidak boleh di masa depan";
+    if (!formData.clock_in_at) newErrors.clock_in_at = "Jam masuk wajib diisi";
+    if (!formData.notes.trim()) newErrors.notes = "Catatan wajib diisi";
+    if (formData.notes.trim().length < 10)
+      newErrors.notes = "Catatan minimal 10 karakter";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    // Construct ISO timestamps
+    const clockInAt = `${formData.attendance_date}T${formData.clock_in_at}:00`;
+    const clockOutAt = formData.clock_out_at
+      ? `${formData.attendance_date}T${formData.clock_out_at}:00`
+      : null;
+
+    onSubmit({
+      employee_id: parseInt(formData.employee_id),
+      attendance_date: formData.attendance_date,
+      clock_in_at: clockInAt,
+      clock_out_at: clockOutAt,
+      notes: formData.notes.trim(),
+    });
+  };
+
+  const employeeOptions = employees.map((e) => ({
+    value: String(e.id),
+    label: e.full_name,
+  }));
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <SearchableSelect
+          label="Pegawai *"
+          value={formData.employee_id}
+          onChange={(val) => handleChange("employee_id", val)}
+          options={employeeOptions}
+          placeholder="Pilih pegawai..."
+          searchPlaceholder="Cari pegawai..."
+        />
+        {errors.employee_id && (
+          <p className="text-xs text-(--destructive)">{errors.employee_id}</p>
+        )}
+      </div>
+
+      <Input
+        id="attendance_date"
+        label="Tanggal *"
+        type="date"
+        max={today}
+        value={formData.attendance_date}
+        onChange={(e) => handleChange("attendance_date", e.target.value)}
+        error={errors.attendance_date}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          id="clock_in_at"
+          label="Jam Masuk *"
+          type="time"
+          value={formData.clock_in_at}
+          onChange={(e) => handleChange("clock_in_at", e.target.value)}
+          error={errors.clock_in_at}
+        />
+        <Input
+          id="clock_out_at"
+          label="Jam Keluar (Opsional)"
+          type="time"
+          value={formData.clock_out_at}
+          onChange={(e) => handleChange("clock_out_at", e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-(--foreground) opacity-80">
+          Catatan *
+        </label>
+        <textarea
+          value={formData.notes}
+          onChange={(e) => handleChange("notes", e.target.value)}
+          placeholder="Jelaskan alasan input presensi manual (min 10 karakter)..."
+          rows={3}
+          className={cn(
+            "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+            "border-(--border) placeholder:text-(--muted-foreground) transition-colors duration-200",
+            "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring) resize-none",
+            errors.notes && "border-(--destructive)",
+          )}
+        />
+        {errors.notes && (
+          <p className="text-xs text-(--destructive)">{errors.notes}</p>
+        )}
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
+          Batal
+        </Button>
+        <Button type="submit" variant="primary" isLoading={isLoading}>
+          Simpan
         </Button>
       </div>
     </form>
@@ -352,6 +509,7 @@ function AttendanceLogTab() {
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showManualForm, setShowManualForm] = useState(false);
 
   const params = useMemo(
     () => ({
@@ -361,12 +519,25 @@ function AttendanceLogTab() {
       start_date: filterStartDate || undefined,
       end_date: filterEndDate || undefined,
     }),
-    [filterEmployee, filterStatus, filterBranch, filterStartDate, filterEndDate],
+    [
+      filterEmployee,
+      filterStatus,
+      filterBranch,
+      filterStartDate,
+      filterEndDate,
+    ],
   );
 
-  const { data: logs, loading } = useAttendanceList(params);
+  const { data: logs, loading, refetch } = useAttendanceList(params);
   const { data: employees } = useEmployeeList({ is_active: true });
   const { data: branches } = useBranchList();
+
+  // Manual attendance mutations
+  const { createManualAttendance, loading: manualLoading } =
+    useManualAttendanceMutations(() => {
+      setShowManualForm(false);
+      refetch();
+    });
 
   // Summary counts
   const summary = useMemo(() => {
@@ -375,9 +546,8 @@ function AttendanceLogTab() {
       present: logs.filter((l) => l.status === "present").length,
       late: logs.filter((l) => l.status === "late").length,
       absent: logs.filter((l) => l.status === "absent").length,
-      leave: logs.filter(
-        (l) => l.status === "leave" || l.status === "half_day",
-      ).length,
+      leave: logs.filter((l) => l.status === "leave" || l.status === "half_day")
+        .length,
     };
   }, [logs]);
 
@@ -443,7 +613,10 @@ function AttendanceLogTab() {
           ].map((item) => (
             <div
               key={item.label}
-              className={cn("rounded-xl border border-(--border) px-4 py-3", item.bg)}
+              className={cn(
+                "rounded-xl border border-(--border) px-4 py-3",
+                item.bg,
+              )}
             >
               <p className="text-xs text-(--muted-foreground)">{item.label}</p>
               <p className={cn("text-2xl font-bold", item.color)}>
@@ -455,84 +628,98 @@ function AttendanceLogTab() {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted-foreground)"
+      {/* Filters & Manual Button */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center flex-1">
+          <div className="relative flex-1 min-w-45 max-w-xs">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted-foreground)"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari pegawai..."
+              className={cn(
+                "w-full rounded-lg border bg-(--input) pl-9 pr-4 py-2 text-sm text-(--foreground)",
+                "border-(--border) placeholder:text-(--muted-foreground)",
+                "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+              )}
+            />
+          </div>
+          <SearchableSelect
+            value={filterEmployee}
+            onChange={setFilterEmployee}
+            options={[
+              { value: "", label: "Semua Pegawai" },
+              ...(employees?.map((e) => ({
+                value: String(e.id),
+                label: e.full_name,
+              })) || []),
+            ]}
+            placeholder="Filter pegawai..."
+            searchPlaceholder="Cari pegawai..."
           />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari pegawai..."
-            className={cn(
-              "w-full rounded-lg border bg-(--input) pl-9 pr-4 py-2 text-sm text-(--foreground)",
-              "border-(--border) placeholder:text-(--muted-foreground)",
-              "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
+          <SearchableSelect
+            value={filterStatus}
+            onChange={setFilterStatus}
+            options={[
+              { value: "", label: "Semua Status" },
+              ...ATTENDANCE_STATUS_OPTIONS.map((s) => ({
+                value: s.value,
+                label: s.label,
+              })),
+            ]}
+            placeholder="Filter status..."
           />
-        </div>
-        <SearchableSelect
-          value={filterEmployee}
-          onChange={setFilterEmployee}
-          options={[
-            { value: "", label: "Semua Pegawai" },
-            ...(employees?.map((e) => ({
-              value: String(e.id),
-              label: e.full_name,
-            })) || []),
-          ]}
-          placeholder="Filter pegawai..."
-          searchPlaceholder="Cari pegawai..."
-        />
-        <SearchableSelect
-          value={filterStatus}
-          onChange={setFilterStatus}
-          options={[
-            { value: "", label: "Semua Status" },
-            ...ATTENDANCE_STATUS_OPTIONS.map((s) => ({
-              value: s.value,
-              label: s.label,
-            })),
-          ]}
-          placeholder="Filter status..."
-        />
-        <SearchableSelect
-          value={filterBranch}
-          onChange={setFilterBranch}
-          options={[
-            { value: "", label: "Semua Cabang" },
-            ...(branches?.map((b) => ({
-              value: String(b.id),
-              label: b.name,
-            })) || []),
-          ]}
-          placeholder="Filter cabang..."
-          searchPlaceholder="Cari cabang..."
-        />
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            value={filterStartDate}
-            onChange={(e) => setFilterStartDate(e.target.value)}
-            className={cn(
-              "rounded-lg border bg-(--input) px-3 py-2 text-sm text-(--foreground)",
-              "border-(--border) focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
-          />
-          <span className="text-(--muted-foreground) text-sm">—</span>
-          <input
-            type="date"
-            value={filterEndDate}
-            onChange={(e) => setFilterEndDate(e.target.value)}
-            className={cn(
-              "rounded-lg border bg-(--input) px-3 py-2 text-sm text-(--foreground)",
-              "border-(--border) focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-            )}
+          <SearchableSelect
+            value={filterBranch}
+            onChange={setFilterBranch}
+            options={[
+              { value: "", label: "Semua Cabang" },
+              ...(branches?.map((b) => ({
+                value: String(b.id),
+                label: b.name,
+              })) || []),
+            ]}
+            placeholder="Filter cabang..."
+            searchPlaceholder="Cari cabang..."
           />
         </div>
+
+        {/* Manual Attendance Button - Demo mode: always show */}
+        <Button
+          variant="primary"
+          onClick={() => setShowManualForm(true)}
+          className="shrink-0"
+        >
+          <UserPlus size={16} />
+          Input Manual
+        </Button>
+      </div>
+
+      {/* Date Filter */}
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          value={filterStartDate}
+          onChange={(e) => setFilterStartDate(e.target.value)}
+          className={cn(
+            "rounded-lg border bg-(--input) px-3 py-2 text-sm text-(--foreground)",
+            "border-(--border) focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+          )}
+        />
+        <span className="text-(--muted-foreground) text-sm">—</span>
+        <input
+          type="date"
+          value={filterEndDate}
+          onChange={(e) => setFilterEndDate(e.target.value)}
+          className={cn(
+            "rounded-lg border bg-(--input) px-3 py-2 text-sm text-(--foreground)",
+            "border-(--border) focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+          )}
+        />
       </div>
 
       {/* Table */}
@@ -671,6 +858,20 @@ function AttendanceLogTab() {
           </div>
         </>
       )}
+
+      {/* Manual Attendance Modal */}
+      <Modal
+        open={showManualForm}
+        title="Input Presensi Manual"
+        onClose={() => setShowManualForm(false)}
+      >
+        <ManualAttendanceForm
+          onClose={() => setShowManualForm(false)}
+          onSubmit={(payload) => createManualAttendance(payload)}
+          employees={employees || []}
+          isLoading={manualLoading}
+        />
+      </Modal>
     </div>
   );
 }
@@ -697,7 +898,9 @@ function AttendanceOverrideTab() {
   const { data: logs } = useAttendanceList({});
   const { loading: mutLoading, createOverride } = useOverrideMutations(refetch);
 
-  const handleCreate = async (payload: Parameters<typeof createOverride>[0]) => {
+  const handleCreate = async (
+    payload: Parameters<typeof createOverride>[0],
+  ) => {
     const result = await createOverride(payload);
     if (result) setShowForm(false);
   };
@@ -718,8 +921,7 @@ function AttendanceOverrideTab() {
     },
     rejected: {
       label: "Ditolak",
-      className:
-        "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+      className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     },
   };
 
@@ -783,7 +985,11 @@ function AttendanceOverrideTab() {
           description="Ajukan koreksi presensi jika ada kesalahan data kehadiran"
           icon={<Edit2 className="h-12 w-12" />}
           action={
-            <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowForm(true)}
+            >
               <Plus size={16} />
               Ajukan Koreksi
             </Button>
@@ -816,7 +1022,8 @@ function AttendanceOverrideTab() {
                 <tbody>
                   {overrides.map((ov, index) => {
                     const statusConfig =
-                      OVERRIDE_STATUS_COLORS[ov.status] || OVERRIDE_STATUS_COLORS.pending;
+                      OVERRIDE_STATUS_COLORS[ov.status] ||
+                      OVERRIDE_STATUS_COLORS.pending;
                     return (
                       <tr
                         key={ov.id}
@@ -887,7 +1094,8 @@ function AttendanceOverrideTab() {
           <div className="flex flex-col gap-3 md:hidden">
             {overrides.map((ov) => {
               const statusConfig =
-                OVERRIDE_STATUS_COLORS[ov.status] || OVERRIDE_STATUS_COLORS.pending;
+                OVERRIDE_STATUS_COLORS[ov.status] ||
+                OVERRIDE_STATUS_COLORS.pending;
               return (
                 <div
                   key={ov.id}
@@ -912,9 +1120,11 @@ function AttendanceOverrideTab() {
                     </span>
                   </div>
                   <p className="text-xs text-(--muted-foreground) mb-1">
-                    {OVERRIDE_TYPE_OPTIONS.find(
-                      (o) => o.value === ov.override_type,
-                    )?.label}
+                    {
+                      OVERRIDE_TYPE_OPTIONS.find(
+                        (o) => o.value === ov.override_type,
+                      )?.label
+                    }
                   </p>
                   <p className="text-xs text-(--foreground) line-clamp-2">
                     {ov.reason}

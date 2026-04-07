@@ -39,6 +39,7 @@ const MASTER_DATA_NAV: NavItem[] = [
   { icon: Network, label: "Departemen", path: "/departments" },
   { icon: Briefcase, label: "Jabatan", path: "/positions" },
   { icon: Shield, label: "Role", path: "/roles" },
+  { icon: CalendarOff, label: "Jenis Cuti", path: "/leave-types" },
 ];
 
 const JADWAL_NAV: NavItem[] = [

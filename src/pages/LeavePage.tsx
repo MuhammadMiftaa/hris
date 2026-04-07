@@ -6,6 +6,7 @@ import {
   BarChart3,
   X,
   AlertCircle,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -13,6 +14,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui/FormElements";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { ApprovalTimeline } from "@/components/ui/ApprovalTimeline";
+import type { TimelineStep } from "@/components/ui/ApprovalTimeline";
 import {
   useLeaveTypeList,
   useLeaveBalanceList,
@@ -53,8 +56,7 @@ const LEAVE_STATUS_CONFIG: Record<
   },
   rejected: {
     label: "Ditolak",
-    className:
-      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   },
 };
 
@@ -146,8 +148,7 @@ function LeaveRequestForm({
   };
 
   const selectedLeaveType = useMemo(
-    () =>
-      leaveTypes?.find((lt) => String(lt.id) === formData.leave_type_id),
+    () => leaveTypes?.find((lt) => String(lt.id) === formData.leave_type_id),
     [leaveTypes, formData.leave_type_id],
   );
 
@@ -170,11 +171,13 @@ function LeaveRequestForm({
     if (!formData.end_date) newErrors.end_date = "Tanggal selesai wajib diisi";
     if (formData.start_date && formData.end_date) {
       if (new Date(formData.end_date) < new Date(formData.start_date)) {
-        newErrors.end_date = "Tanggal selesai tidak boleh sebelum tanggal mulai";
+        newErrors.end_date =
+          "Tanggal selesai tidak boleh sebelum tanggal mulai";
       }
     }
     if (selectedLeaveType?.requires_document && !formData.document_url.trim()) {
-      newErrors.document_url = "Dokumen pendukung wajib diisi untuk jenis cuti ini";
+      newErrors.document_url =
+        "Dokumen pendukung wajib diisi untuk jenis cuti ini";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -204,9 +207,8 @@ function LeaveRequestForm({
             leaveTypes?.map((lt) => ({
               value: String(lt.id),
               label: `${lt.name} ${lt.category === "annual" ? `(Maks. ${lt.max_total_duration_per_year} hari/tahun)` : ""}`,
-              group: LEAVE_CATEGORY_OPTIONS.find(
-                (c) => c.value === lt.category,
-              )?.label,
+              group: LEAVE_CATEGORY_OPTIONS.find((c) => c.value === lt.category)
+                ?.label,
             })) || []
           }
           grouped
@@ -292,7 +294,12 @@ function LeaveRequestForm({
       />
 
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           Batal
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
@@ -349,6 +356,9 @@ function LeaveRequestTab() {
     String(new Date().getFullYear()),
   );
   const [showForm, setShowForm] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(
+    null,
+  );
 
   const params = useMemo(
     () => ({
@@ -361,7 +371,8 @@ function LeaveRequestTab() {
 
   const { data: requests, loading, refetch } = useLeaveRequestList(params);
   const { data: employees } = useEmployeeList({ is_active: true });
-  const { loading: mutLoading, createRequest } = useLeaveRequestMutations(refetch);
+  const { loading: mutLoading, createRequest } =
+    useLeaveRequestMutations(refetch);
 
   const handleCreate = async (payload: CreateLeavePayload) => {
     const result = await createRequest(payload);
@@ -380,6 +391,21 @@ function LeaveRequestTab() {
     sick: "Sakit",
     special: "Cuti Khusus",
     other: "Lainnya",
+  };
+
+  // Transform approval data to timeline steps
+  const getTimelineSteps = (request: LeaveRequest): TimelineStep[] => {
+    if (!request.approvals || request.approvals.length === 0) {
+      return [];
+    }
+    return request.approvals.map((approval) => ({
+      level: approval.level,
+      label: approval.level === 1 ? "Leader Departemen" : "Leader HRGA",
+      approver_name: approval.approver_name || null,
+      status: approval.status,
+      notes: approval.notes,
+      decided_at: approval.decided_at,
+    }));
   };
 
   return (
@@ -442,7 +468,11 @@ function LeaveRequestTab() {
           description="Ajukan cuti atau izin tidak masuk di sini"
           icon={<CalendarDays className="h-12 w-12" />}
           action={
-            <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowForm(true)}
+            >
               <Plus size={16} />
               Ajukan Cuti
             </Button>
@@ -462,6 +492,7 @@ function LeaveRequestTab() {
                       "Hari",
                       "Alasan",
                       "Status",
+                      "Aksi",
                     ].map((h) => (
                       <th
                         key={h}
@@ -509,6 +540,16 @@ function LeaveRequestTab() {
                       <td className="px-5 py-3">
                         <LeaveStatusBadge status={req.status} />
                       </td>
+                      <td className="px-5 py-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedRequest(req)}
+                        >
+                          <Eye size={14} />
+                          Detail
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -546,6 +587,15 @@ function LeaveRequestTab() {
                     <p>{req.total_days} hari</p>
                   </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedRequest(req)}
+                  className="mt-2 w-full"
+                >
+                  <Eye size={14} />
+                  Lihat Detail
+                </Button>
               </div>
             ))}
           </div>
@@ -564,6 +614,94 @@ function LeaveRequestTab() {
           isLoading={mutLoading}
         />
       </Modal>
+
+      {/* Detail Modal with Approval Timeline */}
+      {selectedRequest && (
+        <Modal
+          open={!!selectedRequest}
+          title="Detail Pengajuan Cuti"
+          onClose={() => setSelectedRequest(null)}
+        >
+          <div className="space-y-5">
+            {/* Request Info */}
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-(--foreground)">
+                    {selectedRequest.employee_name || "—"}
+                  </p>
+                  <p className="text-xs text-(--muted-foreground)">
+                    {selectedRequest.leave_type_name}
+                    {selectedRequest.leave_category &&
+                      ` • ${CATEGORY_LABELS[selectedRequest.leave_category]}`}
+                  </p>
+                </div>
+                <LeaveStatusBadge status={selectedRequest.status} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 rounded-lg bg-(--muted)/30 p-3">
+                <div>
+                  <p className="text-xs text-(--muted-foreground)">Periode</p>
+                  <p className="text-sm font-medium text-(--foreground)">
+                    {formatDate(selectedRequest.start_date)} —{" "}
+                    {formatDate(selectedRequest.end_date)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-(--muted-foreground)">Durasi</p>
+                  <p className="text-sm font-medium text-(--foreground)">
+                    {selectedRequest.total_days} hari
+                  </p>
+                </div>
+              </div>
+
+              {selectedRequest.reason && (
+                <div>
+                  <p className="text-xs text-(--muted-foreground) mb-1">
+                    Alasan
+                  </p>
+                  <p className="text-sm text-(--foreground)">
+                    {selectedRequest.reason}
+                  </p>
+                </div>
+              )}
+
+              {selectedRequest.document_url && (
+                <div>
+                  <p className="text-xs text-(--muted-foreground) mb-1">
+                    Dokumen Pendukung
+                  </p>
+                  <a
+                    href={selectedRequest.document_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-(--primary) hover:underline"
+                  >
+                    Lihat Dokumen →
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Approval Timeline */}
+            <div>
+              <h4 className="text-sm font-semibold text-(--foreground) mb-3">
+                Timeline Persetujuan
+              </h4>
+              <ApprovalTimeline
+                steps={getTimelineSteps(selectedRequest)}
+                current_status={selectedRequest.status}
+              />
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-(--border)">
+              <Button variant="ghost" onClick={() => setSelectedRequest(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -645,10 +783,9 @@ function LeaveBalanceTab() {
               <tbody>
                 {balances.map((bal, index) => {
                   const remaining = bal.remaining_duration;
-                  const percentage =
-                    bal.max_duration
-                      ? (bal.used_duration / bal.max_duration) * 100
-                      : 0;
+                  const percentage = bal.max_duration
+                    ? (bal.used_duration / bal.max_duration) * 100
+                    : 0;
                   return (
                     <tr
                       key={bal.id}
@@ -664,7 +801,8 @@ function LeaveBalanceTab() {
                         {bal.leave_type_name || "—"}
                       </td>
                       <td className="px-5 py-3 text-sm text-(--foreground)">
-                        {bal.max_duration !== undefined && bal.max_duration !== null
+                        {bal.max_duration !== undefined &&
+                        bal.max_duration !== null
                           ? `${bal.max_duration} hari`
                           : "Tidak terbatas"}
                       </td>
@@ -684,7 +822,9 @@ function LeaveBalanceTab() {
                                       ? "bg-yellow-500"
                                       : "bg-green-500",
                                 )}
-                                style={{ width: `${Math.min(percentage, 100)}%` }}
+                                style={{
+                                  width: `${Math.min(percentage, 100)}%`,
+                                }}
                               />
                             </div>
                           )}
@@ -738,8 +878,7 @@ function LeaveTypeTab() {
     sick: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     special:
       "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-    other:
-      "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+    other: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
   };
 
   return (

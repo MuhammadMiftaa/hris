@@ -14,6 +14,7 @@ import { ShiftPage } from "./pages/ShiftPage";
 import { HolidayPage } from "./pages/HolidayPage";
 import { AttendancePage } from "./pages/AttendancePage";
 import { LeavePage } from "./pages/LeavePage";
+import { LeaveTypePage } from "./pages/LeaveTypePage";
 import { RequestPage } from "./pages/RequestPage";
 import { DailyReportPage } from "./pages/DailyReportPage";
 
@@ -93,6 +94,14 @@ function App() {
         element={
           <PrivateRoute>
             <RolePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/leave-types"
+        element={
+          <PrivateRoute>
+            <LeaveTypePage />
           </PrivateRoute>
         }
       />

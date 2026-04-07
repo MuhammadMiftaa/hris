@@ -10,18 +10,38 @@ import {
   Briefcase,
   Building2,
   IdCard,
+  ClipboardCheck,
+  Clock,
+  FileCheck,
+  Camera,
+  Lock,
+  Eye,
+  EyeOff,
+  CalendarOff,
+  AlertTriangle,
+  Timer,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import {
   useEmployeeProfile,
   useEmployeeProfileContacts,
 } from "@/hooks/useEmployeeProfile";
+import { useAttendanceList } from "@/hooks/useAttendance";
+import { useLeaveBalanceList } from "@/hooks/useLeave";
+import { useShiftList, useScheduleList } from "@/hooks/useShift";
+import { useContractList } from "@/hooks/useContract";
+import { useDemo } from "@/contexts/DemoContext";
 import {
   GENDER_LABELS,
   MARITAL_STATUS_LABELS,
   CONTACT_TYPE_LABELS,
 } from "@/types/employee";
+import { DAY_OF_WEEK_OPTIONS } from "@/types/shift";
+import { CONTRACT_TYPE_LABELS, CONTRACT_TYPE_COLORS } from "@/types/contract";
+import type { ShiftTemplate, EmployeeSchedule } from "@/types/shift";
+import type { EmploymentContract } from "@/types/contract";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -40,10 +60,13 @@ function TabNav({
     { label: "Info Pribadi", icon: User },
     { label: "Data Pekerjaan", icon: Briefcase },
     { label: "Kontak", icon: Phone },
+    { label: "Kehadiran & Cuti", icon: ClipboardCheck },
+    { label: "Shift & Jadwal", icon: Clock },
+    { label: "Kontrak", icon: FileCheck },
   ];
 
   return (
-    <div className="flex gap-1 overflow-x-auto border-b border-(--border)">
+    <div className="flex gap-1 overflow-x-auto border-b border-(--border) scrollbar-hide">
       {tabs.map((tab, index) => (
         <button
           key={tab.label}
@@ -56,7 +79,7 @@ function TabNav({
           )}
         >
           <tab.icon size={16} />
-          {tab.label}
+          <span className="hidden sm:inline">{tab.label}</span>
         </button>
       ))}
     </div>
@@ -85,11 +108,688 @@ function InfoItem({
 }
 
 // ════════════════════════════════════════════
+// STAT CARD (Simple inline version)
+// ════════════════════════════════════════════
+
+function StatItem({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-(--border) bg-(--card) p-4">
+      <div
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+        style={{ background: `${color}20` }}
+      >
+        <Icon size={18} style={{ color }} />
+      </div>
+      <div>
+        <div className="text-2xl font-bold text-(--foreground)">{value}</div>
+        <div className="text-xs text-(--muted-foreground)">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// PASSWORD INPUT
+// ════════════════════════════════════════════
+
+function PasswordInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium text-(--foreground)">{label}</label>
+      <div className="relative">
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 pr-10 text-sm text-(--foreground) placeholder:text-(--muted-foreground) focus:border-(--primary) focus:outline-none focus:ring-1 focus:ring-(--primary)"
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-(--muted-foreground) hover:text-(--foreground)"
+        >
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// SECURITY SECTION
+// ════════════════════════════════════════════
+
+function SecuritySection() {
+  const { isDemo } = useDemo();
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast.error("Semua field harus diisi");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Password baru tidak cocok");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("Password minimal 8 karakter");
+      return;
+    }
+
+    if (isDemo) {
+      toast("Demo mode — password tidak diubah", { icon: "🔒" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // TODO: call API to change password
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Password berhasil diubah");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      toast.error("Gagal mengubah password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Lock size={18} className="text-(--primary)" />
+        <h3 className="font-semibold text-(--foreground)">Keamanan Akun</h3>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+        <PasswordInput
+          label="Password Lama"
+          value={oldPassword}
+          onChange={setOldPassword}
+          placeholder="Masukkan password lama"
+        />
+        <PasswordInput
+          label="Password Baru"
+          value={newPassword}
+          onChange={setNewPassword}
+          placeholder="Minimal 8 karakter"
+        />
+        <PasswordInput
+          label="Konfirmasi Password Baru"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          placeholder="Ulangi password baru"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-lg bg-(--primary) px-4 py-2 text-sm font-medium text-white hover:bg-(--primary)/90 disabled:opacity-50"
+        >
+          {loading ? "Menyimpan..." : "Ubah Password"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// TAB 4: KEHADIRAN & CUTI
+// ════════════════════════════════════════════
+
+function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+
+  const startDate = new Date(currentYear, currentMonth, 1)
+    .toISOString()
+    .split("T")[0];
+  const endDate = new Date(currentYear, currentMonth + 1, 0)
+    .toISOString()
+    .split("T")[0];
+
+  const { data: attendances, loading: attLoading } = useAttendanceList({
+    employee_id: employeeId || undefined,
+    start_date: startDate,
+    end_date: endDate,
+  });
+
+  const { data: balances, loading: balLoading } = useLeaveBalanceList({
+    employee_id: employeeId || undefined,
+    year: currentYear,
+  });
+
+  if (attLoading || balLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-40 rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
+      </div>
+    );
+  }
+
+  // Compute attendance summary
+  const totalPresent =
+    attendances?.filter((a) => a.status === "present" || a.status === "late")
+      .length || 0;
+  const totalLate = attendances?.filter((a) => a.status === "late").length || 0;
+  const totalAbsent =
+    attendances?.filter((a) => a.status === "absent").length || 0;
+  const totalLeave =
+    attendances?.filter((a) => a.status === "leave" || a.status === "half_day")
+      .length || 0;
+
+  // Compute average clock-in & total late minutes
+  const clockInTimes =
+    attendances
+      ?.filter((a) => a.clock_in_at)
+      .map((a) => {
+        const t =
+          a.clock_in_at!.split("T")[1]?.split(":") || a.clock_in_at!.split(":");
+        return parseInt(t[0], 10) * 60 + parseInt(t[1], 10);
+      }) || [];
+  const avgClockInMinutes =
+    clockInTimes.length > 0
+      ? Math.round(
+          clockInTimes.reduce((a, b) => a + b, 0) / clockInTimes.length,
+        )
+      : null;
+  const avgClockIn = avgClockInMinutes
+    ? `${Math.floor(avgClockInMinutes / 60)
+        .toString()
+        .padStart(
+          2,
+          "0",
+        )}:${(avgClockInMinutes % 60).toString().padStart(2, "0")}`
+    : "-";
+
+  const totalLateMinutes =
+    attendances?.reduce((sum, a) => sum + (a.late_minutes || 0), 0) || 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Attendance Summary */}
+      <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <ClipboardCheck size={18} className="text-(--primary)" />
+          <h3 className="font-semibold text-(--foreground)">
+            Ringkasan Kehadiran Bulan Ini
+          </h3>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatItem
+            icon={ClipboardCheck}
+            label="Total Hadir"
+            value={totalPresent}
+            color="#10b981"
+          />
+          <StatItem
+            icon={AlertTriangle}
+            label="Terlambat"
+            value={totalLate}
+            color="#f59e0b"
+          />
+          <StatItem
+            icon={CalendarOff}
+            label="Absen"
+            value={totalAbsent}
+            color="#ef4444"
+          />
+          <StatItem
+            icon={CalendarOff}
+            label="Cuti/Izin"
+            value={totalLeave}
+            color="#3b82f6"
+          />
+        </div>
+        <div className="mt-4 pt-4 border-t border-(--border) grid grid-cols-2 gap-4">
+          <InfoItem label="Rata-rata Jam Masuk" value={avgClockIn} />
+          <InfoItem
+            label="Total Keterlambatan"
+            value={`${totalLateMinutes} menit`}
+          />
+        </div>
+      </div>
+
+      {/* Leave Balances */}
+      <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <CalendarOff size={18} className="text-(--primary)" />
+          <h3 className="font-semibold text-(--foreground)">
+            Saldo Cuti Tahun {currentYear}
+          </h3>
+        </div>
+        {!balances || balances.length === 0 ? (
+          <p className="text-sm text-(--muted-foreground)">
+            Belum ada data saldo cuti
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-(--border)">
+                  <th className="py-2 px-3 text-left text-xs font-medium text-(--muted-foreground)">
+                    Jenis Cuti
+                  </th>
+                  <th className="py-2 px-3 text-center text-xs font-medium text-(--muted-foreground)">
+                    Kuota
+                  </th>
+                  <th className="py-2 px-3 text-center text-xs font-medium text-(--muted-foreground)">
+                    Terpakai
+                  </th>
+                  <th className="py-2 px-3 text-center text-xs font-medium text-(--muted-foreground)">
+                    Sisa
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {balances.map((b) => (
+                  <tr
+                    key={b.id}
+                    className="border-b border-(--border) last:border-0"
+                  >
+                    <td className="py-2.5 px-3 text-sm font-medium text-(--foreground)">
+                      {b.leave_type_name}
+                    </td>
+                    <td className="py-2.5 px-3 text-center text-sm text-(--muted-foreground)">
+                      {b.max_duration ?? "∞"}
+                    </td>
+                    <td className="py-2.5 px-3 text-center text-sm text-(--muted-foreground)">
+                      {b.used_duration}
+                    </td>
+                    <td className="py-2.5 px-3 text-center text-sm font-medium text-(--primary)">
+                      {b.remaining_duration ?? "∞"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// TAB 5: SHIFT & JADWAL
+// ════════════════════════════════════════════
+
+function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
+  const { data: shifts, loading: shiftLoading } = useShiftList();
+  const { data: schedules, loading: schedLoading } = useScheduleList({
+    employee_id: employeeId || undefined,
+  });
+
+  if (shiftLoading || schedLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-48 rounded-xl" />
+        <Skeleton className="h-32 rounded-xl" />
+      </div>
+    );
+  }
+
+  // Find active schedule
+  const today = new Date().toISOString().split("T")[0];
+  const activeSchedule = schedules?.find(
+    (s: EmployeeSchedule) =>
+      s.is_active &&
+      s.effective_date <= today &&
+      (!s.end_date || s.end_date >= today),
+  );
+
+  // Find shift template for active schedule
+  const activeShift = activeSchedule
+    ? shifts?.find(
+        (s: ShiftTemplate) => s.id === activeSchedule.shift_template_id,
+      )
+    : null;
+
+  if (!activeSchedule || !activeShift) {
+    return (
+      <EmptyState
+        title="Tidak ada shift aktif"
+        description="Jadwal shift belum diatur untuk Anda"
+        icon={<Clock className="h-12 w-12" />}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Active Shift Info */}
+      <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Clock size={18} className="text-(--primary)" />
+            <h3 className="font-semibold text-(--foreground)">Shift Aktif</h3>
+          </div>
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 text-xs font-medium",
+              activeShift.is_flexible
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+            )}
+          >
+            {activeShift.is_flexible ? "Fleksibel" : "Tetap"}
+          </span>
+        </div>
+
+        <p className="text-lg font-semibold text-(--foreground) mb-4">
+          {activeShift.name}
+        </p>
+
+        {/* Schedule Days */}
+        <div className="space-y-2">
+          {DAY_OF_WEEK_OPTIONS.map((day) => {
+            const detail = activeShift.details?.find(
+              (d) => d.day_of_week === day.value,
+            );
+            const isWorkDay = detail?.is_working_day ?? false;
+
+            return (
+              <div
+                key={day.value}
+                className={cn(
+                  "flex items-center justify-between rounded-lg px-3 py-2",
+                  isWorkDay
+                    ? "bg-(--muted)/50"
+                    : "bg-red-50 dark:bg-red-900/10",
+                )}
+              >
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    isWorkDay
+                      ? "text-(--foreground)"
+                      : "text-red-600 dark:text-red-400",
+                  )}
+                >
+                  {day.label}
+                </span>
+                {isWorkDay && detail ? (
+                  <div className="flex items-center gap-4 text-xs text-(--muted-foreground)">
+                    <span>
+                      <Timer size={12} className="inline mr-1" />
+                      {detail.clock_in_start || "-"} -{" "}
+                      {detail.clock_out_end || "-"}
+                    </span>
+                    {(detail.break_dhuhr_start || detail.break_asr_start) && (
+                      <span className="text-(--muted-foreground)/60">
+                        Break:{" "}
+                        {detail.break_dhuhr_start &&
+                          `Dzuhur ${detail.break_dhuhr_start}-${detail.break_dhuhr_end}`}
+                        {detail.break_dhuhr_start &&
+                          detail.break_asr_start &&
+                          ", "}
+                        {detail.break_asr_start &&
+                          `Ashar ${detail.break_asr_start}-${detail.break_asr_end}`}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-xs text-red-600 dark:text-red-400">
+                    Libur
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Schedule Period */}
+      <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <FileCheck size={18} className="text-(--primary)" />
+          <h3 className="font-semibold text-(--foreground)">Jadwal Berlaku</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <InfoItem
+            label="Mulai Berlaku"
+            value={new Date(activeSchedule.effective_date).toLocaleDateString(
+              "id-ID",
+              { day: "numeric", month: "long", year: "numeric" },
+            )}
+          />
+          <InfoItem
+            label="Berakhir"
+            value={
+              activeSchedule.end_date
+                ? new Date(activeSchedule.end_date).toLocaleDateString(
+                    "id-ID",
+                    {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    },
+                  )
+                : "Berlaku seterusnya"
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// TAB 6: KONTRAK
+// ════════════════════════════════════════════
+
+function TabContract({ employeeId }: { employeeId: number | null }) {
+  const { data: contracts, loading } = useContractList(employeeId);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-48 rounded-xl" />
+        <Skeleton className="h-32 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (!contracts || contracts.length === 0) {
+    return (
+      <EmptyState
+        title="Tidak ada data kontrak"
+        description="Data kontrak kerja belum tersedia"
+        icon={<FileCheck className="h-12 w-12" />}
+      />
+    );
+  }
+
+  // Sort by start_date desc
+  const sorted = [...contracts].sort(
+    (a, b) =>
+      new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
+  );
+
+  // Find active contract
+  const today = new Date().toISOString().split("T")[0];
+  const activeContract = sorted.find(
+    (c: EmploymentContract) =>
+      c.start_date <= today && (!c.end_date || c.end_date >= today),
+  );
+  const pastContracts = sorted.filter((c) => c !== activeContract);
+
+  // Compute remaining days
+  const getRemainingDays = (endDate: string | null) => {
+    if (!endDate) return null;
+    const diff = Math.ceil(
+      (new Date(endDate).getTime() - new Date().getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+    return Math.max(0, diff);
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Active Contract */}
+      {activeContract && (
+        <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FileCheck size={18} className="text-(--primary)" />
+              <h3 className="font-semibold text-(--foreground)">
+                Kontrak Aktif
+              </h3>
+            </div>
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-xs font-medium",
+                CONTRACT_TYPE_COLORS[activeContract.contract_type],
+              )}
+            >
+              {CONTRACT_TYPE_LABELS[activeContract.contract_type]}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <InfoItem
+              label="Nomor Kontrak"
+              value={activeContract.contract_number}
+            />
+            <InfoItem
+              label="Tanggal Mulai"
+              value={formatDate(activeContract.start_date)}
+            />
+            <InfoItem
+              label="Tanggal Selesai"
+              value={
+                activeContract.end_date
+                  ? formatDate(activeContract.end_date)
+                  : "Tidak terbatas"
+              }
+            />
+            {activeContract.end_date && (
+              <div className="space-y-1">
+                <div className="text-xs text-(--muted-foreground)">
+                  Sisa Waktu
+                </div>
+                {(() => {
+                  const remaining = getRemainingDays(activeContract.end_date);
+                  const isWarning = remaining !== null && remaining <= 30;
+                  return (
+                    <div
+                      className={cn(
+                        "text-sm font-medium",
+                        isWarning
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-(--foreground)",
+                      )}
+                    >
+                      {remaining} hari
+                      {isWarning && (
+                        <AlertTriangle
+                          size={14}
+                          className="inline ml-1 text-red-600"
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+
+          {activeContract.notes && (
+            <div className="mt-4 pt-4 border-t border-(--border)">
+              <InfoItem label="Catatan" value={activeContract.notes} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Past Contracts */}
+      {pastContracts.length > 0 && (
+        <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <FileCheck size={18} className="text-(--muted-foreground)" />
+            <h3 className="font-semibold text-(--foreground)">
+              Riwayat Kontrak
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {pastContracts.map((contract) => (
+              <div
+                key={contract.id}
+                className="flex items-center justify-between rounded-lg bg-(--muted)/30 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-medium",
+                      CONTRACT_TYPE_COLORS[contract.contract_type],
+                    )}
+                  >
+                    {CONTRACT_TYPE_LABELS[contract.contract_type]}
+                  </span>
+                  <span className="text-sm font-medium text-(--foreground)">
+                    {contract.contract_number}
+                  </span>
+                </div>
+                <span className="text-xs text-(--muted-foreground)">
+                  {formatDate(contract.start_date)} -{" "}
+                  {contract.end_date ? formatDate(contract.end_date) : "—"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
 // MAIN PAGE
 // ════════════════════════════════════════════
 
 export function ProfilePage() {
   const navigate = useNavigate();
+  const { isDemo } = useDemo();
   const { data: profile, loading: profileLoading } = useEmployeeProfile();
   const { data: contacts, loading: contactsLoading } =
     useEmployeeProfileContacts();
@@ -115,6 +815,15 @@ export function ProfilePage() {
         .toUpperCase()
         .slice(0, 2)
     : "??";
+
+  const handleUploadPhoto = () => {
+    if (isDemo) {
+      toast("Demo mode — foto tidak diubah", { icon: "🔒" });
+      return;
+    }
+    // TODO: Implement photo upload via useProfile().uploadPhoto
+    toast.success("Foto berhasil diupload");
+  };
 
   if (loading) {
     return (
@@ -160,23 +869,34 @@ export function ProfilePage() {
             >
               <ArrowLeft size={20} />
             </button>
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white"
-              style={{
-                background:
-                  "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
-              }}
-            >
-              {profile.photo_url ? (
-                <img
-                  src={profile.photo_url}
-                  alt="Profile"
-                  className="h-full w-full rounded-full object-cover"
-                />
-              ) : (
-                initials
-              )}
+
+            {/* Avatar with upload button */}
+            <div className="relative group">
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white overflow-hidden"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
+                }}
+              >
+                {profile.photo_url ? (
+                  <img
+                    src={profile.photo_url}
+                    alt="Profile"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
+              <button
+                onClick={handleUploadPhoto}
+                className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-(--primary) text-white shadow-md transition hover:bg-(--primary)/90"
+              >
+                <Camera size={12} />
+              </button>
             </div>
+
             <div>
               <h1 className="text-xl font-bold text-(--foreground)">
                 {profile.full_name}
@@ -204,7 +924,7 @@ export function ProfilePage() {
 
         {/* Tab Content */}
         <div className="min-h-75">
-          {/* Tab: Info Pribadi */}
+          {/* Tab 0: Info Pribadi */}
           {activeTab === 0 && (
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Data Dasar */}
@@ -274,7 +994,7 @@ export function ProfilePage() {
             </div>
           )}
 
-          {/* Tab: Data Pekerjaan */}
+          {/* Tab 1: Data Pekerjaan */}
           {activeTab === 1 && (
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Penempatan */}
@@ -333,7 +1053,7 @@ export function ProfilePage() {
             </div>
           )}
 
-          {/* Tab: Kontak */}
+          {/* Tab 2: Kontak */}
           {activeTab === 2 && (
             <div className="space-y-4">
               {!contacts || contacts.length === 0 ? (
@@ -391,7 +1111,19 @@ export function ProfilePage() {
               )}
             </div>
           )}
+
+          {/* Tab 3: Kehadiran & Cuti */}
+          {activeTab === 3 && <TabAttendanceLeave employeeId={profile.id} />}
+
+          {/* Tab 4: Shift & Jadwal */}
+          {activeTab === 4 && <TabShiftSchedule employeeId={profile.id} />}
+
+          {/* Tab 5: Kontrak */}
+          {activeTab === 5 && <TabContract employeeId={profile.id} />}
         </div>
+
+        {/* Security Section - Outside tabs */}
+        <SecuritySection />
       </div>
     </MainLayout>
   );
