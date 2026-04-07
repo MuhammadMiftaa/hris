@@ -88,7 +88,10 @@ function ReportForm({
   isLoading?: boolean;
 }) {
   const [formData, setFormData] = useState({
-    report_date: editReport?.report_date || initialDate || new Date().toISOString().split("T")[0],
+    report_date:
+      editReport?.report_date ||
+      initialDate ||
+      new Date().toISOString().split("T")[0],
     activities: editReport?.activities || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -167,7 +170,12 @@ function ReportForm({
       </div>
 
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           Batal
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
@@ -249,9 +257,7 @@ function ReportDetailModal({
 
           <div>
             <p className="text-xs text-(--muted-foreground) mb-2">Aktivitas</p>
-            <div
-              className="rounded-lg bg-(--muted)/30 border border-(--border) p-4 text-sm text-(--foreground) whitespace-pre-wrap leading-relaxed"
-            >
+            <div className="rounded-lg bg-(--muted)/30 border border-(--border) p-4 text-sm text-(--foreground) whitespace-pre-wrap leading-relaxed">
               {report.activities || "—"}
             </div>
           </div>
@@ -395,28 +401,31 @@ function ExpandableRow({
               </Button>
             )}
             {report.status === "submitted" && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onViewDetail(report);
-                }}
-                className="text-xs text-(--primary) hover:underline"
-              >
-                Lihat Detail
-              </button>
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetail(report);
+                  }}
+                  className="text-xs text-(--primary) hover:underline"
+                >
+                  Lihat Detail
+                </button>
+                <button className="text-(--muted-foreground)">
+                  {expanded ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </button>
+              </>
             )}
-            <button className="text-(--muted-foreground)">
-              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
           </div>
         </td>
       </tr>
       {expanded && report.status === "submitted" && (
         <tr className={index % 2 === 0 ? "bg-(--card)" : "bg-(--muted)/20"}>
-          <td
-            colSpan={5}
-            className="px-5 pb-4 border-b border-(--border)"
-          >
+          <td colSpan={5} className="px-5 pb-4 border-b border-(--border)">
             <div className="rounded-lg bg-(--muted)/30 border border-(--border) p-3 text-sm text-(--foreground) whitespace-pre-wrap leading-relaxed mt-1">
               {report.activities || "—"}
             </div>
@@ -453,7 +462,11 @@ export function DailyReportPage() {
 
   const { data: reports, loading, refetch } = useDailyReportList(params);
   const { data: employees } = useEmployeeList({ is_active: true });
-  const { loading: mutLoading, createReport, updateReport } = useDailyReportMutations(refetch);
+  const {
+    loading: mutLoading,
+    createReport,
+    updateReport,
+  } = useDailyReportMutations(refetch);
 
   // Client-side search
   const filtered = useMemo(() => {
@@ -539,7 +552,7 @@ export function DailyReportPage() {
 
         {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <div className="relative flex-1 min-w-45 max-w-xs">
             <Search
               size={15}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted-foreground)"
@@ -611,7 +624,11 @@ export function DailyReportPage() {
             description="Mulai isi laporan aktivitas harian Anda"
             icon={<FileText className="h-12 w-12" />}
             action={
-              <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setShowForm(true)}
+              >
                 <Plus size={16} />
                 Isi Laporan
               </Button>
@@ -625,16 +642,20 @@ export function DailyReportPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-(--border) bg-(--muted)/50">
-                      {["Tanggal", "Pegawai", "Status", "Waktu Submit", "Aksi"].map(
-                        (h) => (
-                          <th
-                            key={h}
-                            className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)"
-                          >
-                            {h}
-                          </th>
-                        ),
-                      )}
+                      {[
+                        "Tanggal",
+                        "Pegawai",
+                        "Status",
+                        "Waktu Submit",
+                        "Aksi",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)"
+                        >
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>

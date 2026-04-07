@@ -2,18 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  Wallet,
-  TrendingUp,
-  ArrowLeftRight,
   LogOut,
   ChevronLeft,
   ChevronRight,
   User,
   Menu,
   X,
-  PieChart,
-  Target,
-  CalendarClock,
   Users,
   Building2,
   Network,
@@ -37,15 +31,6 @@ interface NavItem {
 
 const MAIN_NAV: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", path: "/" },
-  { icon: Wallet, label: "Wallet", path: "/wallet" },
-  { icon: TrendingUp, label: "Investment", path: "/investment" },
-  { icon: ArrowLeftRight, label: "Transaction", path: "/transaction" },
-];
-
-const MONEY_FLOW_NAV: NavItem[] = [
-  { icon: PieChart, label: "Categories", path: "/categories" },
-  { icon: Target, label: "Budget", path: "/budget" },
-  { icon: CalendarClock, label: "Scheduled", path: "/scheduled" },
 ];
 
 const MASTER_DATA_NAV: NavItem[] = [
@@ -202,9 +187,6 @@ export function AppSidebar() {
           const isActive = location.pathname === item.path;
           return renderNavItem(item, isActive);
         })}
-
-        {/* Money Flow */}
-        {renderSection("Money Flow", MONEY_FLOW_NAV)}
 
         {/* Master Data */}
         {renderSection("Master Data", MASTER_DATA_NAV, "prefix")}
