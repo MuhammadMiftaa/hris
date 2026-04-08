@@ -17,6 +17,7 @@ import { LeavePage } from "./pages/LeavePage";
 import { LeaveTypePage } from "./pages/LeaveTypePage";
 import { RequestPage } from "./pages/RequestPage";
 import { DailyReportPage } from "./pages/DailyReportPage";
+import { ChangePasswordPage } from "./pages/ChangePassword";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isLoading } = useAuth();
@@ -44,6 +45,14 @@ function App() {
         element={
           <PrivateRoute>
             <ProfilePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/change-password"
+        element={
+          <PrivateRoute>
+            <ChangePasswordPage />
           </PrivateRoute>
         }
       />

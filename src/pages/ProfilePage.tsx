@@ -15,8 +15,6 @@ import {
   FileCheck,
   Camera,
   Lock,
-  Eye,
-  EyeOff,
   CalendarOff,
   AlertTriangle,
   Timer,
@@ -44,6 +42,7 @@ import type { ShiftTemplate, EmployeeSchedule } from "@/types/shift";
 import type { EmploymentContract } from "@/types/contract";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/FormElements";
 
 // ════════════════════════════════════════════
 // TAB NAV
@@ -86,10 +85,6 @@ function TabNav({
   );
 }
 
-// ════════════════════════════════════════════
-// INFO ITEM
-// ════════════════════════════════════════════
-
 function InfoItem({
   label,
   value,
@@ -106,10 +101,6 @@ function InfoItem({
     </div>
   );
 }
-
-// ════════════════════════════════════════════
-// STAT CARD (Simple inline version)
-// ════════════════════════════════════════════
 
 function StatItem({
   icon: Icon,
@@ -139,139 +130,12 @@ function StatItem({
 }
 
 // ════════════════════════════════════════════
-// PASSWORD INPUT
-// ════════════════════════════════════════════
-
-function PasswordInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}) {
-  const [show, setShow] = useState(false);
-
-  return (
-    <div className="space-y-1.5">
-      <label className="text-sm font-medium text-(--foreground)">{label}</label>
-      <div className="relative">
-        <input
-          type={show ? "text" : "password"}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full rounded-lg border border-(--border) bg-(--background) px-3 py-2 pr-10 text-sm text-(--foreground) placeholder:text-(--muted-foreground) focus:border-(--primary) focus:outline-none focus:ring-1 focus:ring-(--primary)"
-        />
-        <button
-          type="button"
-          onClick={() => setShow(!show)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-(--muted-foreground) hover:text-(--foreground)"
-        >
-          {show ? <EyeOff size={16} /> : <Eye size={16} />}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ════════════════════════════════════════════
-// SECURITY SECTION
-// ════════════════════════════════════════════
-
-function SecuritySection() {
-  const { isDemo } = useDemo();
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      toast.error("Semua field harus diisi");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error("Password baru tidak cocok");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast.error("Password minimal 8 karakter");
-      return;
-    }
-
-    if (isDemo) {
-      toast("Demo mode — password tidak diubah", { icon: "🔒" });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // TODO: call API to change password
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Password berhasil diubah");
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch {
-      toast.error("Gagal mengubah password");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="rounded-xl border border-(--border) bg-(--card) p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Lock size={18} className="text-(--primary)" />
-        <h3 className="font-semibold text-(--foreground)">Keamanan Akun</h3>
-      </div>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <PasswordInput
-          label="Password Lama"
-          value={oldPassword}
-          onChange={setOldPassword}
-          placeholder="Masukkan password lama"
-        />
-        <PasswordInput
-          label="Password Baru"
-          value={newPassword}
-          onChange={setNewPassword}
-          placeholder="Minimal 8 karakter"
-        />
-        <PasswordInput
-          label="Konfirmasi Password Baru"
-          value={confirmPassword}
-          onChange={setConfirmPassword}
-          placeholder="Ulangi password baru"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-(--primary) px-4 py-2 text-sm font-medium text-white hover:bg-(--primary)/90 disabled:opacity-50"
-        >
-          {loading ? "Menyimpan..." : "Ubah Password"}
-        </button>
-      </form>
-    </div>
-  );
-}
-
-// ════════════════════════════════════════════
 // TAB 4: KEHADIRAN & CUTI
 // ════════════════════════════════════════════
 
 function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
-
   const startDate = new Date(currentYear, currentMonth, 1)
     .toISOString()
     .split("T")[0];
@@ -299,7 +163,6 @@ function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
     );
   }
 
-  // Compute attendance summary
   const totalPresent =
     attendances?.filter((a) => a.status === "present" || a.status === "late")
       .length || 0;
@@ -310,7 +173,6 @@ function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
     attendances?.filter((a) => a.status === "leave" || a.status === "half_day")
       .length || 0;
 
-  // Compute average clock-in & total late minutes
   const clockInTimes =
     attendances
       ?.filter((a) => a.clock_in_at)
@@ -339,7 +201,6 @@ function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
 
   return (
     <div className="space-y-6">
-      {/* Attendance Summary */}
       <div className="rounded-xl border border-(--border) bg-(--card) p-5">
         <div className="flex items-center gap-2 mb-4">
           <ClipboardCheck size={18} className="text-(--primary)" />
@@ -382,7 +243,6 @@ function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
         </div>
       </div>
 
-      {/* Leave Balances */}
       <div className="rounded-xl border border-(--border) bg-(--card) p-5">
         <div className="flex items-center gap-2 mb-4">
           <CalendarOff size={18} className="text-(--primary)" />
@@ -461,7 +321,6 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
     );
   }
 
-  // Find active schedule
   const today = new Date().toISOString().split("T")[0];
   const activeSchedule = schedules?.find(
     (s: EmployeeSchedule) =>
@@ -469,8 +328,6 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
       s.effective_date <= today &&
       (!s.end_date || s.end_date >= today),
   );
-
-  // Find shift template for active schedule
   const activeShift = activeSchedule
     ? shifts?.find(
         (s: ShiftTemplate) => s.id === activeSchedule.shift_template_id,
@@ -489,7 +346,6 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
 
   return (
     <div className="space-y-6">
-      {/* Active Shift Info */}
       <div className="rounded-xl border border-(--border) bg-(--card) p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -507,19 +363,15 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
             {activeShift.is_flexible ? "Fleksibel" : "Tetap"}
           </span>
         </div>
-
         <p className="text-lg font-semibold text-(--foreground) mb-4">
           {activeShift.name}
         </p>
-
-        {/* Schedule Days */}
         <div className="space-y-2">
           {DAY_OF_WEEK_OPTIONS.map((day) => {
             const detail = activeShift.details?.find(
               (d) => d.day_of_week === day.value,
             );
             const isWorkDay = detail?.is_working_day ?? false;
-
             return (
               <div
                 key={day.value}
@@ -547,18 +399,6 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
                       {detail.clock_in_start || "-"} -{" "}
                       {detail.clock_out_end || "-"}
                     </span>
-                    {(detail.break_dhuhr_start || detail.break_asr_start) && (
-                      <span className="text-(--muted-foreground)/60">
-                        Break:{" "}
-                        {detail.break_dhuhr_start &&
-                          `Dzuhur ${detail.break_dhuhr_start}-${detail.break_dhuhr_end}`}
-                        {detail.break_dhuhr_start &&
-                          detail.break_asr_start &&
-                          ", "}
-                        {detail.break_asr_start &&
-                          `Ashar ${detail.break_asr_start}-${detail.break_asr_end}`}
-                      </span>
-                    )}
                   </div>
                 ) : (
                   <span className="text-xs text-red-600 dark:text-red-400">
@@ -571,7 +411,6 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
         </div>
       </div>
 
-      {/* Schedule Period */}
       <div className="rounded-xl border border-(--border) bg-(--card) p-5">
         <div className="flex items-center gap-2 mb-4">
           <FileCheck size={18} className="text-(--primary)" />
@@ -591,11 +430,7 @@ function TabShiftSchedule({ employeeId }: { employeeId: number | null }) {
               activeSchedule.end_date
                 ? new Date(activeSchedule.end_date).toLocaleDateString(
                     "id-ID",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    },
+                    { day: "numeric", month: "long", year: "numeric" },
                   )
                 : "Berlaku seterusnya"
             }
@@ -632,13 +467,10 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
     );
   }
 
-  // Sort by start_date desc
   const sorted = [...contracts].sort(
     (a, b) =>
       new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
   );
-
-  // Find active contract
   const today = new Date().toISOString().split("T")[0];
   const activeContract = sorted.find(
     (c: EmploymentContract) =>
@@ -646,7 +478,6 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
   );
   const pastContracts = sorted.filter((c) => c !== activeContract);
 
-  // Compute remaining days
   const getRemainingDays = (endDate: string | null) => {
     if (!endDate) return null;
     const diff = Math.ceil(
@@ -656,17 +487,15 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
     return Math.max(0, diff);
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("id-ID", {
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
-  };
 
   return (
     <div className="space-y-6">
-      {/* Active Contract */}
       {activeContract && (
         <div className="rounded-xl border border-(--border) bg-(--card) p-5">
           <div className="flex items-center justify-between mb-4">
@@ -685,7 +514,6 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
               {CONTRACT_TYPE_LABELS[activeContract.contract_type]}
             </span>
           </div>
-
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <InfoItem
               label="Nomor Kontrak"
@@ -703,15 +531,15 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
                   : "Tidak terbatas"
               }
             />
-            {activeContract.end_date && (
-              <div className="space-y-1">
-                <div className="text-xs text-(--muted-foreground)">
-                  Sisa Waktu
-                </div>
-                {(() => {
-                  const remaining = getRemainingDays(activeContract.end_date);
-                  const isWarning = remaining !== null && remaining <= 30;
-                  return (
+            {activeContract.end_date &&
+              (() => {
+                const remaining = getRemainingDays(activeContract.end_date);
+                const isWarning = remaining !== null && remaining <= 30;
+                return (
+                  <div className="space-y-1">
+                    <div className="text-xs text-(--muted-foreground)">
+                      Sisa Waktu
+                    </div>
                     <div
                       className={cn(
                         "text-sm font-medium",
@@ -728,12 +556,10 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
                         />
                       )}
                     </div>
-                  );
-                })()}
-              </div>
-            )}
+                  </div>
+                );
+              })()}
           </div>
-
           {activeContract.notes && (
             <div className="mt-4 pt-4 border-t border-(--border)">
               <InfoItem label="Catatan" value={activeContract.notes} />
@@ -742,7 +568,6 @@ function TabContract({ employeeId }: { employeeId: number | null }) {
         </div>
       )}
 
-      {/* Past Contracts */}
       {pastContracts.length > 0 && (
         <div className="rounded-xl border border-(--border) bg-(--card) p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -795,7 +620,6 @@ export function ProfilePage() {
     useEmployeeProfileContacts();
 
   const [activeTab, setActiveTab] = useState(0);
-
   const loading = profileLoading || contactsLoading;
 
   const formatDate = (dateStr?: string | null) => {
@@ -821,7 +645,6 @@ export function ProfilePage() {
       toast("Demo mode — foto tidak diubah", { icon: "🔒" });
       return;
     }
-    // TODO: Implement photo upload via useProfile().uploadPhoto
     toast.success("Foto berhasil diupload");
   };
 
@@ -870,7 +693,7 @@ export function ProfilePage() {
               <ArrowLeft size={20} />
             </button>
 
-            {/* Avatar with upload button */}
+            {/* Avatar */}
             <div className="relative group">
               <div
                 className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white overflow-hidden"
@@ -917,6 +740,17 @@ export function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Change Password CTA */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/change-password")}
+            className="self-start sm:self-auto"
+          >
+            <Lock size={14} />
+            Ubah Password
+          </Button>
         </div>
 
         {/* Tabs */}
@@ -927,7 +761,6 @@ export function ProfilePage() {
           {/* Tab 0: Info Pribadi */}
           {activeTab === 0 && (
             <div className="grid gap-6 lg:grid-cols-2">
-              {/* Data Dasar */}
               <div className="rounded-xl border border-(--border) bg-(--card) p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <IdCard size={18} className="text-(--primary)" />
@@ -956,7 +789,6 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              {/* Data Kependudukan */}
               <div className="rounded-xl border border-(--border) bg-(--card) p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <User size={18} className="text-(--primary)" />
@@ -997,7 +829,6 @@ export function ProfilePage() {
           {/* Tab 1: Data Pekerjaan */}
           {activeTab === 1 && (
             <div className="grid gap-6 lg:grid-cols-2">
-              {/* Penempatan */}
               <div className="rounded-xl border border-(--border) bg-(--card) p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Building2 size={18} className="text-(--primary)" />
@@ -1013,8 +844,6 @@ export function ProfilePage() {
                   />
                 </div>
               </div>
-
-              {/* Jabatan */}
               <div className="rounded-xl border border-(--border) bg-(--card) p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Briefcase size={18} className="text-(--primary)" />
@@ -1030,8 +859,6 @@ export function ProfilePage() {
                   <InfoItem label="Role" value={profile.role_name} />
                 </div>
               </div>
-
-              {/* Info Tambahan */}
               <div className="rounded-xl border border-(--border) bg-(--card) p-5 lg:col-span-2">
                 <div className="flex items-center gap-2 mb-4">
                   <IdCard size={18} className="text-(--primary)" />
@@ -1112,18 +939,10 @@ export function ProfilePage() {
             </div>
           )}
 
-          {/* Tab 3: Kehadiran & Cuti */}
           {activeTab === 3 && <TabAttendanceLeave employeeId={profile.id} />}
-
-          {/* Tab 4: Shift & Jadwal */}
           {activeTab === 4 && <TabShiftSchedule employeeId={profile.id} />}
-
-          {/* Tab 5: Kontrak */}
           {activeTab === 5 && <TabContract employeeId={profile.id} />}
         </div>
-
-        {/* Security Section - Outside tabs */}
-        <SecuritySection />
       </div>
     </MainLayout>
   );

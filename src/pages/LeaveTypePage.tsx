@@ -468,8 +468,7 @@ export function LeaveTypePage() {
               }
               placeholder="Opsional"
             />
-            <Select
-              id="max_duration_unit"
+            <SearchableSelect
               label="Satuan"
               value={formData.max_duration_unit || "days"}
               onChange={(value) =>
@@ -479,6 +478,8 @@ export function LeaveTypePage() {
                 })
               }
               options={unitOptions}
+              placeholder="Pilih satuan"
+              searchPlaceholder="Cari satuan..."
             />
           </div>
 
@@ -514,8 +515,7 @@ export function LeaveTypePage() {
               }
               placeholder="Opsional"
             />
-            <Select
-              id="max_total_duration_unit"
+            <SearchableSelect
               label="Satuan"
               value={formData.max_total_duration_unit || "days"}
               onChange={(value) =>
@@ -525,6 +525,8 @@ export function LeaveTypePage() {
                 })
               }
               options={unitOptions}
+              placeholder="Pilih satuan"
+              searchPlaceholder="Cari satuan..."
             />
           </div>
 

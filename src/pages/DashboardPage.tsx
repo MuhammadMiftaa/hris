@@ -32,10 +32,6 @@ import type {
   ExpiringContract,
 } from "@/types/dashboard";
 
-// ════════════════════════════════════════════
-// TYPE BADGE CONFIG
-// ════════════════════════════════════════════
-
 const REQUEST_TYPE_CONFIG: Record<
   string,
   { label: string; icon: React.ElementType; color: string }
@@ -46,10 +42,6 @@ const REQUEST_TYPE_CONFIG: Record<
   business_trip: { label: "Dinas", icon: Plane, color: "#10b981" },
   override: { label: "Koreksi", icon: Edit2, color: "#ef4444" },
 };
-
-// ════════════════════════════════════════════
-// VIEW TOGGLE
-// ════════════════════════════════════════════
 
 function ViewToggle({
   view,
@@ -86,10 +78,6 @@ function ViewToggle({
   );
 }
 
-// ════════════════════════════════════════════
-// LEAVE BALANCE CARD
-// ════════════════════════════════════════════
-
 function LeaveBalanceCard({ balance }: { balance: LeaveBalanceSummary }) {
   const percentage =
     balance.total_quota && balance.remaining !== null
@@ -123,10 +111,6 @@ function LeaveBalanceCard({ balance }: { balance: LeaveBalanceSummary }) {
   );
 }
 
-// ════════════════════════════════════════════
-// PENDING REQUEST CARD
-// ════════════════════════════════════════════
-
 function PendingRequestCard({ request }: { request: PendingRequest }) {
   const config = REQUEST_TYPE_CONFIG[request.type];
   const Icon = config?.icon || Send;
@@ -157,13 +141,8 @@ function PendingRequestCard({ request }: { request: PendingRequest }) {
   );
 }
 
-// ════════════════════════════════════════════
-// APPROVAL QUEUE ITEM
-// ════════════════════════════════════════════
-
 function ApprovalQueueRow({ item }: { item: ApprovalQueueItem }) {
   const config = REQUEST_TYPE_CONFIG[item.type];
-
   return (
     <tr className="border-b border-(--border) last:border-0">
       <td className="py-3 px-4">
@@ -193,10 +172,6 @@ function ApprovalQueueRow({ item }: { item: ApprovalQueueItem }) {
   );
 }
 
-// ════════════════════════════════════════════
-// NOT CLOCKED IN ROW
-// ════════════════════════════════════════════
-
 function NotClockedInRow({ employee }: { employee: NotClockedInEmployee }) {
   return (
     <tr className="border-b border-(--border) last:border-0">
@@ -216,13 +191,8 @@ function NotClockedInRow({ employee }: { employee: NotClockedInEmployee }) {
   );
 }
 
-// ════════════════════════════════════════════
-// EXPIRING CONTRACT CARD
-// ════════════════════════════════════════════
-
 function ExpiringContractCard({ contract }: { contract: ExpiringContract }) {
   const isUrgent = contract.days_remaining <= 14;
-
   return (
     <div
       className={cn(
@@ -270,10 +240,6 @@ function ExpiringContractCard({ contract }: { contract: ExpiringContract }) {
   );
 }
 
-// ════════════════════════════════════════════
-// EMPLOYEE DASHBOARD VIEW
-// ════════════════════════════════════════════
-
 function EmployeeDashboardView() {
   const { data, loading } = useEmployeeDashboard();
   const navigate = useNavigate();
@@ -306,7 +272,6 @@ function EmployeeDashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Monthly Summary Stats */}
       <div>
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Ringkasan Kehadiran Bulan Ini
@@ -343,7 +308,6 @@ function EmployeeDashboardView() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Leave Balances */}
         <div className="rounded-xl border border-(--border) bg-(--card) p-5">
           <h3 className="mb-4 font-semibold text-(--foreground)">Saldo Cuti</h3>
           {data.leave_balances.length === 0 ? (
@@ -361,8 +325,6 @@ function EmployeeDashboardView() {
             </div>
           )}
         </div>
-
-        {/* Pending Requests */}
         <div className="rounded-xl border border-(--border) bg-(--card) p-5">
           <h3 className="mb-4 font-semibold text-(--foreground)">
             Pengajuan Pending
@@ -383,10 +345,6 @@ function EmployeeDashboardView() {
     </div>
   );
 }
-
-// ════════════════════════════════════════════
-// HRD DASHBOARD VIEW
-// ════════════════════════════════════════════
 
 function HRDDashboardView() {
   const { data, loading } = useHRDDashboard();
@@ -417,7 +375,6 @@ function HRDDashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Approval Counts */}
       <div>
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Pengajuan Menunggu Persetujuan
@@ -461,7 +418,6 @@ function HRDDashboardView() {
         </div>
       </div>
 
-      {/* Team Attendance Summary */}
       <div>
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Ringkasan Tim Hari Ini
@@ -496,7 +452,6 @@ function HRDDashboardView() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Not Clocked In */}
         <div className="rounded-xl border border-(--border) bg-(--card) overflow-hidden">
           <div className="border-b border-(--border) px-5 py-3">
             <h3 className="font-semibold text-(--foreground)">
@@ -548,7 +503,6 @@ function HRDDashboardView() {
           )}
         </div>
 
-        {/* Expiring Contracts */}
         <div className="rounded-xl border border-(--border) bg-(--card) p-5">
           <h3 className="mb-4 font-semibold text-(--foreground)">
             Kontrak Akan Habis
@@ -570,7 +524,6 @@ function HRDDashboardView() {
         </div>
       </div>
 
-      {/* Approval Queue */}
       {data.approval_queue.length > 0 && (
         <div className="rounded-xl border border-(--border) bg-(--card) overflow-hidden">
           <div className="border-b border-(--border) px-5 py-3">
@@ -609,16 +562,11 @@ function HRDDashboardView() {
   );
 }
 
-// ════════════════════════════════════════════
-// MAIN DASHBOARD PAGE
-// ════════════════════════════════════════════
-
 export function DashboardPage() {
   const { cachedProfile } = useAuth();
   const { data: profile } = useEmployeeProfile();
   const clockWidget = useClockWidget();
 
-  // Determine if user is HRD/Supervisor
   const roleName = profile?.role_name || "";
   const isHRD =
     roleName === "HRD Admin" ||
@@ -649,6 +597,22 @@ export function DashboardPage() {
   return (
     <MainLayout>
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
+        {/* Clock widget FIRST on mobile, moves after header on desktop */}
+        <div className="md:hidden">
+          {clockWidget.loading ? (
+            <ClockWidgetSkeleton />
+          ) : (
+            <ClockWidget
+              status={clockWidget.status}
+              isMobile={clockWidget.isMobile}
+              onClockIn={() => clockWidget.clockIn()}
+              onClockOut={() => clockWidget.clockOut()}
+              disabled={false}
+              loading={clockWidget.loading}
+            />
+          )}
+        </div>
+
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -663,8 +627,8 @@ export function DashboardPage() {
           {isHRD && <ViewToggle view={view} setView={setView} />}
         </div>
 
-        {/* Clock Widget */}
-        <div className="max-w-md">
+        {/* Clock Widget — desktop only (hidden on mobile, shown above) */}
+        <div className="hidden md:block max-w-md mx-auto">
           {clockWidget.loading ? (
             <ClockWidgetSkeleton />
           ) : (

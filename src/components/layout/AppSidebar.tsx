@@ -19,9 +19,15 @@ import {
   CalendarOff,
   Send,
   FileText,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// LocalStorage key untuk menyimpan status collapse sidebar
+const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
 interface NavItem {
   icon: React.ElementType;
@@ -59,11 +65,22 @@ const PENGAJUAN_NAV: NavItem[] = [
 
 export function AppSidebar() {
   const { user, logout, cachedProfile } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+
+  // Inisialisasi state collapsed dari localStorage
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return saved === "true";
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+
+  // Simpan status collapsed ke localStorage setiap kali berubah
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  }, [collapsed]);
 
   const initials = cachedProfile?.fullname
     ? cachedProfile.fullname
@@ -145,6 +162,44 @@ export function AppSidebar() {
     </>
   );
 
+  const AvatarButton = ({
+    onClick,
+    size = "md",
+  }: {
+    onClick: () => void;
+    size?: "sm" | "md";
+  }) => {
+    const dim = size === "sm" ? "h-7 w-7 text-[10px]" : "h-9 w-9 text-[12px]";
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold text-white transition hover:ring-2 hover:ring-(--primary)/50",
+          dim,
+        )}
+        style={
+          !photoUrl
+            ? {
+                background:
+                  "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
+                boxShadow: "0 0 8px 1px rgba(209,0,113,0.45)",
+              }
+            : undefined
+        }
+      >
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt="Profile"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          initials
+        )}
+      </button>
+    );
+  };
+
   const sidebarContent = (
     <>
       {/* Logo */}
@@ -179,7 +234,6 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
-        {/* Main Menu */}
         <div
           className={cn(
             "mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-(--muted-foreground)",
@@ -192,47 +246,23 @@ export function AppSidebar() {
           const isActive = location.pathname === item.path;
           return renderNavItem(item, isActive);
         })}
-
-        {/* Master Data */}
         {renderSection("Master Data", MASTER_DATA_NAV, "prefix")}
-
-        {/* Jadwal */}
         {renderSection("Jadwal", JADWAL_NAV)}
-
-        {/* Kehadiran */}
         {renderSection("Kehadiran", KEHADIRAN_NAV)}
-
-        {/* Pengajuan */}
         {renderSection("Pengajuan", PENGAJUAN_NAV)}
       </nav>
 
       {/* Bottom Section */}
       <div className="flex flex-col gap-1 border-t border-(--border) p-2">
         {collapsed ? (
-          <div className="flex justify-center py-1">
+          <div className="flex flex-col items-center gap-2 py-1">
+            <AvatarButton onClick={() => navigate("/profile")} />
             <button
-              onClick={() => navigate("/profile")}
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-[12px] font-bold text-white transition hover:ring-2 hover:ring-(--primary)/50"
-              style={
-                !photoUrl
-                  ? {
-                      background:
-                        "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
-                      boxShadow: "0 0 10px 2px rgba(209,0,113,0.35)",
-                    }
-                  : undefined
-              }
-              title={user?.email ?? "Profile"}
+              onClick={toggleTheme}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+              title={theme === "dark" ? "Mode Terang" : "Mode Gelap"}
             >
-              {photoUrl ? (
-                <img
-                  src={photoUrl}
-                  alt="Profile"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                initials
-              )}
+              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
             </button>
           </div>
         ) : (
@@ -247,29 +277,7 @@ export function AppSidebar() {
             }}
           >
             <div className="flex items-center gap-3 px-3 py-2.5">
-              <button
-                onClick={() => navigate("/profile")}
-                className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-[12px] font-bold text-white transition hover:ring-2 hover:ring-(--primary)/50"
-                style={
-                  !photoUrl
-                    ? {
-                        background:
-                          "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
-                        boxShadow: "0 0 8px 1px rgba(209,0,113,0.45)",
-                      }
-                    : undefined
-                }
-              >
-                {photoUrl ? (
-                  <img
-                    src={photoUrl}
-                    alt="Profile"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  initials
-                )}
-              </button>
+              <AvatarButton onClick={() => navigate("/profile")} />
               <div className="min-w-0 flex-1">
                 <div className="truncate text-[11px] font-bold leading-tight text-primary-gradient">
                   {cachedProfile?.fullname ||
@@ -286,6 +294,12 @@ export function AppSidebar() {
                 title="Profile"
               >
                 <User size={13} />
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-2 text-[11px] font-medium text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+              >
+                {theme === "dark" ? <Sun size={12} /> : <Moon size={12} />}
               </button>
             </div>
 
@@ -342,7 +356,9 @@ export function AppSidebar() {
         <div className="relative">
           <button
             onClick={() => setMobileProfileOpen((prev) => !prev)}
-            className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white transition hover:ring-2 hover:ring-(--primary)/50"
+            className={cn(
+              "flex h-7 w-7 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white transition hover:ring-2 hover:ring-(--primary)/50",
+            )}
             style={
               !photoUrl
                 ? {
@@ -366,12 +382,10 @@ export function AppSidebar() {
           {/* Mobile Profile Popup */}
           {mobileProfileOpen && (
             <>
-              {/* Backdrop */}
               <div
                 className="fixed inset-0 z-40"
                 onClick={() => setMobileProfileOpen(false)}
               />
-              {/* Popup */}
               <div
                 className="absolute right-0 top-full mt-2 z-50 w-64 overflow-hidden rounded-xl border"
                 style={{
@@ -442,6 +456,21 @@ export function AppSidebar() {
                     >
                       <User size={16} className="text-(--primary)" />
                       <span>Profil Saya</span>
+                    </button>
+
+                    {/* Dark mode toggle in mobile popup */}
+                    <button
+                      onClick={toggleTheme}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-(--foreground) transition hover:bg-(--muted)"
+                    >
+                      {theme === "dark" ? (
+                        <Sun size={16} className="text-amber-500" />
+                      ) : (
+                        <Moon size={16} className="text-indigo-500" />
+                      )}
+                      <span>
+                        {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
+                      </span>
                     </button>
                   </div>
 
