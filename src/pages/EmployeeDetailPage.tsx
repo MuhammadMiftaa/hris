@@ -25,18 +25,29 @@ import {
   useEmployeeById,
   useEmployeeContacts,
   useEmployeeContactMutations,
+  useEmployeeMutations,
 } from "@/hooks/useEmployee";
 import { useContractList, useContractMutations } from "@/hooks/useContract";
+import { useBranchList } from "@/hooks/useBranch";
+import { useDepartmentList } from "@/hooks/useDepartment";
+import { usePositionList } from "@/hooks/usePosition";
+import { useRoleList } from "@/hooks/useRole";
 import {
   GENDER_LABELS,
   MARITAL_STATUS_LABELS,
   CONTACT_TYPE_LABELS,
+  RELIGION_OPTIONS,
+  BLOOD_TYPE_OPTIONS,
 } from "@/types/employee";
 import { CONTRACT_TYPE_LABELS, CONTRACT_TYPE_COLORS } from "@/types/contract";
 import type {
+  Employee,
   EmployeeContact,
   CreateContactPayload,
   ContactType,
+  Gender,
+  MaritalStatus,
+  UpdateEmployeePayload,
 } from "@/types/employee";
 import type {
   EmploymentContract,
@@ -349,6 +360,341 @@ function ContactForm({
 }
 
 // ════════════════════════════════════════════
+// EMPLOYEE FORM
+// ════════════════════════════════════════════
+
+function EmployeeForm({
+  initialData,
+  onClose,
+  onSubmit,
+  isLoading,
+  branches,
+  departments,
+  positions,
+  roles,
+}: {
+  initialData: Employee;
+  onClose: () => void;
+  onSubmit: (payload: UpdateEmployeePayload) => void;
+  isLoading?: boolean;
+  branches: { id: number; name: string }[];
+  departments: { id: number; name: string }[];
+  positions: { id: number; title: string }[];
+  roles: { id: number; name: string }[];
+}) {
+  const [formData, setFormData] = useState({
+    employee_number: initialData.employee_number || "",
+    full_name: initialData.full_name || "",
+    nik: initialData.nik || "",
+    npwp: initialData.npwp || "",
+    kk_number: initialData.kk_number || "",
+    birth_date: initialData.birth_date?.split("T")[0] || "",
+    birth_place: initialData.birth_place || "",
+    gender: initialData.gender || ("male" as Gender),
+    religion: initialData.religion || "",
+    marital_status: initialData.marital_status || ("single" as MaritalStatus),
+    blood_type: initialData.blood_type || "",
+    nationality: initialData.nationality || "",
+    height: initialData.height?.toString() || "",
+    weight: initialData.weight?.toString() || "",
+    is_active: initialData.is_active ?? true,
+    branch_id: initialData.branch_id?.toString() || "",
+    department_id: initialData.department_id?.toString() || "",
+    job_positions_id: initialData.job_positions_id?.toString() || "",
+    role_id: initialData.role_id?.toString() || "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (field: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.employee_number.trim())
+      newErrors.employee_number = "Nomor pegawai wajib diisi";
+    if (!formData.full_name.trim())
+      newErrors.full_name = "Nama lengkap wajib diisi";
+    if (!formData.birth_date)
+      newErrors.birth_date = "Tanggal lahir wajib diisi";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    const payload: UpdateEmployeePayload = {
+      employee_number: formData.employee_number.trim(),
+      full_name: formData.full_name.trim(),
+      nik: formData.nik.trim() || undefined,
+      npwp: formData.npwp.trim() || undefined,
+      kk_number: formData.kk_number.trim() || undefined,
+      birth_date: formData.birth_date,
+      birth_place: formData.birth_place.trim() || undefined,
+      gender: formData.gender,
+      religion: formData.religion || undefined,
+      marital_status: formData.marital_status || undefined,
+      blood_type: formData.blood_type || undefined,
+      nationality: formData.nationality.trim() || undefined,
+      height: formData.height ? Number.parseInt(formData.height) : undefined,
+      weight: formData.weight ? Number.parseInt(formData.weight) : undefined,
+      is_active: formData.is_active,
+      branch_id: formData.branch_id
+        ? Number.parseInt(formData.branch_id)
+        : undefined,
+      department_id: formData.department_id
+        ? Number.parseInt(formData.department_id)
+        : undefined,
+      job_positions_id: formData.job_positions_id
+        ? Number.parseInt(formData.job_positions_id)
+        : undefined,
+      role_id: formData.role_id ? Number.parseInt(formData.role_id) : undefined,
+    };
+
+    onSubmit(payload);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-h-[70vh] overflow-y-auto pr-2"
+    >
+      {/* Data Dasar */}
+      <div className="space-y-4">
+        <h4 className="font-semibold text-(--foreground) text-sm border-b border-(--border) pb-2">
+          Data Dasar
+        </h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            id="employee_number"
+            label="Nomor Pegawai *"
+            value={formData.employee_number}
+            onChange={(e) => handleChange("employee_number", e.target.value)}
+            placeholder="EMP001"
+            error={errors.employee_number}
+          />
+          <Input
+            id="full_name"
+            label="Nama Lengkap *"
+            value={formData.full_name}
+            onChange={(e) => handleChange("full_name", e.target.value)}
+            placeholder="Nama lengkap pegawai"
+            error={errors.full_name}
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            id="birth_date"
+            label="Tanggal Lahir *"
+            type="date"
+            value={formData.birth_date}
+            onChange={(e) => handleChange("birth_date", e.target.value)}
+            error={errors.birth_date}
+          />
+          <Input
+            id="birth_place"
+            label="Tempat Lahir"
+            value={formData.birth_place}
+            onChange={(e) => handleChange("birth_place", e.target.value)}
+            placeholder="Kota kelahiran"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <SearchableSelect
+            label="Jenis Kelamin *"
+            value={formData.gender}
+            onChange={(val) => handleChange("gender", val)}
+            options={Object.entries(GENDER_LABELS).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+            placeholder="Pilih jenis kelamin"
+            searchPlaceholder="Cari..."
+          />
+        </div>
+      </div>
+
+      {/* Organisasi */}
+      <div className="space-y-4">
+        <h4 className="font-semibold text-(--foreground) text-sm border-b border-(--border) pb-2">
+          Organisasi
+        </h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SearchableSelect
+            label="Cabang"
+            value={formData.branch_id}
+            onChange={(val) => handleChange("branch_id", val)}
+            options={branches.map((b) => ({
+              value: b.id.toString(),
+              label: b.name,
+            }))}
+            placeholder="Pilih cabang"
+            searchPlaceholder="Cari cabang..."
+          />
+          <SearchableSelect
+            label="Departemen"
+            value={formData.department_id}
+            onChange={(val) => handleChange("department_id", val)}
+            options={departments.map((d) => ({
+              value: d.id.toString(),
+              label: d.name,
+            }))}
+            placeholder="Pilih departemen"
+            searchPlaceholder="Cari departemen..."
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SearchableSelect
+            label="Jabatan"
+            value={formData.job_positions_id}
+            onChange={(val) => handleChange("job_positions_id", val)}
+            options={positions.map((p) => ({
+              value: p.id.toString(),
+              label: p.title,
+            }))}
+            placeholder="Pilih jabatan"
+            searchPlaceholder="Cari jabatan..."
+          />
+          <SearchableSelect
+            label="Role"
+            value={formData.role_id}
+            onChange={(val) => handleChange("role_id", val)}
+            options={roles.map((r) => ({
+              value: r.id.toString(),
+              label: r.name,
+            }))}
+            placeholder="Pilih role"
+            searchPlaceholder="Cari role..."
+          />
+        </div>
+      </div>
+
+      {/* Data Pribadi */}
+      <div className="space-y-4">
+        <h4 className="font-semibold text-(--foreground) text-sm border-b border-(--border) pb-2">
+          Data Pribadi
+        </h4>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Input
+            id="nik"
+            label="NIK"
+            value={formData.nik}
+            onChange={(e) => handleChange("nik", e.target.value)}
+            placeholder="16 digit NIK"
+          />
+          <Input
+            id="npwp"
+            label="NPWP"
+            value={formData.npwp}
+            onChange={(e) => handleChange("npwp", e.target.value)}
+            placeholder="NPWP"
+          />
+          <Input
+            id="kk_number"
+            label="Nomor KK"
+            value={formData.kk_number}
+            onChange={(e) => handleChange("kk_number", e.target.value)}
+            placeholder="Nomor Kartu Keluarga"
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SearchableSelect
+            label="Agama"
+            value={formData.religion}
+            onChange={(val) => handleChange("religion", val)}
+            options={RELIGION_OPTIONS.map((r) => ({ value: r, label: r }))}
+            placeholder="Pilih agama"
+            searchPlaceholder="Cari agama..."
+          />
+          <SearchableSelect
+            label="Status Pernikahan"
+            value={formData.marital_status}
+            onChange={(val) => handleChange("marital_status", val)}
+            options={Object.entries(MARITAL_STATUS_LABELS).map(
+              ([value, label]) => ({
+                value,
+                label,
+              }),
+            )}
+            placeholder="Pilih status"
+            searchPlaceholder="Cari..."
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SearchableSelect
+            label="Golongan Darah"
+            value={formData.blood_type}
+            onChange={(val) => handleChange("blood_type", val)}
+            options={BLOOD_TYPE_OPTIONS.map((b) => ({ value: b, label: b }))}
+            placeholder="Pilih"
+            searchPlaceholder="Cari..."
+          />
+          <Input
+            id="height"
+            label="Tinggi Badan (cm)"
+            type="number"
+            value={formData.height}
+            onChange={(e) => handleChange("height", e.target.value)}
+            placeholder="170"
+          />
+          <Input
+            id="weight"
+            label="Berat Badan (kg)"
+            type="number"
+            value={formData.weight}
+            onChange={(e) => handleChange("weight", e.target.value)}
+            placeholder="65"
+          />
+        </div>
+        <Input
+          id="nationality"
+          label="Kewarganegaraan"
+          value={formData.nationality}
+          onChange={(e) => handleChange("nationality", e.target.value)}
+          placeholder="Indonesia"
+        />
+      </div>
+
+      {/* Status */}
+      <div className="space-y-4">
+        <h4 className="font-semibold text-(--foreground) text-sm border-b border-(--border) pb-2">
+          Status
+        </h4>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="is_active"
+            checked={formData.is_active}
+            onChange={(e) => handleChange("is_active", e.target.checked)}
+            className="h-4 w-4 rounded border-(--border)"
+          />
+          <label htmlFor="is_active" className="text-sm text-(--foreground)">
+            Pegawai aktif
+          </label>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4 border-t border-(--border) sticky bottom-0 bg-(--card)">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
+          Batal
+        </Button>
+        <Button type="submit" variant="primary" isLoading={isLoading}>
+          Simpan Perubahan
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+// ════════════════════════════════════════════
 // CONTRACT FORM
 // ════════════════════════════════════════════
 
@@ -572,11 +918,21 @@ export function EmployeeDetailPage() {
   const { token } = useAuth();
   const { isDemo } = useDemo();
 
-  const { data: employee, loading } = useEmployeeById(employeeId);
+  const {
+    data: employee,
+    loading,
+    refetch: refetchEmployee,
+  } = useEmployeeById(employeeId);
   const { data: contacts, refetch: refetchContacts } =
     useEmployeeContacts(employeeId);
   const { data: contracts, refetch: refetchContracts } =
     useContractList(employeeId);
+
+  // Fetch reference data for employee form
+  const { data: branches } = useBranchList();
+  const { data: departments } = useDepartmentList();
+  const { data: positions } = usePositionList();
+  const { data: roles } = useRoleList();
 
   const {
     loading: contactMutLoading,
@@ -590,9 +946,14 @@ export function EmployeeDetailPage() {
     updateContract,
     deleteContract,
   } = useContractMutations(refetchContracts);
+  const { loading: employeeMutLoading, updateEmployee } =
+    useEmployeeMutations(refetchEmployee);
 
   const [activeTab, setActiveTab] = useState(0);
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+
+  // Employee edit state
+  const [showEmployeeForm, setShowEmployeeForm] = useState(false);
 
   // Contact state
   const [showContactForm, setShowContactForm] = useState(false);
@@ -611,6 +972,12 @@ export function EmployeeDetailPage() {
 
   // Reset password state
   const [showResetPassword, setShowResetPassword] = useState(false);
+
+  // Handlers: Employee
+  const handleUpdateEmployee = async (payload: UpdateEmployeePayload) => {
+    const result = await updateEmployee(employeeId, payload);
+    if (result) setShowEmployeeForm(false);
+  };
 
   // Handlers: Contacts
   const handleCreateContact = async (payload: CreateContactPayload) => {
@@ -776,6 +1143,14 @@ export function EmployeeDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowEmployeeForm(true)}
+            >
+              <Edit2 size={14} />
+              Edit Pegawai
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -1145,6 +1520,27 @@ export function EmployeeDetailPage() {
           onSubmit={handleResetPassword}
           isLoading={resetPasswordLoading}
         />
+      </Modal>
+
+      {/* Employee Edit Modal */}
+      <Modal
+        open={showEmployeeForm}
+        title="Edit Data Pegawai"
+        onClose={() => setShowEmployeeForm(false)}
+        maxWidth="max-w-2xl"
+      >
+        {employee && (
+          <EmployeeForm
+            initialData={employee}
+            onClose={() => setShowEmployeeForm(false)}
+            onSubmit={handleUpdateEmployee}
+            isLoading={employeeMutLoading}
+            branches={branches || []}
+            departments={departments || []}
+            positions={positions || []}
+            roles={roles || []}
+          />
+        )}
       </Modal>
     </MainLayout>
   );

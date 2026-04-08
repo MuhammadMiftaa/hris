@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, CalendarOff, X, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, CalendarOff, X } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useLeaveTypeList, useLeaveTypeMutations } from "@/hooks/useLeaveType";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/types/leave";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Input, Button, Select } from "@/components/ui/FormElements";
+import { Input, Button } from "@/components/ui/FormElements";
 import { cn } from "@/lib/utils";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
