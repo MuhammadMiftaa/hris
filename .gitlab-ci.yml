@@ -64,8 +64,8 @@ deploy-staging:
         cd ~/web/staging/hris_wafa &&
 
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-        docker compose -f docker-compose.yml pull stg-hris_wafa-web &&
-        docker compose -f docker-compose.yml up -d stg-hris_wafa-web
+        docker compose -f docker-compose.yml pull stg-hris-wafa-web &&
+        docker compose -f docker-compose.yml up -d stg-hris-wafa-web
       "
 
 deploy-production:
@@ -90,7 +90,7 @@ deploy-production:
         cd ~/web/production/hris_wafa &&
 
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-        docker compose -f docker-compose.yml pull prod-hris_wafa-web &&
-        docker compose -f docker-compose.yml up -d prod-hris_wafa-web
+        docker compose -f docker-compose.yml pull prod-hris-wafa-web &&
+        docker compose -f docker-compose.yml up -d prod-hris-wafa-web
       "
   when: manual
