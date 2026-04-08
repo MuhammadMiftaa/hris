@@ -4,18 +4,18 @@ import type {
   UpdateLeaveTypePayload,
 } from "@/types/leave";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
 // ══════════════════════════════════════════════════════════════════════════════
-// BFF CALL WRAPPER
+// API CALL WRAPPER
 // ══════════════════════════════════════════════════════════════════════════════
 
-async function bffCall<T>(
+async function apiCall<T>(
   token: string,
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -44,12 +44,12 @@ async function bffCall<T>(
 
 /** GET /leave-types — List all leave types */
 export async function fetchLeaveTypes(token: string) {
-  return bffCall<LeaveType[]>(token, "/leave-types");
+  return apiCall<LeaveType[]>(token, "/leave-types");
 }
 
 /** GET /leave-types/:id — Get leave type by ID */
 export async function fetchLeaveTypeById(token: string, id: number) {
-  return bffCall<LeaveType>(token, `/leave-types/${id}`);
+  return apiCall<LeaveType>(token, `/leave-types/${id}`);
 }
 
 /** POST /leave-types — Create new leave type */
@@ -57,7 +57,7 @@ export async function createLeaveType(
   token: string,
   payload: CreateLeaveTypePayload,
 ) {
-  return bffCall<LeaveType>(token, "/leave-types", {
+  return apiCall<LeaveType>(token, "/leave-types", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -69,7 +69,7 @@ export async function updateLeaveType(
   id: number,
   payload: UpdateLeaveTypePayload,
 ) {
-  return bffCall<LeaveType>(token, `/leave-types/${id}`, {
+  return apiCall<LeaveType>(token, `/leave-types/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });
@@ -77,7 +77,7 @@ export async function updateLeaveType(
 
 /** DELETE /leave-types/:id — Delete leave type (soft delete) */
 export async function deleteLeaveType(token: string, id: number) {
-  return bffCall<{ message: string }>(token, `/leave-types/${id}`, {
+  return apiCall<{ message: string }>(token, `/leave-types/${id}`, {
     method: "DELETE",
   });
 }

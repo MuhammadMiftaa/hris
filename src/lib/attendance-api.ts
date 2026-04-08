@@ -6,14 +6,14 @@ import type {
   OverrideListParams,
 } from "@/types/attendance-override";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -58,14 +58,14 @@ export async function fetchAttendanceLogs(
   params?: AttendanceListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<AttendanceLog[]>(`/attendance${query}`, {
+  return apiCall<AttendanceLog[]>(`/attendance${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /attendance/:id — Get attendance log by ID */
 export async function fetchAttendanceLogById(token: string, id: number) {
-  return bffCall<AttendanceLog>(`/attendance/${id}`, {
+  return apiCall<AttendanceLog>(`/attendance/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -80,14 +80,14 @@ export async function fetchAttendanceOverrides(
   params?: OverrideListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<AttendanceOverride[]>(`/attendance-overrides${query}`, {
+  return apiCall<AttendanceOverride[]>(`/attendance-overrides${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /attendance-overrides/:id — Get override by ID */
 export async function fetchAttendanceOverrideById(token: string, id: number) {
-  return bffCall<AttendanceOverride>(`/attendance-overrides/${id}`, {
+  return apiCall<AttendanceOverride>(`/attendance-overrides/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -97,7 +97,7 @@ export async function createAttendanceOverride(
   token: string,
   payload: CreateOverridePayload,
 ) {
-  return bffCall<AttendanceOverride>("/attendance-overrides", {
+  return apiCall<AttendanceOverride>("/attendance-overrides", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -110,7 +110,7 @@ export async function updateOverrideStatus(
   id: number,
   payload: UpdateOverrideStatusPayload,
 ) {
-  return bffCall<AttendanceOverride>(`/attendance-overrides/${id}`, {
+  return apiCall<AttendanceOverride>(`/attendance-overrides/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -128,7 +128,7 @@ export async function createManualAttendance(
   token: string,
   payload: CreateManualAttendancePayload,
 ) {
-  return bffCall<AttendanceLog>("/attendance/manual", {
+  return apiCall<AttendanceLog>("/attendance/manual", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),

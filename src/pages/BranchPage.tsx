@@ -14,6 +14,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
+import { MapPicker } from "@/components/ui/MapPicker";
 import { useBranchList, useBranchMutations } from "@/hooks/useBranch";
 import type { Branch, CreateBranchPayload } from "@/types/branch";
 
@@ -171,28 +172,30 @@ function BranchForm({
     code: editBranch?.code || "",
     name: editBranch?.name || "",
     address: editBranch?.address || "",
-    latitude: editBranch?.latitude?.toString() || "",
-    longitude: editBranch?.longitude?.toString() || "",
+    latitude: editBranch?.latitude ?? (null as number | null),
+    longitude: editBranch?.longitude ?? (null as number | null),
     radius_meters: editBranch?.radius_meters?.toString() || "100",
     allow_wfh: editBranch?.allow_wfh || false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: string, value: string | boolean) => {
+  const handleChange = (
+    field: string,
+    value: string | boolean | number | null,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+    setErrors((prev) => ({ ...prev, location: "" }));
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.code.trim()) newErrors.code = "Kode cabang wajib diisi";
     if (!formData.name.trim()) newErrors.name = "Nama cabang wajib diisi";
-    if (formData.latitude && isNaN(Number.parseFloat(formData.latitude))) {
-      newErrors.latitude = "Latitude tidak valid";
-    }
-    if (formData.longitude && isNaN(Number.parseFloat(formData.longitude))) {
-      newErrors.longitude = "Longitude tidak valid";
-    }
     if (
       formData.radius_meters &&
       isNaN(Number.parseInt(formData.radius_meters))
@@ -211,12 +214,8 @@ function BranchForm({
       code: formData.code.trim(),
       name: formData.name.trim(),
       address: formData.address.trim() || undefined,
-      latitude: formData.latitude
-        ? Number.parseFloat(formData.latitude)
-        : undefined,
-      longitude: formData.longitude
-        ? Number.parseFloat(formData.longitude)
-        : undefined,
+      latitude: formData.latitude ?? undefined,
+      longitude: formData.longitude ?? undefined,
       radius_meters: formData.radius_meters
         ? Number.parseInt(formData.radius_meters)
         : undefined,
@@ -255,28 +254,13 @@ function BranchForm({
         placeholder="Alamat lengkap cabang"
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          id="latitude"
-          label="Latitude"
-          type="number"
-          step="any"
-          value={formData.latitude}
-          onChange={(e) => handleChange("latitude", e.target.value)}
-          placeholder="-7.2575"
-          error={errors.latitude}
-        />
-        <Input
-          id="longitude"
-          label="Longitude"
-          type="number"
-          step="any"
-          value={formData.longitude}
-          onChange={(e) => handleChange("longitude", e.target.value)}
-          placeholder="112.7521"
-          error={errors.longitude}
-        />
-      </div>
+      <MapPicker
+        label="Lokasi GPS"
+        latitude={formData.latitude}
+        longitude={formData.longitude}
+        onLocationChange={handleLocationChange}
+        error={errors.location}
+      />
 
       <Input
         id="radius_meters"

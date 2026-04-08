@@ -5,14 +5,14 @@ import type {
   BusinessTripListParams,
 } from "@/types/business-trip";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -57,14 +57,14 @@ export async function fetchBusinessTrips(
   params?: BusinessTripListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<BusinessTripRequest[]>(`/business-trips${query}`, {
+  return apiCall<BusinessTripRequest[]>(`/business-trips${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /business-trips/:id — Get business trip by ID */
 export async function fetchBusinessTripById(token: string, id: number) {
-  return bffCall<BusinessTripRequest>(`/business-trips/${id}`, {
+  return apiCall<BusinessTripRequest>(`/business-trips/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -74,7 +74,7 @@ export async function createBusinessTrip(
   token: string,
   payload: CreateBusinessTripPayload,
 ) {
-  return bffCall<BusinessTripRequest>("/business-trips", {
+  return apiCall<BusinessTripRequest>("/business-trips", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -87,7 +87,7 @@ export async function updateBusinessTripStatus(
   id: number,
   payload: UpdateBusinessTripStatusPayload,
 ) {
-  return bffCall<BusinessTripRequest>(`/business-trips/${id}`, {
+  return apiCall<BusinessTripRequest>(`/business-trips/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -96,7 +96,7 @@ export async function updateBusinessTripStatus(
 
 /** DELETE /business-trips/:id — Delete a business trip request */
 export async function deleteBusinessTrip(token: string, id: number) {
-  return bffCall<null>(`/business-trips/${id}`, {
+  return apiCall<null>(`/business-trips/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -5,14 +5,14 @@ import type {
   HolidayListParams,
 } from "@/types/holiday";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -54,14 +54,14 @@ export async function fetchHolidays(token: string, params?: HolidayListParams) {
   const query = searchParams.toString();
   const endpoint = query ? `/holidays?${query}` : "/holidays";
 
-  return bffCall<Holiday[]>(endpoint, {
+  return apiCall<Holiday[]>(endpoint, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /holidays/:id — Get holiday by ID */
 export async function fetchHolidayById(token: string, id: number) {
-  return bffCall<Holiday>(`/holidays/${id}`, {
+  return apiCall<Holiday>(`/holidays/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -71,7 +71,7 @@ export async function createHoliday(
   token: string,
   payload: CreateHolidayPayload,
 ) {
-  return bffCall<Holiday>("/holidays", {
+  return apiCall<Holiday>("/holidays", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -84,7 +84,7 @@ export async function updateHoliday(
   id: number,
   payload: UpdateHolidayPayload,
 ) {
-  return bffCall<Holiday>(`/holidays/${id}`, {
+  return apiCall<Holiday>(`/holidays/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -93,7 +93,7 @@ export async function updateHoliday(
 
 /** DELETE /holidays/:id — Delete a holiday */
 export async function deleteHoliday(token: string, id: number) {
-  return bffCall<{ message: string }>(`/holidays/${id}`, {
+  return apiCall<{ message: string }>(`/holidays/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

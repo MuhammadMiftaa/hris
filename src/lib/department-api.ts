@@ -5,14 +5,14 @@ import type {
   DepartmentListParams,
 } from "@/types/department";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -54,14 +54,14 @@ export async function fetchDepartments(
   const query = searchParams.toString();
   const endpoint = query ? `/departments?${query}` : "/departments";
 
-  return bffCall<Department[]>(endpoint, {
+  return apiCall<Department[]>(endpoint, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /departments/:id — Get department by ID */
 export async function fetchDepartmentById(token: string, id: number) {
-  return bffCall<Department>(`/departments/${id}`, {
+  return apiCall<Department>(`/departments/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -71,7 +71,7 @@ export async function createDepartment(
   token: string,
   payload: CreateDepartmentPayload,
 ) {
-  return bffCall<Department>("/departments", {
+  return apiCall<Department>("/departments", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -84,7 +84,7 @@ export async function updateDepartment(
   id: number,
   payload: UpdateDepartmentPayload,
 ) {
-  return bffCall<Department>(`/departments/${id}`, {
+  return apiCall<Department>(`/departments/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -93,7 +93,7 @@ export async function updateDepartment(
 
 /** DELETE /departments/:id — Delete a department */
 export async function deleteDepartment(token: string, id: number) {
-  return bffCall<{ message: string }>(`/departments/${id}`, {
+  return apiCall<{ message: string }>(`/departments/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

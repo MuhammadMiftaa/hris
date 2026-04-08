@@ -1,4 +1,4 @@
-import { AUTH_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
 // ============================================
 // TYPES
@@ -24,7 +24,7 @@ export async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${AUTH_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include", // cross-domain cookie support
     headers: {

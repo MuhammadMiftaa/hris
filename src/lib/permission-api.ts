@@ -5,14 +5,14 @@ import type {
   PermissionListParams,
 } from "@/types/permission-request";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -57,14 +57,14 @@ export async function fetchPermissionRequests(
   params?: PermissionListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<PermissionRequest[]>(`/permission-requests${query}`, {
+  return apiCall<PermissionRequest[]>(`/permission-requests${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /permission-requests/:id — Get permission request by ID */
 export async function fetchPermissionRequestById(token: string, id: number) {
-  return bffCall<PermissionRequest>(`/permission-requests/${id}`, {
+  return apiCall<PermissionRequest>(`/permission-requests/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -74,7 +74,7 @@ export async function createPermissionRequest(
   token: string,
   payload: CreatePermissionPayload,
 ) {
-  return bffCall<PermissionRequest>("/permission-requests", {
+  return apiCall<PermissionRequest>("/permission-requests", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -87,7 +87,7 @@ export async function updatePermissionStatus(
   id: number,
   payload: UpdatePermissionStatusPayload,
 ) {
-  return bffCall<PermissionRequest>(`/permission-requests/${id}`, {
+  return apiCall<PermissionRequest>(`/permission-requests/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -96,7 +96,7 @@ export async function updatePermissionStatus(
 
 /** DELETE /permission-requests/:id — Delete a permission request */
 export async function deletePermissionRequest(token: string, id: number) {
-  return bffCall<null>(`/permission-requests/${id}`, {
+  return apiCall<null>(`/permission-requests/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -1,4 +1,4 @@
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
 interface ApiError {
   statusCode: number;
@@ -6,13 +6,11 @@ interface ApiError {
 }
 
 /**
- * Send DELETE to BFF cache refresh endpoint for a given service.
+ * Send DELETE to API cache refresh endpoint for a given service.
  * Includes credentials and optional Authorization header when token provided.
  */
 export async function refreshCache(service: string, token?: string) {
-  const url = `${BFF_BASE_URL}/cache/refresh?service=${encodeURIComponent(
-    service,
-  )}`;
+  const url = `${API_URL}/cache/refresh?service=${encodeURIComponent(service)}`;
 
   const res = await fetch(url, {
     method: "DELETE",

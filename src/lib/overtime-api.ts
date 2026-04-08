@@ -5,14 +5,14 @@ import type {
   OvertimeListParams,
 } from "@/types/overtime";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -57,14 +57,14 @@ export async function fetchOvertimeRequests(
   params?: OvertimeListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<OvertimeRequest[]>(`/overtime-requests${query}`, {
+  return apiCall<OvertimeRequest[]>(`/overtime-requests${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /overtime-requests/:id — Get overtime request by ID */
 export async function fetchOvertimeRequestById(token: string, id: number) {
-  return bffCall<OvertimeRequest>(`/overtime-requests/${id}`, {
+  return apiCall<OvertimeRequest>(`/overtime-requests/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -74,7 +74,7 @@ export async function createOvertimeRequest(
   token: string,
   payload: CreateOvertimePayload,
 ) {
-  return bffCall<OvertimeRequest>("/overtime-requests", {
+  return apiCall<OvertimeRequest>("/overtime-requests", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -87,7 +87,7 @@ export async function updateOvertimeStatus(
   id: number,
   payload: UpdateOvertimeStatusPayload,
 ) {
-  return bffCall<OvertimeRequest>(`/overtime-requests/${id}`, {
+  return apiCall<OvertimeRequest>(`/overtime-requests/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -96,7 +96,7 @@ export async function updateOvertimeStatus(
 
 /** DELETE /overtime-requests/:id — Delete an overtime request */
 export async function deleteOvertimeRequest(token: string, id: number) {
-  return bffCall<null>(`/overtime-requests/${id}`, {
+  return apiCall<null>(`/overtime-requests/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

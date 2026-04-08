@@ -9,14 +9,14 @@ import type {
   ScheduleListParams,
 } from "@/types/shift";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -44,14 +44,14 @@ async function bffCall<T>(
 
 /** GET /shifts — List all shift templates */
 export async function fetchShiftTemplates(token: string) {
-  return bffCall<ShiftTemplate[]>("/shifts", {
+  return apiCall<ShiftTemplate[]>("/shifts", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /shifts/:id — Get shift template by ID */
 export async function fetchShiftTemplateById(token: string, id: number) {
-  return bffCall<ShiftTemplate>(`/shifts/${id}`, {
+  return apiCall<ShiftTemplate>(`/shifts/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -61,7 +61,7 @@ export async function createShiftTemplate(
   token: string,
   payload: CreateShiftPayload,
 ) {
-  return bffCall<ShiftTemplate>("/shifts", {
+  return apiCall<ShiftTemplate>("/shifts", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -74,7 +74,7 @@ export async function updateShiftTemplate(
   id: number,
   payload: UpdateShiftPayload,
 ) {
-  return bffCall<ShiftTemplate>(`/shifts/${id}`, {
+  return apiCall<ShiftTemplate>(`/shifts/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -83,7 +83,7 @@ export async function updateShiftTemplate(
 
 /** DELETE /shifts/:id — Delete a shift template */
 export async function deleteShiftTemplate(token: string, id: number) {
-  return bffCall<{ message: string }>(`/shifts/${id}`, {
+  return apiCall<{ message: string }>(`/shifts/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -94,7 +94,7 @@ export async function fetchShiftTemplateDetails(
   token: string,
   shiftId: number,
 ) {
-  return bffCall<ShiftTemplateDetail[]>(`/shifts/${shiftId}/details`, {
+  return apiCall<ShiftTemplateDetail[]>(`/shifts/${shiftId}/details`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -122,14 +122,14 @@ export async function fetchEmployeeSchedules(
   const query = searchParams.toString();
   const endpoint = query ? `/schedules?${query}` : "/schedules";
 
-  return bffCall<EmployeeSchedule[]>(endpoint, {
+  return apiCall<EmployeeSchedule[]>(endpoint, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /schedules/:id — Get employee schedule by ID */
 export async function fetchEmployeeScheduleById(token: string, id: number) {
-  return bffCall<EmployeeSchedule>(`/schedules/${id}`, {
+  return apiCall<EmployeeSchedule>(`/schedules/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -139,7 +139,7 @@ export async function createEmployeeSchedule(
   token: string,
   payload: CreateSchedulePayload,
 ) {
-  return bffCall<EmployeeSchedule>("/schedules", {
+  return apiCall<EmployeeSchedule>("/schedules", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -152,7 +152,7 @@ export async function updateEmployeeSchedule(
   id: number,
   payload: UpdateSchedulePayload,
 ) {
-  return bffCall<EmployeeSchedule>(`/schedules/${id}`, {
+  return apiCall<EmployeeSchedule>(`/schedules/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -161,7 +161,7 @@ export async function updateEmployeeSchedule(
 
 /** DELETE /schedules/:id — Delete an employee schedule */
 export async function deleteEmployeeSchedule(token: string, id: number) {
-  return bffCall<{ message: string }>(`/schedules/${id}`, {
+  return apiCall<{ message: string }>(`/schedules/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

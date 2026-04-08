@@ -6,14 +6,14 @@ import type {
   UpdateRolePermissionsPayload,
 } from "@/types/role";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -41,21 +41,21 @@ async function bffCall<T>(
 
 /** GET /roles — List all roles */
 export async function fetchRoles(token: string) {
-  return bffCall<Role[]>("/roles", {
+  return apiCall<Role[]>("/roles", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /roles/:id — Get role by ID (with permissions) */
 export async function fetchRoleById(token: string, id: number) {
-  return bffCall<Role>(`/roles/${id}`, {
+  return apiCall<Role>(`/roles/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** POST /roles — Create a new role */
 export async function createRole(token: string, payload: CreateRolePayload) {
-  return bffCall<Role>("/roles", {
+  return apiCall<Role>("/roles", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -68,7 +68,7 @@ export async function updateRole(
   id: number,
   payload: UpdateRolePayload,
 ) {
-  return bffCall<Role>(`/roles/${id}`, {
+  return apiCall<Role>(`/roles/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -77,7 +77,7 @@ export async function updateRole(
 
 /** DELETE /roles/:id — Delete a role */
 export async function deleteRole(token: string, id: number) {
-  return bffCall<{ message: string }>(`/roles/${id}`, {
+  return apiCall<{ message: string }>(`/roles/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -89,7 +89,7 @@ export async function deleteRole(token: string, id: number) {
 
 /** GET /permissions — List all permissions */
 export async function fetchPermissions(token: string) {
-  return bffCall<Permission[]>("/permissions", {
+  return apiCall<Permission[]>("/permissions", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -100,7 +100,7 @@ export async function updateRolePermissions(
   roleId: number,
   payload: UpdateRolePermissionsPayload,
 ) {
-  return bffCall<Role>(`/roles/${roleId}/permissions`, {
+  return apiCall<Role>(`/roles/${roleId}/permissions`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),

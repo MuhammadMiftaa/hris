@@ -120,6 +120,84 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 // ============================================
+// SELECT
+// ============================================
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface SelectProps extends Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "onChange"
+> {
+  label?: string;
+  error?: string;
+  options: SelectOption[];
+  placeholder?: string;
+  onChange?: (value: string) => void;
+}
+
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+  (
+    {
+      className,
+      label,
+      error,
+      id,
+      options,
+      placeholder,
+      onChange,
+      value,
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <div className="space-y-1.5">
+        {label && (
+          <label
+            htmlFor={id}
+            className="block text-sm font-medium text-(--foreground) opacity-80"
+          >
+            {label}
+          </label>
+        )}
+        <select
+          id={id}
+          ref={ref}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          className={cn(
+            "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+            "border-(--border) placeholder:text-(--muted-foreground)",
+            "transition-colors duration-200",
+            "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+            error && "border-(--destructive)",
+            className,
+          )}
+          {...props}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        {error && <p className="text-xs text-(--destructive)">{error}</p>}
+      </div>
+    );
+  },
+);
+Select.displayName = "Select";
+
+// ============================================
 // THEME TOGGLE
 // ============================================
 

@@ -1,17 +1,17 @@
 import type { AuditLog, AuditLogListParams } from "@/types/audit-log";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
 // ══════════════════════════════════════════════════════════════════════════════
-// BFF CALL WRAPPER
+// API CALL WRAPPER
 // ══════════════════════════════════════════════════════════════════════════════
 
-async function bffCall<T>(
+async function apiCall<T>(
   token: string,
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -60,7 +60,7 @@ export async function fetchAuditLogs(
   params?: AuditLogListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<AuditLog[]>(token, `/audit-logs${query}`);
+  return apiCall<AuditLog[]>(token, `/audit-logs${query}`);
 }
 
 /** GET /audit-logs — Fetch audit logs for a specific record */
@@ -74,5 +74,5 @@ export async function fetchAuditLogsByRecord(
 
 /** GET /audit-logs/:id — Get audit log by ID */
 export async function fetchAuditLogById(token: string, id: number) {
-  return bffCall<AuditLog>(token, `/audit-logs/${id}`);
+  return apiCall<AuditLog>(token, `/audit-logs/${id}`);
 }

@@ -8,14 +8,14 @@ import type {
   UpdateContactPayload,
 } from "@/types/employee";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -55,14 +55,14 @@ export async function fetchEmployees(
   const queryString = query.toString();
   const endpoint = queryString ? `/employees?${queryString}` : "/employees";
 
-  return bffCall<Employee[]>(endpoint, {
+  return apiCall<Employee[]>(endpoint, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /employees/:id — Get employee by ID */
 export async function fetchEmployeeById(token: string, id: number) {
-  return bffCall<Employee>(`/employees/${id}`, {
+  return apiCall<Employee>(`/employees/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -72,7 +72,7 @@ export async function createEmployee(
   token: string,
   payload: CreateEmployeePayload,
 ) {
-  return bffCall<Employee>("/employees", {
+  return apiCall<Employee>("/employees", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -85,7 +85,7 @@ export async function updateEmployee(
   id: number,
   payload: UpdateEmployeePayload,
 ) {
-  return bffCall<Employee>(`/employees/${id}`, {
+  return apiCall<Employee>(`/employees/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -94,7 +94,7 @@ export async function updateEmployee(
 
 /** DELETE /employees/:id — Delete an employee */
 export async function deleteEmployee(token: string, id: number) {
-  return bffCall<{ message: string }>(`/employees/${id}`, {
+  return apiCall<{ message: string }>(`/employees/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -106,7 +106,7 @@ export async function deleteEmployee(token: string, id: number) {
 
 /** GET /employees/:employeeId/contacts — List contacts for an employee */
 export async function fetchEmployeeContacts(token: string, employeeId: number) {
-  return bffCall<EmployeeContact[]>(`/employees/${employeeId}/contacts`, {
+  return apiCall<EmployeeContact[]>(`/employees/${employeeId}/contacts`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -117,7 +117,7 @@ export async function createEmployeeContact(
   employeeId: number,
   payload: CreateContactPayload,
 ) {
-  return bffCall<EmployeeContact>(`/employees/${employeeId}/contacts`, {
+  return apiCall<EmployeeContact>(`/employees/${employeeId}/contacts`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -130,7 +130,7 @@ export async function updateEmployeeContact(
   contactId: number,
   payload: UpdateContactPayload,
 ) {
-  return bffCall<EmployeeContact>(`/employee-contacts/${contactId}`, {
+  return apiCall<EmployeeContact>(`/employee-contacts/${contactId}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -139,7 +139,7 @@ export async function updateEmployeeContact(
 
 /** DELETE /employee-contacts/:id — Delete a contact */
 export async function deleteEmployeeContact(token: string, contactId: number) {
-  return bffCall<{ message: string }>(`/employee-contacts/${contactId}`, {
+  return apiCall<{ message: string }>(`/employee-contacts/${contactId}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

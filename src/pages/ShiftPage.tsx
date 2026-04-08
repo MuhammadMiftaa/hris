@@ -2000,7 +2000,7 @@ function ScheduleTab({
 // ════════════════════════════════════════════
 
 export function ShiftPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("templates");
+  const [activeTab, setActiveTab] = useState<TabType>("schedules");
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
 

@@ -4,14 +4,14 @@ import type {
   UpdateBranchPayload,
 } from "@/types/branch";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -39,14 +39,14 @@ async function bffCall<T>(
 
 /** GET /branches — List all branches */
 export async function fetchBranches(token: string) {
-  return bffCall<Branch[]>("/branches", {
+  return apiCall<Branch[]>("/branches", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /branches/:id — Get branch by ID */
 export async function fetchBranchById(token: string, id: number) {
-  return bffCall<Branch>(`/branches/${id}`, {
+  return apiCall<Branch>(`/branches/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -56,7 +56,7 @@ export async function createBranch(
   token: string,
   payload: CreateBranchPayload,
 ) {
-  return bffCall<Branch>("/branches", {
+  return apiCall<Branch>("/branches", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -69,7 +69,7 @@ export async function updateBranch(
   id: number,
   payload: UpdateBranchPayload,
 ) {
-  return bffCall<Branch>(`/branches/${id}`, {
+  return apiCall<Branch>(`/branches/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -78,7 +78,7 @@ export async function updateBranch(
 
 /** DELETE /branches/:id — Delete a branch */
 export async function deleteBranch(token: string, id: number) {
-  return bffCall<{ message: string }>(`/branches/${id}`, {
+  return apiCall<{ message: string }>(`/branches/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

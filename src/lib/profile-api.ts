@@ -5,14 +5,14 @@ import type {
   UploadPhotoResponse,
 } from "@/types/profile";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -40,7 +40,7 @@ async function bffCall<T>(
 
 /** GET /profile — Get user profile */
 export async function fetchProfile(token: string) {
-  return bffCall<Profile>("/profile", {
+  return apiCall<Profile>("/profile", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -50,7 +50,7 @@ export async function updateProfile(
   token: string,
   payload: UpdateProfilePayload,
 ) {
-  return bffCall<Profile>("/profile", {
+  return apiCall<Profile>("/profile", {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -62,7 +62,7 @@ export async function uploadProfilePhoto(
   token: string,
   payload: UploadPhotoPayload,
 ) {
-  return bffCall<UploadPhotoResponse>("/profile/photo", {
+  return apiCall<UploadPhotoResponse>("/profile/photo", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -71,7 +71,7 @@ export async function uploadProfilePhoto(
 
 /** DELETE /profile/photo — Delete profile photo */
 export async function deleteProfilePhoto(token: string) {
-  return bffCall<{ message: string }>("/profile/photo", {
+  return apiCall<{ message: string }>("/profile/photo", {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

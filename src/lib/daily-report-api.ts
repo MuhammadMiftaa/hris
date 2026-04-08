@@ -5,14 +5,14 @@ import type {
   DailyReportListParams,
 } from "@/types/daily-report";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -57,14 +57,14 @@ export async function fetchDailyReports(
   params?: DailyReportListParams,
 ) {
   const query = buildQueryString(params);
-  return bffCall<DailyReport[]>(`/daily-reports${query}`, {
+  return apiCall<DailyReport[]>(`/daily-reports${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 /** GET /daily-reports/:id — Get daily report by ID */
 export async function fetchDailyReportById(token: string, id: number) {
-  return bffCall<DailyReport>(`/daily-reports/${id}`, {
+  return apiCall<DailyReport>(`/daily-reports/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -74,7 +74,7 @@ export async function createDailyReport(
   token: string,
   payload: CreateDailyReportPayload,
 ) {
-  return bffCall<DailyReport>("/daily-reports", {
+  return apiCall<DailyReport>("/daily-reports", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -87,7 +87,7 @@ export async function updateDailyReport(
   id: number,
   payload: UpdateDailyReportPayload,
 ) {
-  return bffCall<DailyReport>(`/daily-reports/${id}`, {
+  return apiCall<DailyReport>(`/daily-reports/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),

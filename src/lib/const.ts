@@ -6,8 +6,8 @@
 declare global {
   interface Window {
     __ENV__: {
-      AUTH_URL: string;
-      BFF_URL: string;
+      API_URL: string;
+      GOOGLE_MAPS_API_KEY: string;
     };
   }
 }
@@ -16,12 +16,12 @@ export {};
 
 const env = typeof window !== "undefined" ? window.__ENV__ : undefined;
 
-export const AUTH_BASE_URL: string =
-  env?.AUTH_URL && env.AUTH_URL !== "$AUTH_URL"
-    ? env.AUTH_URL
-    : import.meta.env.AUTH_URL || "http://localhost:8080";
+export const API_URL: string =
+  env?.API_URL && env.API_URL !== "$API_URL"
+    ? env.API_URL
+    : import.meta.env.API_URL || "http://localhost:8080";
 
-export const BFF_BASE_URL: string =
-  env?.BFF_URL && env.BFF_URL !== "$BFF_URL"
-    ? env.BFF_URL
-    : import.meta.env.BFF_URL || "http://localhost:8083";
+export const GOOGLE_MAPS_API_KEY: string =
+  env?.GOOGLE_MAPS_API_KEY && env.GOOGLE_MAPS_API_KEY !== "$GOOGLE_MAPS_API_KEY"
+    ? env.GOOGLE_MAPS_API_KEY
+    : import.meta.env.GOOGLE_MAPS_API_KEY || "";

@@ -4,14 +4,14 @@ import type {
   UpdatePositionPayload,
 } from "@/types/job-position";
 import type { ApiResponse, ApiError } from "./api";
-import { BFF_BASE_URL } from "./const";
+import { API_URL } from "./const";
 
-/** Fetch wrapper targeting the BFF */
-async function bffCall<T>(
+/** Fetch wrapper targeting the API */
+async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(`${BFF_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
@@ -39,7 +39,7 @@ async function bffCall<T>(
 
 /** GET /positions — List all job positions */
 export async function fetchPositions(token: string) {
-  return bffCall<JobPosition[]>("/positions", {
+  return apiCall<JobPosition[]>("/positions", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -49,7 +49,7 @@ export async function createPosition(
   token: string,
   payload: CreatePositionPayload,
 ) {
-  return bffCall<JobPosition>("/positions", {
+  return apiCall<JobPosition>("/positions", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -62,7 +62,7 @@ export async function updatePosition(
   id: number,
   payload: UpdatePositionPayload,
 ) {
-  return bffCall<JobPosition>(`/positions/${id}`, {
+  return apiCall<JobPosition>(`/positions/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
@@ -71,7 +71,7 @@ export async function updatePosition(
 
 /** DELETE /positions/:id — Delete a job position */
 export async function deletePosition(token: string, id: number) {
-  return bffCall<{ message: string }>(`/positions/${id}`, {
+  return apiCall<{ message: string }>(`/positions/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

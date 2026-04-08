@@ -63,6 +63,7 @@ export function AppSidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
 
   const initials = cachedProfile?.fullname
     ? cachedProfile.fullname
@@ -83,7 +84,10 @@ export function AppSidebar() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        setMobileProfileOpen(false);
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -335,14 +339,135 @@ export function AppSidebar() {
             Wafa Indonesia
           </span>
         </div>
-        <div
-          className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white"
-          style={{
-            background:
-              "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
-          }}
-        >
-          {initials}
+        <div className="relative">
+          <button
+            onClick={() => setMobileProfileOpen((prev) => !prev)}
+            className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white transition hover:ring-2 hover:ring-(--primary)/50"
+            style={
+              !photoUrl
+                ? {
+                    background:
+                      "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
+                  }
+                : undefined
+            }
+          >
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials
+            )}
+          </button>
+
+          {/* Mobile Profile Popup */}
+          {mobileProfileOpen && (
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setMobileProfileOpen(false)}
+              />
+              {/* Popup */}
+              <div
+                className="absolute right-0 top-full mt-2 z-50 w-64 overflow-hidden rounded-xl border"
+                style={{
+                  borderColor: "rgba(209,0,113,0.25)",
+                  background: "var(--card)",
+                  boxShadow:
+                    "0 10px 40px -10px rgba(0,0,0,0.35), 0 0 20px 0 rgba(209,0,113,0.15)",
+                }}
+              >
+                <div
+                  className="overflow-hidden"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(209,0,113,0.08) 0%, rgba(221,13,137,0.04) 50%, rgba(209,0,113,0.06) 100%)",
+                  }}
+                >
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-[13px] font-bold text-white"
+                      style={
+                        !photoUrl
+                          ? {
+                              background:
+                                "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
+                              boxShadow: "0 0 10px 2px rgba(209,0,113,0.45)",
+                            }
+                          : undefined
+                      }
+                    >
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt="Profile"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        initials
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-bold leading-tight text-primary-gradient">
+                        {cachedProfile?.fullname ||
+                          user?.email?.split("@")[0] ||
+                          "User"}
+                      </div>
+                      <div className="truncate text-xs text-(--muted-foreground)">
+                        {user?.email ?? ""}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className="mx-3"
+                    style={{
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(209,0,113,0.25), transparent)",
+                    }}
+                  />
+
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        setMobileProfileOpen(false);
+                        navigate("/profile");
+                      }}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-(--foreground) transition hover:bg-(--muted)"
+                    >
+                      <User size={16} className="text-(--primary)" />
+                      <span>Profil Saya</span>
+                    </button>
+                  </div>
+
+                  <div
+                    className="mx-3"
+                    style={{
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(209,0,113,0.25), transparent)",
+                    }}
+                  />
+
+                  <button
+                    onClick={() => {
+                      setMobileProfileOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-rose-500/90 transition hover:bg-rose-500/10 hover:text-rose-500"
+                  >
+                    <LogOut size={16} />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
