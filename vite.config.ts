@@ -41,8 +41,8 @@ export default defineConfig({
         short_name: "Wafa Indonesia",
         description:
           "lembaga pengembang metode pembelajaran Al-Qur'an inovatif berbasis otak kanan yang menyediakan sistem, metodologi, dan media untuk memudahkan belajar Al-Qur'an secara menyenangkan, mudah, dan efektif, bertujuan melahirkan generasi ahli Al-Qur'an yang mampu membaca, memahami, mempraktekkan, serta menghafal dengan konsep 5T (Tilawah, Tahfidz, Tarjamah, Tafhim, Tafsir).",
-        theme_color: "#1a1a1a",
-        background_color: "#1a1a1a",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
         display: "standalone",
         start_url: "/",
         scope: "/",
