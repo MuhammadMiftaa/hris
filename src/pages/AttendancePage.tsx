@@ -28,6 +28,7 @@ import {
   useOverrideMutations,
   useManualAttendanceMutations,
 } from "@/hooks/useAttendance";
+import { SummaryCard } from "@/components/ui/SummaryCard";
 import { useEmployeeList } from "@/hooks/useEmployee";
 import { useBranchList } from "@/hooks/useBranch";
 import {
@@ -813,19 +814,14 @@ function AttendanceLogTab() {
               bg: "bg-blue-50 dark:bg-blue-900/20",
             },
           ].map((item) => (
-            <div
+            <SummaryCard
               key={item.label}
-              className={cn(
-                "rounded-xl border border-(--border) px-4 py-3",
-                item.bg,
-              )}
-            >
-              <p className="text-xs text-(--muted-foreground)">{item.label}</p>
-              <p className={cn("text-2xl font-bold", item.color)}>
-                {item.value}
-              </p>
-              <p className="text-xs text-(--muted-foreground)">hari</p>
-            </div>
+              title={item.label}
+              value={item.value}
+              subtitle="hari"
+              colorBg={item.bg}
+              colorText={item.color}
+            />
           ))}
         </div>
       )}

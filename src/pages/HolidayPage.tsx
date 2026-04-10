@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { SummaryCard } from "@/components/ui/SummaryCard";
 import { useHolidayList, useHolidayMutations } from "@/hooks/useHoliday";
 import { useBranchList } from "@/hooks/useBranch";
 import {
@@ -814,36 +815,24 @@ export function HolidayPage() {
         {/* Summary Cards */}
         {!loading && filtered.length > 0 && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <div className="rounded-xl border border-(--border) bg-(--card) px-4 py-3">
-              <p className="text-xs text-(--muted-foreground)">Total</p>
-              <p className="text-2xl font-bold text-(--foreground)">
-                {filtered.length}
-              </p>
-              <p className="text-xs text-(--muted-foreground)">hari libur</p>
-            </div>
+            <SummaryCard
+              title="Total"
+              value={filtered.length}
+              subtitle="hari libur"
+            />
             {(Object.keys(HOLIDAY_TYPE_LABELS) as HolidayType[]).map((type) => {
               const count = totalByType[type] || 0;
               if (count === 0) return null;
               const colors = HOLIDAY_TYPE_COLORS[type];
               return (
-                <div
+                <SummaryCard
                   key={type}
-                  className={cn(
-                    "rounded-xl border px-4 py-3",
-                    colors.bg,
-                    "border-transparent",
-                  )}
-                >
-                  <p className={cn("text-xs font-medium", colors.text)}>
-                    {HOLIDAY_TYPE_LABELS[type]}
-                  </p>
-                  <p className={cn("text-2xl font-bold", colors.text)}>
-                    {count}
-                  </p>
-                  <p className={cn("text-xs", colors.text, "opacity-70")}>
-                    hari
-                  </p>
-                </div>
+                  title={HOLIDAY_TYPE_LABELS[type]}
+                  value={count}
+                  subtitle="hari"
+                  colorBg={colors.bg}
+                  colorText={colors.text}
+                />
               );
             })}
           </div>

@@ -19,6 +19,7 @@ import {
   useDailyReportList,
   useDailyReportMutations,
 } from "@/hooks/useDailyReport";
+import { SummaryCard } from "@/components/ui/SummaryCard";
 import { useEmployeeList } from "@/hooks/useEmployee";
 import type {
   DailyReport,
@@ -532,20 +533,20 @@ export function DailyReportPage() {
         {/* Summary */}
         {!loading && filtered.length > 0 && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-            <div className="rounded-xl border border-(--border) bg-green-50 dark:bg-green-900/20 px-4 py-3">
-              <p className="text-xs text-(--muted-foreground)">Terkirim</p>
-              <p className="text-2xl font-bold text-green-600">
-                {summary.submitted}
-              </p>
-              <p className="text-xs text-(--muted-foreground)">laporan</p>
-            </div>
-            <div className="rounded-xl border border-(--border) bg-red-50 dark:bg-red-900/20 px-4 py-3">
-              <p className="text-xs text-(--muted-foreground)">Belum Diisi</p>
-              <p className="text-2xl font-bold text-red-600">
-                {summary.missing}
-              </p>
-              <p className="text-xs text-(--muted-foreground)">laporan</p>
-            </div>
+            <SummaryCard
+              title="Terkirim"
+              value={summary.submitted}
+              subtitle="laporan"
+              colorBg="bg-green-50 dark:bg-green-900/20"
+              colorText="text-green-600"
+            />
+            <SummaryCard
+              title="Belum Diisi"
+              value={summary.missing}
+              subtitle="laporan"
+              colorBg="bg-red-50 dark:bg-red-900/20"
+              colorText="text-red-600"
+            />
           </div>
         )}
 
