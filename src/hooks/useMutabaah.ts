@@ -105,7 +105,7 @@ export function useMutabaahList(params?: MutabaahListParams) {
 // useMutabaahActions — Submit / Cancel tilawah
 // ════════════════════════════════════════════
 
-export function useMutabaahActions() {
+export function useMutabaahActions(onSuccess?: () => void) {
   const { token } = useAuth();
   const { isDemo } = useDemo();
   const [todayStatus, setTodayStatus] = useState<AsyncState<MutabaahTodayStatus>>({
@@ -171,6 +171,7 @@ export function useMutabaahActions() {
         });
         toast.success("Tilawah berhasil dicatat");
         refetchToday();
+        onSuccess?.();
         return res.data;
       } catch (err: unknown) {
         const message =
@@ -181,7 +182,7 @@ export function useMutabaahActions() {
         setActionLoading(false);
       }
     },
-    [token, isDemo, refetchToday],
+    [token, isDemo, refetchToday, onSuccess],
   );
 
   const cancelToday = useCallback(
@@ -202,6 +203,7 @@ export function useMutabaahActions() {
         });
         toast.success("Tilawah dibatalkan");
         refetchToday();
+        onSuccess?.();
         return res.data;
       } catch (err: unknown) {
         const message =
@@ -212,7 +214,7 @@ export function useMutabaahActions() {
         setActionLoading(false);
       }
     },
-    [token, isDemo, refetchToday],
+    [token, isDemo, refetchToday, onSuccess],
   );
 
   return {

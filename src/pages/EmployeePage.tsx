@@ -114,12 +114,15 @@ function EmployeeForm({
     nationality: "Indonesia",
     height: "",
     weight: "",
+    is_trainer: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: "" }));
+    if (typeof value === "string") {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
 
   // Cascading: filter positions by selected department
@@ -183,6 +186,7 @@ function EmployeeForm({
       nationality: formData.nationality.trim() || undefined,
       height: formData.height ? parseFloat(formData.height) : undefined,
       weight: formData.weight ? parseFloat(formData.weight) : undefined,
+      is_trainer: formData.is_trainer,
     };
 
     onSubmit(payload);
@@ -313,6 +317,54 @@ function EmployeeForm({
               }))}
               placeholder="Pilih role"
             />
+          </div>
+
+          {/* Trainer toggle */}
+          <div className="rounded-xl border border-(--border) bg-(--muted)/20 p-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <div className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                <input
+                  type="checkbox"
+                  id="is_trainer"
+                  checked={formData.is_trainer}
+                  onChange={(e) => handleChange("is_trainer", e.target.checked)}
+                  className="peer sr-only"
+                />
+                <div
+                  className={cn(
+                    "h-5 w-5 rounded border-2 transition-all flex items-center justify-center",
+                    formData.is_trainer
+                      ? "border-(--primary) bg-(--primary)"
+                      : "border-(--border) bg-(--input)",
+                  )}
+                >
+                  {formData.is_trainer && (
+                    <svg
+                      className="h-3 w-3 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-(--foreground)">
+                  Trainer Wafa
+                </div>
+                <div className="mt-0.5 text-xs text-(--muted-foreground)">
+                  Pegawai berstatus trainer memiliki target tilawah 10
+                  halaman/hari (non-trainer: 5 halaman/hari)
+                </div>
+              </div>
+            </label>
           </div>
         </div>
       )}
@@ -483,7 +535,6 @@ function SkeletonTable() {
 export function EmployeePage() {
   const navigate = useNavigate();
 
-  // Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [filterBranch, setFilterBranch] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
@@ -491,7 +542,6 @@ export function EmployeePage() {
     "",
   );
 
-  // Build params for hook
   const params = useMemo(
     () => ({
       search: searchQuery || undefined,

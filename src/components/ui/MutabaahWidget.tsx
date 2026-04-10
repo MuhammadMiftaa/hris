@@ -1,4 +1,4 @@
-import { BookOpen, Check, X, Loader2 } from "lucide-react";
+import { BookOpen, Check, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MutabaahTodayStatus } from "@/types/mutabaah";
 
@@ -8,6 +8,7 @@ interface MutabaahWidgetProps {
   onCancel: () => void;
   disabled?: boolean;
   loading?: boolean;
+  mutabaahLogId?: number | null;
 }
 
 export function MutabaahWidget({
@@ -16,6 +17,7 @@ export function MutabaahWidget({
   onCancel,
   disabled,
   loading,
+  mutabaahLogId,
 }: MutabaahWidgetProps) {
   if (!status.has_record) return null;
 
@@ -27,80 +29,89 @@ export function MutabaahWidget({
     });
   };
 
+  const canCancel = status.is_submitted && mutabaahLogId != null;
+
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border transition-all duration-300",
+        "relative overflow-hidden rounded-2xl border transition-all duration-300",
         status.is_submitted
-          ? "border-green-500/30 bg-green-500/5"
+          ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/8 via-emerald-500/4 to-transparent"
           : "border-(--border) bg-(--card)",
       )}
     >
-      <div className="flex items-center gap-4 p-4">
+      {/* Decorative bg orb when submitted */}
+      {status.is_submitted && (
+        <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500/10 blur-xl" />
+      )}
+
+      <div className="relative flex items-center gap-4 p-4">
         {/* Icon */}
         <div
           className={cn(
             "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all",
             status.is_submitted
-              ? "bg-green-500/15 text-green-600"
+              ? "bg-emerald-500/15 text-emerald-600"
               : "bg-(--primary)/10 text-(--primary)",
           )}
         >
-          <BookOpen size={22} />
+          {status.is_submitted ? (
+            <Sparkles size={22} />
+          ) : (
+            <BookOpen size={22} />
+          )}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <p
             className={cn(
-              "text-sm font-semibold",
+              "text-sm font-semibold leading-tight",
               status.is_submitted
-                ? "text-green-700 dark:text-green-400"
+                ? "text-emerald-700 dark:text-emerald-400"
                 : "text-(--foreground)",
             )}
           >
-            {status.is_submitted
-              ? "✅ Tilawah Selesai"
-              : "📖 Tilawah Hari Ini"}
+            {status.is_submitted ? "Tilawah Selesai ✓" : "📖 Tilawah Hari Ini"}
           </p>
-          <p className="text-xs text-(--muted-foreground)">
+          <p className="mt-0.5 text-xs text-(--muted-foreground)">
             {status.is_submitted
-              ? `Sudah membaca ${status.target_pages} halaman · ${formatTime(status.submitted_at)}`
-              : `Target: ${status.target_pages} Halaman Al-Quran`}
+              ? `${status.target_pages} halaman · pukul ${formatTime(status.submitted_at)}`
+              : `Target: ${status.target_pages} halaman Al-Quran`}
           </p>
         </div>
 
         {/* Action */}
         {status.is_submitted ? (
-          <button
-            onClick={onCancel}
-            disabled={disabled || loading}
-            className="shrink-0 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-1.5 text-xs font-medium text-red-500 transition hover:bg-red-500/10 disabled:opacity-50"
-          >
-            {loading ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <span className="flex items-center gap-1">
-                <X size={12} />
-                Batalkan
-              </span>
-            )}
-          </button>
+          canCancel && (
+            <button
+              onClick={onCancel}
+              disabled={disabled || loading}
+              className="shrink-0 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-1.5 text-xs font-medium text-red-500 transition hover:bg-red-500/10 disabled:opacity-50"
+            >
+              {loading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <span className="flex items-center gap-1">
+                  <X size={12} />
+                  Batalkan
+                </span>
+              )}
+            </button>
+          )
         ) : (
           <button
             onClick={onSubmit}
             disabled={disabled || loading}
             className="shrink-0 rounded-lg bg-(--primary) px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-            style={{
-              boxShadow: "0 2px 8px rgba(209,0,113,0.3)",
-            }}
+            style={{ boxShadow: "0 2px 8px rgba(209,0,113,0.3)" }}
           >
             {loading ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
               <span className="flex items-center gap-1.5">
                 <Check size={14} />
-                Sudah Baca {status.target_pages} Halaman
+                Sudah Baca
               </span>
             )}
           </button>

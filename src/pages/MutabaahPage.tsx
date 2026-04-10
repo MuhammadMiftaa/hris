@@ -1,10 +1,5 @@
 import { useState, useMemo } from "react";
-import {
-  BookOpen,
-  Search,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
+import { BookOpen, Search, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -12,7 +7,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import {
   useMutabaahDailyReport,
   useMutabaahMonthlyReport,
-  useMutabaahCategoryReport,
 } from "@/hooks/useMutabaah";
 
 // ════════════════════════════════════════════
@@ -74,8 +68,7 @@ function DailyTab() {
   }, [data, searchQuery]);
 
   const summary = useMemo(() => {
-    if (!data)
-      return { total: 0, submitted: 0, not_submitted: 0 };
+    if (!data) return { total: 0, submitted: 0, not_submitted: 0 };
     return {
       total: data.length,
       submitted: data.filter((r) => r.is_submitted).length,
@@ -95,7 +88,7 @@ function DailyTab() {
     <div className="space-y-4">
       {/* Summary Cards */}
       {!loading && data && data.length > 0 && (
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="rounded-xl border border-(--border) bg-(--card) px-4 py-3">
             <p className="text-xs text-(--muted-foreground)">Total</p>
             <p className="text-2xl font-bold text-(--foreground)">
@@ -251,8 +244,7 @@ function DailyTab() {
                       {report.employee_name}
                     </p>
                     <p className="text-xs text-(--muted-foreground)">
-                      {report.employee_number} •{" "}
-                      {report.department_name || "—"}
+                      {report.employee_number} • {report.department_name || "—"}
                     </p>
                   </div>
                   {report.is_submitted ? (
@@ -498,124 +490,10 @@ function MonthlyTab() {
 }
 
 // ════════════════════════════════════════════
-// CATEGORY TAB
-// ════════════════════════════════════════════
-
-function CategoryTab() {
-  const today = new Date().toISOString().split("T")[0];
-  const { data, loading } = useMutabaahCategoryReport(today);
-
-  if (loading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2">
-        {[1, 2].map((i) => (
-          <div
-            key={i}
-            className="rounded-xl border border-(--border) bg-(--card) p-6"
-          >
-            <Skeleton className="h-6 w-32 mb-4" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <EmptyState
-        title="Tidak ada data perbandingan"
-        description="Belum ada data Mutaba'ah untuk hari ini"
-        icon={<BookOpen className="h-12 w-12" />}
-      />
-    );
-  }
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {data.map((cat) => (
-        <div
-          key={cat.category}
-          className={cn(
-            "rounded-xl border p-6",
-            cat.category === "trainer"
-              ? "border-blue-500/30 bg-blue-500/5"
-              : "border-(--border) bg-(--card)",
-          )}
-        >
-          <h3 className="text-lg font-bold text-(--foreground) mb-1">
-            {cat.category === "trainer" ? "Trainer" : "Non-Trainer"}
-          </h3>
-          <p className="text-sm text-(--muted-foreground) mb-4">
-            {cat.total_employees} pegawai
-          </p>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-(--muted-foreground)">
-                Hari ini
-              </span>
-              <span className="text-sm font-semibold text-(--foreground)">
-                <span className="text-green-600">
-                  {cat.total_submitted_today}
-                </span>
-                /{cat.total_employees} ✅
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-(--muted-foreground)">
-                Belum membaca
-              </span>
-              <span className="text-sm font-semibold text-yellow-600">
-                {cat.total_not_submitted_today}
-              </span>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm text-(--muted-foreground)">
-                  Rata-rata kepatuhan
-                </span>
-                <span
-                  className={cn(
-                    "text-sm font-bold",
-                    cat.average_compliance >= 90
-                      ? "text-green-600"
-                      : cat.average_compliance >= 70
-                        ? "text-yellow-600"
-                        : "text-red-600",
-                  )}
-                >
-                  {cat.average_compliance}%
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-(--muted) overflow-hidden">
-                <div
-                  className={cn(
-                    "h-full rounded-full",
-                    cat.average_compliance >= 90
-                      ? "bg-green-500"
-                      : cat.average_compliance >= 70
-                        ? "bg-yellow-500"
-                        : "bg-red-500",
-                  )}
-                  style={{ width: `${cat.average_compliance}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ════════════════════════════════════════════
 // MAIN PAGE
 // ════════════════════════════════════════════
 
-type TabKey = "daily" | "monthly" | "category";
+type TabKey = "daily" | "monthly";
 
 export function MutabaahPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("daily");
@@ -623,7 +501,6 @@ export function MutabaahPage() {
   const TABS: { key: TabKey; label: string }[] = [
     { key: "daily", label: "Harian" },
     { key: "monthly", label: "Bulanan" },
-    { key: "category", label: "Perbandingan" },
   ];
 
   return (
@@ -664,7 +541,6 @@ export function MutabaahPage() {
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {activeTab === "daily" && <DailyTab />}
         {activeTab === "monthly" && <MonthlyTab />}
-        {activeTab === "category" && <CategoryTab />}
       </div>
     </MainLayout>
   );

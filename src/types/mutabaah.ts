@@ -52,6 +52,8 @@ export interface MutabaahTodayStatus {
   is_submitted: boolean;
   submitted_at: string | null;
   target_pages: number;
+  mutabaah_log_id?: number | null; // ID for cancellation
+  attendance_log_id?: number | null; // ID for submission
 }
 
 // Report types (§14.6)

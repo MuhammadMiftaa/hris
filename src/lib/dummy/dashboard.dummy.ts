@@ -18,7 +18,7 @@ import type { MutabaahTodayStatus } from "@/types/mutabaah";
 // ══════════════════════════════════════════════════════════════════════════════
 
 const getDateString = (daysAgo: number): string => {
-  const date = new Date("2026-04-07"); // Current date sesuai context
+  const date = new Date("2026-04-07");
   date.setDate(date.getDate() - daysAgo);
   return date.toISOString().split("T")[0];
 };
@@ -69,7 +69,7 @@ const DUMMY_LEAVE_BALANCES: LeaveBalanceSummary[] = [
   {
     leave_type_id: 2,
     leave_type_name: "Sakit",
-    total_quota: null, // unlimited
+    total_quota: null,
     used: 2,
     remaining: null,
   },
@@ -104,8 +104,18 @@ const DUMMY_MUTABAAH_TODAY: MutabaahTodayStatus = {
   is_submitted: false,
   submitted_at: null,
   target_pages: 5,
+  mutabaah_log_id: null,
+  attendance_log_id: 1,
 };
 
+const DUMMY_MUTABAAH_TODAY_SUBMITTED: MutabaahTodayStatus = {
+  has_record: true,
+  is_submitted: true,
+  submitted_at: getTimestamp(getDateString(0), "07:55"),
+  target_pages: 5,
+  mutabaah_log_id: 1,
+  attendance_log_id: 1,
+};
 
 const DUMMY_EMPLOYEE_DASHBOARD: EmployeeDashboardData = {
   today: DUMMY_TODAY_STATUS,
@@ -243,30 +253,29 @@ const DUMMY_HRD_DASHBOARD: HRDDashboardData = {
 // EXPORTED FUNCTIONS
 // ══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Get dummy employee dashboard data
- * @param clockedIn - if true, returns data with clocked in status; if false, not clocked in
- */
 export function getDummyEmployeeDashboard(
   clockedIn: boolean = true,
 ): EmployeeDashboardData {
   return {
     ...DUMMY_EMPLOYEE_DASHBOARD,
     today: clockedIn ? DUMMY_TODAY_STATUS : DUMMY_TODAY_STATUS_NOT_CLOCKED_IN,
-    mutabaah_today: clockedIn ? DUMMY_MUTABAAH_TODAY : { has_record: false, is_submitted: false, submitted_at: null, target_pages: 5 },
+    mutabaah_today: clockedIn
+      ? DUMMY_MUTABAAH_TODAY
+      : {
+          has_record: false,
+          is_submitted: false,
+          submitted_at: null,
+          target_pages: 5,
+          mutabaah_log_id: null,
+          attendance_log_id: null,
+        },
   };
 }
 
-/**
- * Get dummy HRD dashboard data
- */
 export function getDummyHRDDashboard(): HRDDashboardData {
   return DUMMY_HRD_DASHBOARD;
 }
 
-/**
- * Get dummy today attendance status
- */
 export function getDummyTodayStatus(
   clockedIn: boolean = true,
 ): TodayAttendanceStatus {

@@ -18,6 +18,7 @@ import {
   CalendarOff,
   AlertTriangle,
   Timer,
+  BookOpen,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ import {
 } from "@/types/employee";
 import { DAY_OF_WEEK_OPTIONS } from "@/types/shift";
 import { CONTRACT_TYPE_LABELS, CONTRACT_TYPE_COLORS } from "@/types/contract";
+import { MUTABAAH_TARGET } from "@/types/mutabaah";
 import type { ShiftTemplate, EmployeeSchedule } from "@/types/shift";
 import type { EmploymentContract } from "@/types/contract";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -190,10 +192,7 @@ function TabAttendanceLeave({ employeeId }: { employeeId: number | null }) {
   const avgClockIn = avgClockInMinutes
     ? `${Math.floor(avgClockInMinutes / 60)
         .toString()
-        .padStart(
-          2,
-          "0",
-        )}:${(avgClockInMinutes % 60).toString().padStart(2, "0")}`
+        .padStart(2, "0")}:${(avgClockInMinutes % 60).toString().padStart(2, "0")}`
     : "-";
 
   const totalLateMinutes =
@@ -680,6 +679,12 @@ export function ProfilePage() {
     );
   }
 
+  // Trainer target info
+  const isTrainer = (profile as unknown as { is_trainer?: boolean })?.is_trainer ?? false;
+  const tilawahTarget = isTrainer
+    ? MUTABAAH_TARGET.TRAINER
+    : MUTABAAH_TARGET.NON_TRAINER;
+
   return (
     <MainLayout>
       <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
@@ -721,9 +726,23 @@ export function ProfilePage() {
             </div>
 
             <div>
-              <h1 className="text-xl font-bold text-(--foreground)">
-                {profile.full_name}
-              </h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl font-bold text-(--foreground)">
+                  {profile.full_name}
+                </h1>
+                {/* Trainer badge in header */}
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+                    isTrainer
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                      : "bg-gray-100 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400",
+                  )}
+                >
+                  <BookOpen size={10} />
+                  {isTrainer ? "Trainer" : "Non-Trainer"}
+                </span>
+              </div>
               <div className="flex flex-wrap items-center gap-2 mt-0.5">
                 <p className="text-sm text-(--muted-foreground)">
                   {profile.employee_number}
@@ -844,6 +863,7 @@ export function ProfilePage() {
                   />
                 </div>
               </div>
+
               <div className="rounded-xl border border-(--border) bg-(--card) p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Briefcase size={18} className="text-(--primary)" />
@@ -859,6 +879,67 @@ export function ProfilePage() {
                   <InfoItem label="Role" value={profile.role_name} />
                 </div>
               </div>
+
+              {/* Trainer Status Card */}
+              <div
+                className={cn(
+                  "rounded-xl border p-5 lg:col-span-2",
+                  isTrainer
+                    ? "border-blue-500/30 bg-blue-500/5"
+                    : "border-(--border) bg-(--card)",
+                )}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <BookOpen
+                      size={18}
+                      className={isTrainer ? "text-blue-500" : "text-(--muted-foreground)"}
+                    />
+                    <h3 className="font-semibold text-(--foreground)">
+                      Status Tilawah (Mutaba'ah)
+                    </h3>
+                  </div>
+                  <span
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-semibold",
+                      isTrainer
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400",
+                    )}
+                  >
+                    {isTrainer ? "Trainer Wafa" : "Non-Trainer"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="rounded-lg bg-(--muted)/40 p-4 text-center">
+                    <div
+                      className={cn(
+                        "text-3xl font-bold mb-1",
+                        isTrainer ? "text-blue-600" : "text-(--primary)",
+                      )}
+                    >
+                      {tilawahTarget}
+                    </div>
+                    <div className="text-xs text-(--muted-foreground)">
+                      halaman / hari
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-col justify-center">
+                    <p className="text-sm text-(--foreground) font-medium mb-1">
+                      {isTrainer
+                        ? "Anda adalah Trainer Wafa"
+                        : "Anda adalah pegawai non-trainer"}
+                    </p>
+                    <p className="text-xs text-(--muted-foreground)">
+                      {isTrainer
+                        ? `Sebagai trainer, Anda diwajibkan membaca ${MUTABAAH_TARGET.TRAINER} halaman Al-Quran setiap hari kerja. Target ini lebih tinggi dari pegawai reguler (${MUTABAAH_TARGET.NON_TRAINER} halaman).`
+                        : `Anda diwajibkan membaca ${MUTABAAH_TARGET.NON_TRAINER} halaman Al-Quran setiap hari kerja sebagai bagian dari program Mutaba'ah perusahaan.`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-xl border border-(--border) bg-(--card) p-5 lg:col-span-2">
                 <div className="flex items-center gap-2 mb-4">
                   <IdCard size={18} className="text-(--primary)" />

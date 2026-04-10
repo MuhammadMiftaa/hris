@@ -29,6 +29,7 @@ import {
   useHRDDashboard,
   useClockWidget,
 } from "@/hooks/useDashboard";
+import { useMutabaahActions } from "@/hooks/useMutabaah";
 import type {
   LeaveBalanceSummary,
   PendingRequest,
@@ -245,6 +246,249 @@ function ExpiringContractCard({ contract }: { contract: ExpiringContract }) {
   );
 }
 
+// ════════════════════════════════════════════
+// COMBINED ATTENDANCE + MUTABAAH PANEL
+// ════════════════════════════════════════════
+
+interface AttendanceMutabaahPanelProps {
+  clockWidget: ReturnType<typeof useClockWidget>;
+  empDashData: ReturnType<typeof useEmployeeDashboard>["data"];
+  empDashLoading: boolean;
+  isIntern: boolean;
+  onMutabaahSubmit: () => void;
+  onMutabaahCancel: () => void;
+  mutabaahLoading: boolean;
+}
+
+function AttendanceMutabaahPanel({
+  clockWidget,
+  empDashData,
+  empDashLoading,
+  isIntern,
+  onMutabaahSubmit,
+  onMutabaahCancel,
+  mutabaahLoading,
+}: AttendanceMutabaahPanelProps) {
+  const showMutabaah =
+    !isIntern && !empDashLoading && empDashData?.mutabaah_today?.has_record;
+
+  return (
+    <div
+      className={cn(
+        "grid gap-4",
+        showMutabaah
+          ? "lg:grid-cols-2"
+          : "lg:grid-cols-1 max-w-md mx-auto w-full",
+      )}
+    >
+      {/* Clock Widget */}
+      <div>
+        {clockWidget.loading ? (
+          <ClockWidgetSkeleton />
+        ) : (
+          <ClockWidget
+            status={clockWidget.status}
+            isMobile={clockWidget.isMobile}
+            onClockIn={() => clockWidget.clockIn()}
+            onClockOut={() => clockWidget.clockOut()}
+            disabled={false}
+            loading={clockWidget.loading}
+          />
+        )}
+      </div>
+
+      {/* Mutaba'ah Widget — only if not intern and has record */}
+      {showMutabaah && (
+        <div className="flex flex-col justify-center">
+          <MutabaahCard
+            status={empDashData!.mutabaah_today}
+            onSubmit={onMutabaahSubmit}
+            onCancel={onMutabaahCancel}
+            loading={mutabaahLoading}
+          />
+        </div>
+      )}
+
+      {/* Skeleton for mutabaah loading */}
+      {!isIntern && empDashLoading && (
+        <div className="flex flex-col justify-center">
+          <MutabaahWidgetSkeleton />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// MUTABAAH CARD (expanded, matches clock widget height)
+// ════════════════════════════════════════════
+
+function MutabaahCard({
+  status,
+  onSubmit,
+  onCancel,
+  loading,
+}: {
+  status: NonNullable<
+    ReturnType<typeof useEmployeeDashboard>["data"]
+  >["mutabaah_today"];
+  onSubmit: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  const canCancel = status.is_submitted && status.mutabaah_log_id != null;
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl border shadow-xl h-full flex flex-col transition-all duration-300",
+        status.is_submitted ? "border-emerald-500/30" : "border-(--border)",
+      )}
+    >
+      {/* Gradient header */}
+      <div
+        className={cn(
+          "relative px-5 pt-5 pb-8",
+          status.is_submitted
+            ? "bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600"
+            : "bg-gradient-to-br from-wafa-700 via-wafa-500 to-wafa-400",
+        )}
+      >
+        {/* Decorative circles */}
+        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute -right-2 top-8 h-16 w-16 rounded-full bg-white/10" />
+
+        {/* Header badge */}
+        <div className="mb-3 flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            <BookOpen size={11} />
+            Mutaba'ah
+          </span>
+          {status.is_submitted && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+              ✓ Selesai
+            </span>
+          )}
+        </div>
+
+        {/* Main display */}
+        <div className="text-center">
+          <div className="text-5xl font-bold tracking-tight text-white drop-shadow-lg md:text-6xl">
+            {status.target_pages}
+          </div>
+          <div className="mt-1.5 text-sm font-medium text-white/80">
+            halaman Al-Quran per hari
+          </div>
+        </div>
+      </div>
+
+      {/* Curved connector */}
+      <div
+        className={cn(
+          "h-6",
+          status.is_submitted
+            ? "bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600"
+            : "bg-gradient-to-br from-wafa-700 via-wafa-500 to-wafa-400",
+        )}
+        style={{ clipPath: "ellipse(100% 100% at 50% 0%)" }}
+      />
+
+      {/* Bottom section */}
+      <div className="flex flex-1 flex-col bg-(--card) px-5 pb-5 mt-4">
+        {/* Status indicator */}
+        <div className="mb-4 flex justify-center">
+          <div
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium",
+              status.is_submitted
+                ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
+                : "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20",
+            )}
+          >
+            <span
+              className={cn(
+                "h-2 w-2 rounded-full",
+                status.is_submitted
+                  ? "bg-emerald-500"
+                  : "animate-pulse bg-amber-500",
+              )}
+            />
+            {status.is_submitted
+              ? `Dibaca pukul ${
+                  status.submitted_at
+                    ? new Date(status.submitted_at).toLocaleTimeString(
+                        "id-ID",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )
+                    : "--:--"
+                }`
+              : "Belum membaca hari ini"}
+          </div>
+        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Action button */}
+        <div className="flex gap-3">
+          {!status.is_submitted ? (
+            <button
+              onClick={onSubmit}
+              disabled={loading}
+              className={cn(
+                "group relative flex flex-1 items-center justify-center gap-2.5 overflow-hidden rounded-xl px-4 py-3.5 font-semibold text-white transition-all",
+                "bg-gradient-to-r from-wafa-700 to-wafa-500 shadow-lg",
+                "hover:shadow-xl hover:-translate-y-0.5",
+                "disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none",
+              )}
+            >
+              {loading ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              ) : (
+                <>✓ Sudah Baca {status.target_pages} Halaman</>
+              )}
+            </button>
+          ) : (
+            <div className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-(--muted)/50 px-4 py-3.5 text-(--muted-foreground)">
+              <span className="text-emerald-500">✓</span>
+              <span className="font-medium">Tilawah Selesai</span>
+            </div>
+          )}
+        </div>
+
+        {/* Cancel link */}
+        {canCancel && (
+          <div className="mt-2 text-center">
+            <button
+              onClick={onCancel}
+              disabled={loading}
+              className="text-xs text-(--muted-foreground) hover:text-red-500 transition-colors disabled:opacity-50"
+            >
+              Batalkan pencatatan
+            </button>
+          </div>
+        )}
+
+        {/* Info when not submitted */}
+        {!status.is_submitted && (
+          <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/8 px-3 py-2">
+            <p className="text-center text-xs text-amber-600">
+              📖 Jangan lupa catat tilawah setelah membaca
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// EMPLOYEE DASHBOARD VIEW
+// ════════════════════════════════════════════
+
 function EmployeeDashboardView() {
   const { data, loading } = useEmployeeDashboard();
   const navigate = useNavigate();
@@ -350,6 +594,10 @@ function EmployeeDashboardView() {
     </div>
   );
 }
+
+// ════════════════════════════════════════════
+// HRD DASHBOARD VIEW
+// ════════════════════════════════════════════
 
 function HRDDashboardView() {
   const { data, loading } = useHRDDashboard();
@@ -461,7 +709,7 @@ function HRDDashboardView() {
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Tilawah Tim Hari Ini
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <StatCard
             icon={BookOpen}
             label="Sudah Tilawah"
@@ -591,11 +839,15 @@ function HRDDashboardView() {
   );
 }
 
+// ════════════════════════════════════════════
+// MAIN PAGE
+// ════════════════════════════════════════════
+
 export function DashboardPage() {
   const { cachedProfile } = useAuth();
   const { data: profile } = useEmployeeProfile();
   const clockWidget = useClockWidget();
-  const { data: empDashData } = useEmployeeDashboard();
+  const { data: empDashData, loading: empDashLoading } = useEmployeeDashboard();
 
   const roleName = profile?.role_name || "";
   const isHRD =
@@ -603,9 +855,38 @@ export function DashboardPage() {
     roleName === "Super Admin" ||
     roleName === "Supervisor";
 
+  // Intern check — do not show mutabaah card for interns
+  // Check by contract type stored in profile or role name
+  const contractType = (profile as unknown as { contract_type?: string })
+    ?.contract_type;
+  const isIntern =
+    contractType === "intern" ||
+    roleName?.toLowerCase().includes("intern") ||
+    profile?.job_position_title?.toLowerCase().includes("intern") ||
+    false;
+
   const [view, setView] = useState<"employee" | "hrd">(
     isHRD ? "hrd" : "employee",
   );
+
+  // Mutabaah actions
+  const {
+    actionLoading: mutabaahLoading,
+    submitToday,
+    cancelToday,
+  } = useMutabaahActions();
+
+  const handleMutabaahSubmit = async () => {
+    const attendanceLogId = empDashData?.mutabaah_today?.attendance_log_id;
+    if (!attendanceLogId) return;
+    await submitToday(attendanceLogId);
+  };
+
+  const handleMutabaahCancel = async () => {
+    const logId = empDashData?.mutabaah_today?.mutabaah_log_id;
+    if (!logId) return;
+    await cancelToday(logId);
+  };
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -627,36 +908,6 @@ export function DashboardPage() {
   return (
     <MainLayout>
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
-        {/* Clock widget FIRST on mobile, moves after header on desktop */}
-        <div className="md:hidden">
-          {clockWidget.loading ? (
-            <ClockWidgetSkeleton />
-          ) : (
-            <ClockWidget
-              status={clockWidget.status}
-              isMobile={clockWidget.isMobile}
-              onClockIn={() => clockWidget.clockIn()}
-              onClockOut={() => clockWidget.clockOut()}
-              disabled={false}
-              loading={clockWidget.loading}
-            />
-          )}
-        </div>
-
-        {/* Mutaba'ah Widget — mobile only */}
-        <div className="md:hidden">
-          {!empDashData ? (
-            <MutabaahWidgetSkeleton />
-          ) : empDashData.mutabaah_today.has_record ? (
-            <MutabaahWidget
-              status={empDashData.mutabaah_today}
-              onSubmit={() => {}}
-              onCancel={() => {}}
-              disabled={true}
-            />
-          ) : null}
-        </div>
-
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -671,35 +922,16 @@ export function DashboardPage() {
           {isHRD && <ViewToggle view={view} setView={setView} />}
         </div>
 
-        {/* Clock Widget — desktop only (hidden on mobile, shown above) */}
-        <div className="hidden md:block max-w-md mx-auto">
-          {clockWidget.loading ? (
-            <ClockWidgetSkeleton />
-          ) : (
-            <ClockWidget
-              status={clockWidget.status}
-              isMobile={clockWidget.isMobile}
-              onClockIn={() => clockWidget.clockIn()}
-              onClockOut={() => clockWidget.clockOut()}
-              disabled={false}
-              loading={clockWidget.loading}
-            />
-          )}
-        </div>
-
-        {/* Mutaba'ah Widget — desktop only */}
-        <div className="hidden md:block max-w-md mx-auto">
-          {!empDashData ? (
-            <MutabaahWidgetSkeleton />
-          ) : empDashData.mutabaah_today.has_record ? (
-            <MutabaahWidget
-              status={empDashData.mutabaah_today}
-              onSubmit={() => {}}
-              onCancel={() => {}}
-              disabled={true}
-            />
-          ) : null}
-        </div>
+        {/* Clock + Mutabaah side-by-side panel */}
+        <AttendanceMutabaahPanel
+          clockWidget={clockWidget}
+          empDashData={empDashData}
+          empDashLoading={empDashLoading}
+          isIntern={isIntern}
+          onMutabaahSubmit={handleMutabaahSubmit}
+          onMutabaahCancel={handleMutabaahCancel}
+          mutabaahLoading={mutabaahLoading}
+        />
 
         {/* Dashboard Content */}
         {view === "employee" ? <EmployeeDashboardView /> : <HRDDashboardView />}
