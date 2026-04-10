@@ -2,6 +2,8 @@
 // Dashboard Types (§13)
 // ══════════════════════════════════════════════════════════════════════════════
 
+import type { MutabaahTodayStatus } from "./mutabaah";
+
 export interface AttendanceSummary {
   total_present: number;
   total_late: number;
@@ -42,6 +44,7 @@ export interface LeaveBalanceSummary {
 
 export interface EmployeeDashboardData {
   today: TodayAttendanceStatus;
+  mutabaah_today: MutabaahTodayStatus;
   monthly_summary: AttendanceSummary;
   leave_balances: LeaveBalanceSummary[];
   pending_requests: PendingRequest[];
@@ -84,6 +87,13 @@ export interface NotClockedInEmployee {
   shift_start: string | null; // expected clock in time
 }
 
+// Ringkasan Mutaba'ah tim (§13.2 — v3)
+export interface TeamMutabaahSummary {
+  total_employees: number;
+  submitted_count: number;
+  not_submitted_count: number;
+}
+
 export interface HRDDashboardData {
   approval_queue: ApprovalQueueItem[];
   approval_counts: {
@@ -95,6 +105,7 @@ export interface HRDDashboardData {
     total: number;
   };
   team_attendance: TeamAttendanceSummary;
+  team_mutabaah: TeamMutabaahSummary;
   not_clocked_in: NotClockedInEmployee[];
   expiring_contracts: ExpiringContract[];
 }

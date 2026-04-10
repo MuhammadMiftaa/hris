@@ -19,6 +19,7 @@ import {
   CalendarOff,
   Send,
   FileText,
+  BookOpen,
   Sun,
   Moon,
 } from "lucide-react";
@@ -61,6 +62,7 @@ const KEHADIRAN_NAV: NavItem[] = [
 const PENGAJUAN_NAV: NavItem[] = [
   { icon: Send, label: "Pengajuan", path: "/requests" },
   { icon: FileText, label: "Laporan Harian", path: "/daily-reports" },
+  { icon: BookOpen, label: "Mutaba'ah", path: "/mutabaah" },
 ];
 
 export function AppSidebar() {

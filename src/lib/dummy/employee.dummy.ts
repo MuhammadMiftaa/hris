@@ -27,6 +27,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 72,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 1,
     department_id: 1, // HRGA
     role_id: 1,
@@ -57,6 +58,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 55,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 1,
     department_id: 1, // HRGA
     role_id: 2,
@@ -87,6 +89,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 68,
     photo_url: null,
     is_active: true,
+    is_trainer: true,
     branch_id: 2,
     department_id: 2, // Akademik
     role_id: 5,
@@ -117,6 +120,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 50,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 1,
     department_id: 1, // HRGA
     role_id: 5,
@@ -147,6 +151,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 60,
     photo_url: null,
     is_active: true,
+    is_trainer: true,
     branch_id: 3,
     department_id: 2, // Akademik
     role_id: 5,
@@ -177,6 +182,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 52,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 2,
     department_id: 3, // PDK
     role_id: 4,
@@ -207,6 +213,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 65,
     photo_url: null,
     is_active: true,
+    is_trainer: true,
     branch_id: 1,
     department_id: 3, // PDK
     role_id: 5,
@@ -237,6 +244,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 48,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 3,
     department_id: 1, // HRGA
     role_id: 5,
@@ -267,6 +275,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 75,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 1,
     department_id: 1, // HRGA
     role_id: 3,
@@ -297,6 +306,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 49,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 1,
     department_id: 2, // Akademik
     role_id: 5,
@@ -327,6 +337,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 70,
     photo_url: null,
     is_active: false,
+    is_trainer: false,
     branch_id: 2,
     department_id: 2, // Akademik
     role_id: 5,
@@ -357,6 +368,7 @@ export const DUMMY_EMPLOYEES: Employee[] = [
     weight: 51,
     photo_url: null,
     is_active: true,
+    is_trainer: false,
     branch_id: 2,
     department_id: 5, // ITP
     role_id: 5,

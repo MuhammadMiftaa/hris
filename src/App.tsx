@@ -17,6 +17,7 @@ import { LeavePage } from "./pages/LeavePage";
 import { LeaveTypePage } from "./pages/LeaveTypePage";
 import { RequestPage } from "./pages/RequestPage";
 import { DailyReportPage } from "./pages/DailyReportPage";
+import { MutabaahPage } from "./pages/MutabaahPage";
 import { ChangePasswordPage } from "./pages/ChangePassword";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -165,6 +166,14 @@ function App() {
         element={
           <PrivateRoute>
             <DailyReportPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mutabaah"
+        element={
+          <PrivateRoute>
+            <MutabaahPage />
           </PrivateRoute>
         }
       />

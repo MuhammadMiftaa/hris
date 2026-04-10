@@ -24,6 +24,7 @@ export interface Employee {
   weight: number | null;
   photo_url: string | null;
   is_active: boolean;
+  is_trainer: boolean;
   branch_id: number | null;
   department_id: number | null;
   role_id: number | null;
@@ -67,6 +68,7 @@ export interface CreateEmployeePayload {
   weight?: number;
   photo_url?: string;
   is_active?: boolean;
+  is_trainer?: boolean;
   branch_id?: number;
   department_id?: number;
   role_id?: number;
@@ -90,6 +92,7 @@ export interface UpdateEmployeePayload {
   weight?: number;
   photo_url?: string;
   is_active?: boolean;
+  is_trainer?: boolean;
   branch_id?: number;
   department_id?: number;
   role_id?: number;

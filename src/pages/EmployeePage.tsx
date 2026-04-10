@@ -656,6 +656,9 @@ export function EmployeePage() {
                       Cabang
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
+                      Trainer
+                    </th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
                       Status
                     </th>
                     <th className="px-5 py-3" />
@@ -712,6 +715,18 @@ export function EmployeePage() {
                       </td>
                       <td className="px-5 py-4 text-sm text-(--muted-foreground)">
                         {employee.branch_name || "-"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
+                            employee.is_trainer
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              : "bg-gray-100 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400",
+                          )}
+                        >
+                          {employee.is_trainer ? "Trainer" : "Non-Trainer"}
+                        </span>
                       </td>
                       <td className="px-5 py-4">
                         <StatusBadge isActive={employee.is_active} />

@@ -150,3 +150,13 @@ export {
   getDummyAuditLogs,
   getDummyAuditLogDisplay,
 } from "./audit-log.dummy";
+
+// Mutaba'ah
+export {
+  DUMMY_MUTABAAH_LOGS,
+  getDummyMutabaahLogs,
+  getDummyMutabaahTodayStatus,
+  getDummyMutabaahDailyReport,
+  getDummyMutabaahMonthlySummary,
+  getDummyMutabaahCategorySummary,
+} from "./mutabaah.dummy";

@@ -7,9 +7,11 @@ import type {
   PendingRequest,
   ApprovalQueueItem,
   TeamAttendanceSummary,
+  TeamMutabaahSummary,
   NotClockedInEmployee,
   ExpiringContract,
 } from "@/types/dashboard";
+import type { MutabaahTodayStatus } from "@/types/mutabaah";
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS
@@ -97,8 +99,17 @@ const DUMMY_PENDING_REQUESTS: PendingRequest[] = [
   },
 ];
 
+const DUMMY_MUTABAAH_TODAY: MutabaahTodayStatus = {
+  has_record: true,
+  is_submitted: false,
+  submitted_at: null,
+  target_pages: 5,
+};
+
+
 const DUMMY_EMPLOYEE_DASHBOARD: EmployeeDashboardData = {
   today: DUMMY_TODAY_STATUS,
+  mutabaah_today: DUMMY_MUTABAAH_TODAY,
   monthly_summary: DUMMY_MONTHLY_SUMMARY,
   leave_balances: DUMMY_LEAVE_BALANCES,
   pending_requests: DUMMY_PENDING_REQUESTS,
@@ -213,10 +224,17 @@ const DUMMY_EXPIRING_CONTRACTS: ExpiringContract[] = [
   },
 ];
 
+const DUMMY_TEAM_MUTABAAH: TeamMutabaahSummary = {
+  total_employees: 45,
+  submitted_count: 38,
+  not_submitted_count: 7,
+};
+
 const DUMMY_HRD_DASHBOARD: HRDDashboardData = {
   approval_queue: DUMMY_APPROVAL_QUEUE,
   approval_counts: DUMMY_APPROVAL_COUNTS,
   team_attendance: DUMMY_TEAM_ATTENDANCE,
+  team_mutabaah: DUMMY_TEAM_MUTABAAH,
   not_clocked_in: DUMMY_NOT_CLOCKED_IN,
   expiring_contracts: DUMMY_EXPIRING_CONTRACTS,
 };
@@ -235,6 +253,7 @@ export function getDummyEmployeeDashboard(
   return {
     ...DUMMY_EMPLOYEE_DASHBOARD,
     today: clockedIn ? DUMMY_TODAY_STATUS : DUMMY_TODAY_STATUS_NOT_CLOCKED_IN,
+    mutabaah_today: clockedIn ? DUMMY_MUTABAAH_TODAY : { has_record: false, is_submitted: false, submitted_at: null, target_pages: 5 },
   };
 }
 

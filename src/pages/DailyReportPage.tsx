@@ -22,7 +22,6 @@ import {
 import { useEmployeeList } from "@/hooks/useEmployee";
 import type {
   DailyReport,
-  ReportStatus,
   CreateDailyReportPayload,
 } from "@/types/daily-report";
 
@@ -264,7 +263,7 @@ function ReportDetailModal({
 
           <div className="flex items-center justify-between text-xs text-(--muted-foreground)">
             <span>Dikirim: {formatDateTime(report.submitted_at)}</span>
-            {report.status === "submitted" ? (
+            {report.is_submitted ? (
               <span className="inline-flex items-center gap-1 text-green-600">
                 <CheckCircle2 size={12} />
                 Terkirim
@@ -371,7 +370,7 @@ function ExpandableRow({
           {report.employee_name || "—"}
         </td>
         <td className="px-5 py-3">
-          {report.status === "submitted" ? (
+          {report.is_submitted ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 text-xs font-medium">
               <CheckCircle2 size={12} />
               Terkirim
@@ -388,7 +387,7 @@ function ExpandableRow({
         </td>
         <td className="px-5 py-3">
           <div className="flex items-center justify-end gap-2">
-            {report.status === "missing" && (
+            {!report.is_submitted && (
               <Button
                 variant="primary"
                 size="sm"
@@ -400,7 +399,7 @@ function ExpandableRow({
                 Isi Laporan
               </Button>
             )}
-            {report.status === "submitted" && (
+            {report.is_submitted && (
               <>
                 <button
                   onClick={(e) => {
@@ -423,11 +422,11 @@ function ExpandableRow({
           </div>
         </td>
       </tr>
-      {expanded && report.status === "submitted" && (
+      {expanded && report.is_submitted && (
         <tr className={index % 2 === 0 ? "bg-(--card)" : "bg-(--muted)/20"}>
           <td colSpan={5} className="px-5 pb-4 border-b border-(--border)">
             <div className="rounded-lg bg-(--muted)/30 border border-(--border) p-3 text-sm text-(--foreground) whitespace-pre-wrap leading-relaxed mt-1">
-              {report.activities || "—"}
+              {report.activities || "Belum diisi"}
             </div>
           </td>
         </tr>
@@ -453,7 +452,7 @@ export function DailyReportPage() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as ReportStatus | undefined,
+      is_submitted: filterStatus === "submitted" ? true : filterStatus === "not_submitted" ? false : undefined,
       start_date: filterStartDate || undefined,
       end_date: filterEndDate || undefined,
     }),
@@ -485,8 +484,8 @@ export function DailyReportPage() {
   const summary = useMemo(() => {
     if (!filtered) return { submitted: 0, missing: 0 };
     return {
-      submitted: filtered.filter((r) => r.status === "submitted").length,
-      missing: filtered.filter((r) => r.status === "missing").length,
+      submitted: filtered.filter((r) => r.is_submitted).length,
+      missing: filtered.filter((r) => !r.is_submitted).length,
     };
   }, [filtered]);
 
@@ -587,8 +586,8 @@ export function DailyReportPage() {
             onChange={setFilterStatus}
             options={[
               { value: "", label: "Semua Status" },
-              { value: "submitted", label: "Terkirim" },
-              { value: "missing", label: "Belum Diisi" },
+              { value: "submitted", label: "Sudah Diisi" },
+              { value: "not_submitted", label: "Belum Diisi" },
             ]}
             placeholder="Filter status..."
           />
@@ -696,7 +695,7 @@ export function DailyReportPage() {
                         )}
                       </p>
                     </div>
-                    {report.status === "submitted" ? (
+                    {report.is_submitted ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 text-xs font-medium">
                         <CheckCircle2 size={12} />
                         Terkirim
@@ -709,7 +708,7 @@ export function DailyReportPage() {
                     )}
                   </div>
 
-                  {report.status === "submitted" ? (
+                  {report.is_submitted ? (
                     <>
                       <p className="text-xs text-(--foreground) line-clamp-2 mb-2">
                         {report.activities}
@@ -754,7 +753,7 @@ export function DailyReportPage() {
       <Modal
         open={!!editReport}
         title={
-          editReport?.status === "missing"
+          editReport?.is_submitted === false
             ? "Isi Laporan Harian"
             : "Edit Laporan Harian"
         }
@@ -764,11 +763,11 @@ export function DailyReportPage() {
           <ReportForm
             onClose={() => setEditReport(null)}
             onSubmit={
-              editReport.status === "missing" ? handleCreate : handleUpdate
+              editReport.is_submitted === false ? handleCreate : handleUpdate
             }
             initialDate={editReport.report_date}
             editReport={
-              editReport.status === "missing" ? undefined : editReport
+              editReport.is_submitted === false ? undefined : editReport
             }
             isLoading={mutLoading}
           />

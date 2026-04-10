@@ -398,6 +398,7 @@ function EmployeeForm({
     height: initialData.height?.toString() || "",
     weight: initialData.weight?.toString() || "",
     is_active: initialData.is_active ?? true,
+    is_trainer: initialData.is_trainer ?? false,
     branch_id: initialData.branch_id?.toString() || "",
     department_id: initialData.department_id?.toString() || "",
     job_positions_id: initialData.job_positions_id?.toString() || "",
@@ -442,6 +443,7 @@ function EmployeeForm({
       height: formData.height ? Number.parseInt(formData.height) : undefined,
       weight: formData.weight ? Number.parseInt(formData.weight) : undefined,
       is_active: formData.is_active,
+      is_trainer: formData.is_trainer,
       branch_id: formData.branch_id
         ? Number.parseInt(formData.branch_id)
         : undefined,
@@ -673,6 +675,18 @@ function EmployeeForm({
           />
           <label htmlFor="is_active" className="text-sm text-(--foreground)">
             Pegawai aktif
+          </label>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <input
+            type="checkbox"
+            id="is_trainer"
+            checked={formData.is_trainer}
+            onChange={(e) => handleChange("is_trainer", e.target.checked)}
+            className="h-4 w-4 rounded border-(--border)"
+          />
+          <label htmlFor="is_trainer" className="text-sm text-(--foreground)">
+            Trainer Wafa
           </label>
         </div>
       </div>

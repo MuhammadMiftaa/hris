@@ -84,7 +84,7 @@ export function useDailyReportList(params?: DailyReportListParams) {
     params?.employee_id,
     params?.start_date,
     params?.end_date,
-    params?.status,
+    params?.is_submitted,
   ]);
 
   return { ...state, refetch };

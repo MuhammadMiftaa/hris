@@ -10,6 +10,7 @@ import {
   Send,
   Plane,
   Edit2,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -17,6 +18,10 @@ import { StatCard, StatCardSkeleton } from "@/components/ui/StatCard";
 import { ClockWidget, ClockWidgetSkeleton } from "@/components/ui/ClockWidget";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  MutabaahWidget,
+  MutabaahWidgetSkeleton,
+} from "@/components/ui/MutabaahWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEmployeeProfile } from "@/hooks/useEmployeeProfile";
 import {
@@ -451,6 +456,30 @@ function HRDDashboardView() {
         </div>
       </div>
 
+      {/* Ringkasan Mutaba'ah Tim */}
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
+          Tilawah Tim Hari Ini
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+          <StatCard
+            icon={BookOpen}
+            label="Sudah Tilawah"
+            value={data.team_mutabaah.submitted_count}
+            color="#10b981"
+            subtitle={`dari ${data.team_mutabaah.total_employees} pegawai`}
+            onClick={() => navigate("/mutabaah")}
+          />
+          <StatCard
+            icon={BookOpen}
+            label="Belum Tilawah"
+            value={data.team_mutabaah.not_submitted_count}
+            color="#f59e0b"
+            onClick={() => navigate("/mutabaah")}
+          />
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-(--border) bg-(--card) overflow-hidden">
           <div className="border-b border-(--border) px-5 py-3">
@@ -566,6 +595,7 @@ export function DashboardPage() {
   const { cachedProfile } = useAuth();
   const { data: profile } = useEmployeeProfile();
   const clockWidget = useClockWidget();
+  const { data: empDashData } = useEmployeeDashboard();
 
   const roleName = profile?.role_name || "";
   const isHRD =
@@ -613,6 +643,20 @@ export function DashboardPage() {
           )}
         </div>
 
+        {/* Mutaba'ah Widget — mobile only */}
+        <div className="md:hidden">
+          {!empDashData ? (
+            <MutabaahWidgetSkeleton />
+          ) : empDashData.mutabaah_today.has_record ? (
+            <MutabaahWidget
+              status={empDashData.mutabaah_today}
+              onSubmit={() => {}}
+              onCancel={() => {}}
+              disabled={true}
+            />
+          ) : null}
+        </div>
+
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -641,6 +685,20 @@ export function DashboardPage() {
               loading={clockWidget.loading}
             />
           )}
+        </div>
+
+        {/* Mutaba'ah Widget — desktop only */}
+        <div className="hidden md:block max-w-md mx-auto">
+          {!empDashData ? (
+            <MutabaahWidgetSkeleton />
+          ) : empDashData.mutabaah_today.has_record ? (
+            <MutabaahWidget
+              status={empDashData.mutabaah_today}
+              onSubmit={() => {}}
+              onCancel={() => {}}
+              disabled={true}
+            />
+          ) : null}
         </div>
 
         {/* Dashboard Content */}

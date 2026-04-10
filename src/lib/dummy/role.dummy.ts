@@ -333,6 +333,17 @@ export const DUMMY_PERMISSIONS: Permission[] = [
     updated_at: "2024-01-01T00:00:00Z",
     deleted_at: null,
   },
+
+  // Mutaba'ah
+  {
+    id: 30,
+    module: "mutabaah",
+    action: "view",
+    description: "Melihat laporan Mutaba'ah tilawah",
+    created_at: "2024-01-01T00:00:00Z",
+    updated_at: "2024-01-01T00:00:00Z",
+    deleted_at: null,
+  },
 ];
 
 // ════════════════════════════════════════════
@@ -402,6 +413,12 @@ export const DUMMY_ROLE_PERMISSIONS: RolePermission[] = [
     permission_id: 29,
     created_at: "2024-01-01T00:00:00Z",
   }, // report create
+  {
+    id: 113,
+    role_id: 2,
+    permission_id: 30,
+    created_at: "2024-01-01T00:00:00Z",
+  }, // mutabaah view
 
   // Branch Admin
   { id: 200, role_id: 3, permission_id: 1, created_at: "2024-01-01T00:00:00Z" }, // dashboard view
@@ -448,6 +465,12 @@ export const DUMMY_ROLE_PERMISSIONS: RolePermission[] = [
     permission_id: 27,
     created_at: "2024-01-01T00:00:00Z",
   }, // leave approve
+  {
+    id: 306,
+    role_id: 4,
+    permission_id: 30,
+    created_at: "2024-01-01T00:00:00Z",
+  }, // mutabaah view
 
   // Staff
   { id: 400, role_id: 5, permission_id: 1, created_at: "2024-01-01T00:00:00Z" }, // dashboard view
