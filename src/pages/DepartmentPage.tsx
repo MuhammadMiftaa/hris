@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
@@ -527,28 +528,24 @@ function DepartmentContent() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Departemen & Jabatan
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Kelola unit organisasi, jabatan, dan daftar pegawai secara terpadu
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <PermissionGate permission={PERMISSIONS.JOB_POSITION_CREATE}>
-          <Button variant="outline" size="sm" onClick={() => setShowPosForm({})}>
-            <Plus size={16} /> <span className="hidden sm:inline ml-1">Jabatan</span>
-          </Button>
-          </PermissionGate>
-          <PermissionGate permission={PERMISSIONS.DEPARTMENT_CREATE}>
-          <Button variant="primary" size="sm" onClick={() => setShowDeptForm(true)}>
-            <Plus size={16} /> <span className="hidden sm:inline ml-1">Departemen</span>
-          </Button>
-          </PermissionGate>
-        </div>
-      </header>
+      <PageHeader
+        title="Departemen & Jabatan"
+        description="Kelola unit organisasi, jabatan, dan daftar pegawai secara terpadu"
+        actions={
+          <div className="flex gap-2">
+            <PermissionGate permission={PERMISSIONS.JOB_POSITION_CREATE}>
+            <Button variant="outline" size="sm" onClick={() => setShowPosForm({})}>
+              <Plus size={16} /> <span className="hidden sm:inline ml-1">Jabatan</span>
+            </Button>
+            </PermissionGate>
+            <PermissionGate permission={PERMISSIONS.DEPARTMENT_CREATE}>
+            <Button variant="primary" size="sm" onClick={() => setShowDeptForm(true)}>
+              <Plus size={16} /> <span className="hidden sm:inline ml-1">Departemen</span>
+            </Button>
+            </PermissionGate>
+          </div>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5 space-y-4">
       {(!departments || departments.length === 0) && (
@@ -564,7 +561,7 @@ function DepartmentContent() {
           <div key={dept.id} className="rounded-xl border border-(--border) bg-(--card) overflow-hidden transition-all">
             <div className="flex items-center justify-between p-4 bg-(--muted)/20 hover:bg-(--muted)/40 transition cursor-pointer" onClick={() => toggleDept(dept.id)}>
               <div className="flex items-center gap-3">
-                {isDeptExpanded ? <ChevronDown size={18} className="text-(--muted-foreground)" /> : <ChevronRight size={18} className="text-(--muted-foreground)" />}
+                {isDeptExpanded ? <ChevronDown size={18} className="text-(--muted-foreground) shrink-0" /> : <ChevronRight size={18} className="text-(--muted-foreground) shrink-0" />}
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-(--foreground)">{dept.name}</h3>
@@ -604,7 +601,7 @@ function DepartmentContent() {
                       <div key={pos.id} className="ml-7 rounded-lg border border-(--border) overflow-hidden">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-(--muted)/10 hover:bg-(--muted)/30 cursor-pointer" onClick={() => togglePos(pos.id)}>
                            <div className="flex items-center gap-2">
-                             {isPosExpanded ? <ChevronDown size={16} className="text-(--muted-foreground)" /> : <ChevronRight size={16} className="text-(--muted-foreground)" />}
+                             {isPosExpanded ? <ChevronDown size={16} className="text-(--muted-foreground) shrink-0" /> : <ChevronRight size={16} className="text-(--muted-foreground) shrink-0" />}
                              <Briefcase size={16} className="text-(--primary)" />
                              <span className="font-medium text-sm text-(--foreground)">{pos.title}</span>
                              <span className="text-xs text-(--muted-foreground) ml-2">({posEmployees.length} Pegawai)</span>

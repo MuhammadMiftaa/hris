@@ -1,151 +1,76 @@
-export const PERM_HomeEmployeeRead = "home-employee_read";
-export const PERM_HomeAdminRead = "home-admin_read";
-export const PERM_HomeClockIn = "home-clock_in";
-export const PERM_HomeClockOut = "home-clock_out";
-export const PERM_EmployeeRead = "employee-read";
-export const PERM_EmployeeCreate = "employee-create";
-export const PERM_EmployeeUpdate = "employee-update";
-export const PERM_EmployeeDelete = "employee-delete";
-export const PERM_EmployeeResetPassword = "employee-reset_password";
-export const PERM_BranchRead = "branch-read";
-export const PERM_BranchCreate = "branch-create";
-export const PERM_BranchUpdate = "branch-update";
-export const PERM_BranchDelete = "branch-delete";
-export const PERM_DepartmentRead = "department-read";
-export const PERM_DepartmentCreate = "department-create";
-export const PERM_DepartmentUpdate = "department-update";
-export const PERM_DepartmentDelete = "department-delete";
-export const PERM_JobPositionRead = "job_position-read";
-export const PERM_JobPositionCreate = "job_position-create";
-export const PERM_JobPositionUpdate = "job_position-update";
-export const PERM_JobPositionDelete = "job_position-delete";
-export const PERM_RoleRead = "role-read";
-export const PERM_RoleCreate = "role-create";
-export const PERM_RoleUpdate = "role-update";
-export const PERM_RoleDelete = "role-delete";
-export const PERM_LeaveTypeRead = "leave_type-read";
-export const PERM_LeaveTypeCreate = "leave_type-create";
-export const PERM_LeaveTypeUpdate = "leave_type-update";
-export const PERM_LeaveTypeDelete = "leave_type-delete";
-export const PERM_TemplateShiftRead = "template_shift-read";
-export const PERM_TemplateShiftCreate = "template_shift-create";
-export const PERM_TemplateShiftUpdate = "template_shift-update";
-export const PERM_TemplateShiftDelete = "template_shift-delete";
-export const PERM_ScheduleRead = "schedule-read";
-export const PERM_ScheduleCreate = "schedule-create";
-export const PERM_ScheduleUpdate = "schedule-update";
-export const PERM_ScheduleDelete = "schedule-delete";
-export const PERM_HolidayRead = "holiday-read";
-export const PERM_HolidayCreate = "holiday-create";
-export const PERM_HolidayUpdate = "holiday-update";
-export const PERM_HolidayDelete = "holiday-delete";
-export const PERM_AttendanceRead = "attendance-read";
-export const PERM_AttendanceCreate = "attendance-create";
-export const PERM_AttendanceUpdate = "attendance-update";
-export const PERM_AttendanceAdjustmentRead = "attendance_adjustment-read";
-export const PERM_AttendanceAdjustmentCreate = "attendance_adjustment-create";
-export const PERM_AttendanceAdjustmentApprove = "attendance_adjustment-approve";
-export const PERM_LeaveRead = "leave-read";
-export const PERM_LeaveCreate = "leave-create";
-export const PERM_LeaveUpdate = "leave-update";
-export const PERM_LeaveLeaderApprove = "leave-leader_approve";
-export const PERM_LeaveHRApprove = "leave-hr_approve";
-export const PERM_LeaveBalanceRead = "leave_balance-read";
-export const PERM_RequestRead = "request-read";
-export const PERM_RequestCreate = "request-create";
-export const PERM_RequestApprove = "request-approve";
-export const PERM_RequestUpdate = "request-update";
-export const PERM_RequestDelete = "request-delete";
-export const PERM_BusinessTripRead = "business_trip-read";
-export const PERM_BusinessTripCreate = "business_trip-create";
-export const PERM_BusinessTripApprove = "business_trip-approve";
-export const PERM_OvertimeRead = "overtime-read";
-export const PERM_OvertimeCreate = "overtime-create";
-export const PERM_OvertimeApprove = "overtime-approve";
-export const PERM_DailyReportRead = "daily_report-read";
-export const PERM_DailyReportCreate = "daily_report-create";
-export const PERM_DailyReportDelete = "daily_report-delete";
-export const PERM_MutabaahRead = "mutabaah-read";
-export const PERM_MutabaahCreate = "mutabaah-create";
-export const PERM_MutabaahUpdate = "mutabaah-update";
-export const PERM_ProfileRead = "profile-read";
-export const PERM_ProfileUpdate = "profile-update";
-export const PERM_ProfileResetPassword = "profile-reset_password";
-
 /** Object map for convenient use in components */
 export const PERMISSIONS = {
-  HOME_EMPLOYEE_READ: PERM_HomeEmployeeRead,
-  HOME_ADMIN_READ: PERM_HomeAdminRead,
-  HOME_CLOCK_IN: PERM_HomeClockIn,
-  HOME_CLOCK_OUT: PERM_HomeClockOut,
-  EMPLOYEE_READ: PERM_EmployeeRead,
-  EMPLOYEE_CREATE: PERM_EmployeeCreate,
-  EMPLOYEE_UPDATE: PERM_EmployeeUpdate,
-  EMPLOYEE_DELETE: PERM_EmployeeDelete,
-  EMPLOYEE_RESET_PASSWORD: PERM_EmployeeResetPassword,
-  BRANCH_READ: PERM_BranchRead,
-  BRANCH_CREATE: PERM_BranchCreate,
-  BRANCH_UPDATE: PERM_BranchUpdate,
-  BRANCH_DELETE: PERM_BranchDelete,
-  DEPARTMENT_READ: PERM_DepartmentRead,
-  DEPARTMENT_CREATE: PERM_DepartmentCreate,
-  DEPARTMENT_UPDATE: PERM_DepartmentUpdate,
-  DEPARTMENT_DELETE: PERM_DepartmentDelete,
-  JOB_POSITION_READ: PERM_JobPositionRead,
-  JOB_POSITION_CREATE: PERM_JobPositionCreate,
-  JOB_POSITION_UPDATE: PERM_JobPositionUpdate,
-  JOB_POSITION_DELETE: PERM_JobPositionDelete,
-  ROLE_READ: PERM_RoleRead,
-  ROLE_CREATE: PERM_RoleCreate,
-  ROLE_UPDATE: PERM_RoleUpdate,
-  ROLE_DELETE: PERM_RoleDelete,
-  LEAVE_TYPE_READ: PERM_LeaveTypeRead,
-  LEAVE_TYPE_CREATE: PERM_LeaveTypeCreate,
-  LEAVE_TYPE_UPDATE: PERM_LeaveTypeUpdate,
-  LEAVE_TYPE_DELETE: PERM_LeaveTypeDelete,
-  TEMPLATE_SHIFT_READ: PERM_TemplateShiftRead,
-  TEMPLATE_SHIFT_CREATE: PERM_TemplateShiftCreate,
-  TEMPLATE_SHIFT_UPDATE: PERM_TemplateShiftUpdate,
-  TEMPLATE_SHIFT_DELETE: PERM_TemplateShiftDelete,
-  SCHEDULE_READ: PERM_ScheduleRead,
-  SCHEDULE_CREATE: PERM_ScheduleCreate,
-  SCHEDULE_UPDATE: PERM_ScheduleUpdate,
-  SCHEDULE_DELETE: PERM_ScheduleDelete,
-  HOLIDAY_READ: PERM_HolidayRead,
-  HOLIDAY_CREATE: PERM_HolidayCreate,
-  HOLIDAY_UPDATE: PERM_HolidayUpdate,
-  HOLIDAY_DELETE: PERM_HolidayDelete,
-  ATTENDANCE_READ: PERM_AttendanceRead,
-  ATTENDANCE_CREATE: PERM_AttendanceCreate,
-  ATTENDANCE_UPDATE: PERM_AttendanceUpdate,
-  ATTENDANCE_ADJUSTMENT_READ: PERM_AttendanceAdjustmentRead,
-  ATTENDANCE_ADJUSTMENT_CREATE: PERM_AttendanceAdjustmentCreate,
-  ATTENDANCE_ADJUSTMENT_APPROVE: PERM_AttendanceAdjustmentApprove,
-  LEAVE_READ: PERM_LeaveRead,
-  LEAVE_CREATE: PERM_LeaveCreate,
-  LEAVE_UPDATE: PERM_LeaveUpdate,
-  LEAVE_LEADER_APPROVE: PERM_LeaveLeaderApprove,
-  LEAVE_HR_APPROVE: PERM_LeaveHRApprove,
-  LEAVE_BALANCE_READ: PERM_LeaveBalanceRead,
-  REQUEST_READ: PERM_RequestRead,
-  REQUEST_CREATE: PERM_RequestCreate,
-  REQUEST_APPROVE: PERM_RequestApprove,
-  REQUEST_UPDATE: PERM_RequestUpdate,
-  REQUEST_DELETE: PERM_RequestDelete,
-  BUSINESS_TRIP_READ: PERM_BusinessTripRead,
-  BUSINESS_TRIP_CREATE: PERM_BusinessTripCreate,
-  BUSINESS_TRIP_APPROVE: PERM_BusinessTripApprove,
-  OVERTIME_READ: PERM_OvertimeRead,
-  OVERTIME_CREATE: PERM_OvertimeCreate,
-  OVERTIME_APPROVE: PERM_OvertimeApprove,
-  DAILY_REPORT_READ: PERM_DailyReportRead,
-  DAILY_REPORT_CREATE: PERM_DailyReportCreate,
-  DAILY_REPORT_DELETE: PERM_DailyReportDelete,
-  MUTABAAH_READ: PERM_MutabaahRead,
-  MUTABAAH_CREATE: PERM_MutabaahCreate,
-  MUTABAAH_UPDATE: PERM_MutabaahUpdate,
-  PROFILE_READ: PERM_ProfileRead,
-  PROFILE_UPDATE: PERM_ProfileUpdate,
-  PROFILE_RESET_PASSWORD: PERM_ProfileResetPassword,
+  HOME_EMPLOYEE_READ: "home-employee_read",
+  HOME_ADMIN_READ: "home-admin_read",
+  HOME_CLOCK_IN: "home-clock_in",
+  HOME_CLOCK_OUT: "home-clock_out",
+  EMPLOYEE_READ: "employee-read",
+  EMPLOYEE_CREATE: "employee-create",
+  EMPLOYEE_UPDATE: "employee-update",
+  EMPLOYEE_DELETE: "employee-delete",
+  EMPLOYEE_RESET_PASSWORD: "employee-reset_password",
+  BRANCH_READ: "branch-read",
+  BRANCH_CREATE: "branch-create",
+  BRANCH_UPDATE: "branch-update",
+  BRANCH_DELETE: "branch-delete",
+  DEPARTMENT_READ: "department-read",
+  DEPARTMENT_CREATE: "department-create",
+  DEPARTMENT_UPDATE: "department-update",
+  DEPARTMENT_DELETE: "department-delete",
+  JOB_POSITION_READ: "job_position-read",
+  JOB_POSITION_CREATE: "job_position-create",
+  JOB_POSITION_UPDATE: "job_position-update",
+  JOB_POSITION_DELETE: "job_position-delete",
+  ROLE_READ: "role-read",
+  ROLE_CREATE: "role-create",
+  ROLE_UPDATE: "role-update",
+  ROLE_DELETE: "role-delete",
+  LEAVE_TYPE_READ: "leave_type-read",
+  LEAVE_TYPE_CREATE: "leave_type-create",
+  LEAVE_TYPE_UPDATE: "leave_type-update",
+  LEAVE_TYPE_DELETE: "leave_type-delete",
+  TEMPLATE_SHIFT_READ: "template_shift-read",
+  TEMPLATE_SHIFT_CREATE: "template_shift-create",
+  TEMPLATE_SHIFT_UPDATE: "template_shift-update",
+  TEMPLATE_SHIFT_DELETE: "template_shift-delete",
+  SCHEDULE_READ: "schedule-read",
+  SCHEDULE_CREATE: "schedule-create",
+  SCHEDULE_UPDATE: "schedule-update",
+  SCHEDULE_DELETE: "schedule-delete",
+  HOLIDAY_READ: "holiday-read",
+  HOLIDAY_CREATE: "holiday-create",
+  HOLIDAY_UPDATE: "holiday-update",
+  HOLIDAY_DELETE: "holiday-delete",
+  ATTENDANCE_READ: "attendance-read",
+  ATTENDANCE_CREATE: "attendance-create",
+  ATTENDANCE_UPDATE: "attendance-update",
+  ATTENDANCE_ADJUSTMENT_READ: "attendance_adjustment-read",
+  ATTENDANCE_ADJUSTMENT_CREATE: "attendance_adjustment-create",
+  ATTENDANCE_ADJUSTMENT_APPROVE: "attendance_adjustment-approve",
+  LEAVE_READ: "leave-read",
+  LEAVE_CREATE: "leave-create",
+  LEAVE_UPDATE: "leave-update",
+  LEAVE_LEADER_APPROVE: "leave-leader_approve",
+  LEAVE_HR_APPROVE: "leave-hr_approve",
+  LEAVE_BALANCE_READ: "leave_balance-read",
+  REQUEST_READ: "request-read",
+  REQUEST_CREATE: "request-create",
+  REQUEST_APPROVE: "request-approve",
+  REQUEST_UPDATE: "request-update",
+  REQUEST_DELETE: "request-delete",
+  BUSINESS_TRIP_READ: "business_trip-read",
+  BUSINESS_TRIP_CREATE: "business_trip-create",
+  BUSINESS_TRIP_APPROVE: "business_trip-approve",
+  OVERTIME_READ: "overtime-read",
+  OVERTIME_CREATE: "overtime-create",
+  OVERTIME_APPROVE: "overtime-approve",
+  DAILY_REPORT_READ: "daily_report-read",
+  DAILY_REPORT_CREATE: "daily_report-create",
+  DAILY_REPORT_DELETE: "daily_report-delete",
+  MUTABAAH_READ: "mutabaah-read",
+  MUTABAAH_CREATE: "mutabaah-create",
+  MUTABAAH_UPDATE: "mutabaah-update",
+  PROFILE_READ: "profile-read",
+  PROFILE_UPDATE: "profile-update",
+  PROFILE_RESET_PASSWORD: "profile-reset_password",
 } as const;
-

@@ -5,7 +5,7 @@
 /* ── Custom Theme ── */
 @theme {
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Cormorant", ui-serif, Georgia, serif;
+  --font-heading: "Manrope", ui-serif, Georgia, serif;
 
   /* Wafa Primary Colors - Magenta/Pink */
   --color-wafa-50: #fce4f3;

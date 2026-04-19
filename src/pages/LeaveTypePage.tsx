@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, CalendarOff, X } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useLeaveTypeList, useLeaveTypeMutations } from "@/hooks/useLeaveType";
 import { useLeaveTypeMetadata } from "@/hooks/useMetadata";
 import type {
@@ -291,26 +292,23 @@ export function LeaveTypePage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Jenis Cuti
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Kelola master data jenis cuti dan peraturannya.
-          </p>
-        </div>
-        <PermissionGate permission={PERMISSIONS.LEAVE_TYPE_CREATE}>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => handleOpenModal()}
-          className="w-full sm:w-auto"
-        >
-          <Plus size={16} /> Tambah Jenis Cuti
-        </Button>
-        </PermissionGate>
-      </header>
+      <PageHeader
+        title="Jenis Cuti"
+        description="Kelola master data jenis cuti dan peraturannya."
+        actions={
+          <PermissionGate permission={PERMISSIONS.LEAVE_TYPE_CREATE}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleOpenModal()}
+              className="w-full sm:w-auto"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:block">Tambah Jenis Cuti</span>
+            </Button>
+          </PermissionGate>
+        }
+      />
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
         <div className="w-48">
@@ -372,7 +370,7 @@ export function LeaveTypePage() {
                         {lt.name}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex rounded-full bg-(--primary)/10 px-2 py-0.5 text-xs font-semibold text-(--primary)">
+                        <span className="inline-flex rounded-full bg-(--primary)/10 px-2 py-0.5 text-xs font-semibold text-(--primary) text-nowrap">
                           {getCategoryLabel(lt.category)}
                         </span>
                       </td>
@@ -401,23 +399,27 @@ export function LeaveTypePage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <PermissionGate permission={PERMISSIONS.LEAVE_TYPE_UPDATE}>
-                          <button
-                            onClick={() => handleOpenModal(lt)}
-                            className="rounded-lg p-1.5 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
-                            title="Edit"
+                          <PermissionGate
+                            permission={PERMISSIONS.LEAVE_TYPE_UPDATE}
                           >
-                            <Pencil size={16} />
-                          </button>
+                            <button
+                              onClick={() => handleOpenModal(lt)}
+                              className="rounded-lg p-1.5 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
                           </PermissionGate>
-                          <PermissionGate permission={PERMISSIONS.LEAVE_TYPE_DELETE}>
-                          <button
-                            onClick={() => setDeleteTarget(lt)}
-                            className="rounded-lg p-1.5 text-(--muted-foreground) transition hover:bg-red-500/10 hover:text-red-500"
-                            title="Hapus"
+                          <PermissionGate
+                            permission={PERMISSIONS.LEAVE_TYPE_DELETE}
                           >
-                            <Trash2 size={16} />
-                          </button>
+                            <button
+                              onClick={() => setDeleteTarget(lt)}
+                              className="rounded-lg p-1.5 text-(--muted-foreground) transition hover:bg-red-500/10 hover:text-red-500"
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </PermissionGate>
                         </div>
                       </td>

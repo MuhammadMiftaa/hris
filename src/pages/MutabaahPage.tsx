@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { BookOpen, Search, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
@@ -89,7 +90,7 @@ function DailyTab() {
     <div className="space-y-4">
       {/* Summary Cards */}
       {!loading && data && data.length > 0 && (
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
           <SummaryCard title="Total" value={summary.total} />
           <SummaryCard
             title="Sudah Membaca"
@@ -504,19 +505,10 @@ export function MutabaahPage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg flex items-center gap-2">
-              <BookOpen size={20} className="text-(--primary)" />
-              Mutaba'ah — Tilawah Al-Quran
-            </h1>
-            <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-              Pantau dan kelola tilawah harian pegawai
-            </p>
-          </div>
-
-          {/* Tab buttons */}
+      <PageHeader
+        title="Mutaba'ah — Tilawah Al-Quran"
+        description="Pantau dan kelola tilawah harian pegawai"
+        actions={
           <div className="flex rounded-lg border border-(--border) bg-(--muted)/30 p-1">
             {TABS.map((tab) => (
               <button
@@ -533,8 +525,8 @@ export function MutabaahPage() {
               </button>
             ))}
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {activeTab === "daily" && <DailyTab />}

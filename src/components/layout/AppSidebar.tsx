@@ -354,11 +354,11 @@ export function AppSidebar() {
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <img
+          {/* <img
             className="h-7 w-7 object-contain"
             src="/images/icons/logo.png"
             alt="Wafa Logo"
-          />
+          /> */}
           <span className="font-heading text-sm font-bold text-primary-gradient">
             Wafa Indonesia
           </span>

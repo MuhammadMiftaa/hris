@@ -28,7 +28,7 @@ export const DUMMY_BUSINESS_TRIPS: BusinessTripRequest[] = [
     end_date: getDateString(11),
     total_days: 1,
     purpose: "Meeting dengan klien PT. ABC untuk pembahasan kontrak kerjasama",
-    document_url: "https://example.com/surat-tugas-ahmad.pdf",
+    document_url: "https://wafa.id/surat-tugas-ahmad.pdf",
     status: "approved",
     approved_by: 2,
     approver_name: "Fatimah Azzahra",

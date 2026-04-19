@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
@@ -512,7 +513,9 @@ const DEFAULT_NON_WORKING_DAY_CONFIG: CreateShiftDetailPayload = {
   break_asr_end: null,
 };
 
-function createDefaultDetails(dayMeta: { id: string; name: string }[]): CreateShiftDetailPayload[] {
+function createDefaultDetails(
+  dayMeta: { id: string; name: string }[],
+): CreateShiftDetailPayload[] {
   return dayMeta.map((day, index) => {
     const isWeekend = index >= 5;
     return {
@@ -883,7 +886,7 @@ function ScheduleForm({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="block text-sm font-medium text-(--foreground) opacity-80">
             Tanggal Berlaku
@@ -1095,7 +1098,7 @@ function TabSelector({
         )}
       >
         <Clock size={16} />
-        Template Shift
+        <span className="hidden sm:block">Template Shift</span>
       </button>
       <button
         onClick={() => onTabChange("schedules")}
@@ -1107,7 +1110,7 @@ function TabSelector({
         )}
       >
         <Calendar size={16} />
-        Jadwal Pegawai
+        <span className="hidden sm:block">Jadwal Pegawai</span>
       </button>
     </div>
   );
@@ -1803,8 +1806,10 @@ function ScheduleTab({
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden md:block overflow-hidden rounded-xl border border-(--border) mt-5
-          ">
+          <div
+            className="hidden md:block overflow-hidden rounded-xl border border-(--border) mt-5
+          "
+          >
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -1901,7 +1906,7 @@ function ScheduleTab({
           </div>
 
           {/* Mobile Cards */}
-          <div className="flex flex-col gap-3 md:hidden">
+          <div className="flex flex-col gap-3 md:hidden mt-5">
             {filtered.map((schedule) => (
               <div
                 key={schedule.id}
@@ -2023,46 +2028,44 @@ export function ShiftPage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 flex justify-between items-center gap-5">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Shift & Jadwal Kerja
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Kelola template shift dan jadwal kerja pegawai
-          </p>
-        </div>
-        <div className="w-fit ml-auto">
-          <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-        <div className="flex items-center gap-2 w-40 justify-end">
-          {activeTab === "templates" ? (
-            <PermissionGate permission={PERMISSIONS.TEMPLATE_SHIFT_CREATE}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setShowTemplateForm(true)}
-                className="self-start sm:self-auto"
-              >
-                <Plus size={16} />
-                Tambah Template
-              </Button>
-            </PermissionGate>
-          ) : (
-            <PermissionGate permission={PERMISSIONS.SCHEDULE_CREATE}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setShowScheduleForm(true)}
-                className="self-start sm:self-auto"
-              >
-                <Plus size={16} />
-                Assign Shift
-              </Button>
-            </PermissionGate>
-          )}
-        </div>
-      </header>
+      <PageHeader
+        title="Shift & Jadwal Kerja"
+        description="Kelola template shift dan jadwal kerja pegawai"
+        actions={
+          <div className="flex flex-row justify-end gap-4">
+            <div className="w-fit md:ml-auto">
+              <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+            <div className="flex items-center gap-2 md:w-40 md:justify-end">
+              {activeTab === "templates" ? (
+                <PermissionGate permission={PERMISSIONS.TEMPLATE_SHIFT_CREATE}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setShowTemplateForm(true)}
+                    className="self-start sm:self-auto"
+                  >
+                    <Plus size={16} />
+                    <span className="hidden sm:block">Tambah Template</span>
+                  </Button>
+                </PermissionGate>
+              ) : (
+                <PermissionGate permission={PERMISSIONS.SCHEDULE_CREATE}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setShowScheduleForm(true)}
+                    className="self-start sm:self-auto"
+                  >
+                    <Plus size={16} />
+                    <span className="hidden sm:block">Assign Shift</span>
+                  </Button>
+                </PermissionGate>
+              )}
+            </div>
+          </div>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Tab Content */}

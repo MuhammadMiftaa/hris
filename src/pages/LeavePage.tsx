@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui/FormElements";
@@ -33,6 +34,7 @@ import {
   type LeaveRequest,
   type CreateLeavePayload,
 } from "@/types/leave";
+import { MobileActionButton } from "@/components/ui/Button";
 
 // ════════════════════════════════════════════
 // STATUS BADGE
@@ -668,7 +670,7 @@ function LeaveRequestTab() {
             variant="primary"
             size="sm"
             onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
+            className="self-end sm:self-auto"
           >
             <Plus size={16} />
             Ajukan Cuti
@@ -771,24 +773,28 @@ function LeaveRequestTab() {
                           </Button>
                           {isPending(req.status) && (
                             <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleApprove(req)}
-                                className="h-7 px-2 text-xs text-green-700 hover:bg-green-500/10 dark:text-green-400"
+                              <PermissionGate
+                                permission={PERMISSIONS.LEAVE_UPDATE}
                               >
-                                <Check size={13} />
-                                Setuju
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedRequest(req)}
-                                className="h-7 px-2 text-xs text-red-600 hover:bg-red-500/10"
-                              >
-                                <Ban size={13} />
-                                Tolak
-                              </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleApprove(req)}
+                                  className="h-7 px-2 text-xs text-green-700 hover:bg-green-500/10 dark:text-green-400"
+                                >
+                                  <Check size={13} />
+                                  Setuju
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setSelectedRequest(req)}
+                                  className="h-7 px-2 text-xs text-red-600 hover:bg-red-500/10"
+                                >
+                                  <Ban size={13} />
+                                  Tolak
+                                </Button>
+                              </PermissionGate>
                             </>
                           )}
                         </div>
@@ -830,35 +836,28 @@ function LeaveRequestTab() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <MobileActionButton
+                    icon={Eye}
+                    label="Detail"
+                    variant="neutral"
                     onClick={() => setSelectedRequest(req)}
-                    className="flex-1"
-                  >
-                    <Eye size={13} />
-                    Detail
-                  </Button>
-                  {isPending(req.status) && (
+                  />
+                  {req.status === "pending" && (
                     <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleApprove(req)}
-                        className="flex-1 text-green-700 hover:bg-green-500/10 dark:text-green-400"
-                      >
-                        <Check size={13} />
-                        Setuju
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedRequest(req)}
-                        className="flex-1 text-red-600 hover:bg-red-500/10"
-                      >
-                        <Ban size={13} />
-                        Tolak
-                      </Button>
+                      <PermissionGate permission={PERMISSIONS.LEAVE_UPDATE}>
+                        <MobileActionButton
+                          icon={Check}
+                          label="Setuju"
+                          variant="approve"
+                          onClick={() => handleApprove(req)}
+                        />
+                        <MobileActionButton
+                          icon={Ban}
+                          label="Tolak"
+                          variant="reject"
+                          onClick={() => setSelectedRequest(req)}
+                        />
+                      </PermissionGate>
                     </>
                   )}
                 </div>
@@ -1062,16 +1061,10 @@ export function LeavePage() {
 
   return (
     <MainLayout>
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-              Cuti
-            </h1>
-            <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-              Kelola pengajuan cuti, saldo, dan konfigurasi jenis cuti
-            </p>
-          </div>
+      <PageHeader
+        title="Cuti"
+        description="Kelola pengajuan cuti, saldo, dan konfigurasi jenis cuti"
+        actions={
           <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50 w-fit">
             {TABS.map((tab) => {
               const Icon = tab.icon;
@@ -1092,8 +1085,8 @@ export function LeavePage() {
               );
             })}
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {activeTab === "requests" && <LeaveRequestTab />}

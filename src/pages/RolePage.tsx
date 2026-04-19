@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
@@ -382,7 +383,7 @@ function RoleCard({
               </p>
             )}
           </div>
-          <span className="inline-flex items-center rounded-full bg-(--muted) px-2.5 py-0.5 text-xs font-medium text-(--muted-foreground)">
+          <span className="hidden md:inline-flex items-center rounded-full bg-(--muted) px-2.5 py-0.5 text-xs font-medium text-(--muted-foreground)">
             {role.permission_count || rolePermissionCodes.length} permissions
           </span>
         </div>
@@ -519,16 +520,11 @@ export function RolePage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Role & Akses
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Kelola role dan permission per module
-          </p>
-        </div>
-        <PermissionGate permission={PERMISSIONS.ROLE_CREATE}>
+      <PageHeader
+        title="Role & Akses"
+        description="Kelola role dan permission per module"
+        actions={
+          <PermissionGate permission={PERMISSIONS.ROLE_CREATE}>
         <Button
           variant="primary"
           size="sm"
@@ -536,10 +532,11 @@ export function RolePage() {
           className="self-start sm:self-auto"
         >
           <Plus size={16} />
-          Tambah Role
+          <span className="hidden sm:block">Tambah Role</span>
         </Button>
         </PermissionGate>
-      </header>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Content */}

@@ -59,11 +59,9 @@ export function LoginPage() {
       <AuthLayout>
         <div className="space-y-1 text-center">
           <h2 className="font-heading text-2xl font-semibold text-(--foreground)">
-            Welcome back
+            HRIS
           </h2>
-          <p className="text-sm text-(--muted-foreground)">
-            
-          </p>
+          <p className="text-sm text-(--muted-foreground)"></p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -71,7 +69,7 @@ export function LoginPage() {
             id="email"
             label="Email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="fulan@wafa.id"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={errors.email}
@@ -128,7 +126,7 @@ export function LoginPage() {
           </div>
 
           <Button type="submit" className="w-full" isLoading={isLoading}>
-            Sign In
+            Masuk
           </Button>
         </form>
       </AuthLayout>

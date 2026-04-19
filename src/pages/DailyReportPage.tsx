@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/FormElements";
@@ -513,16 +514,11 @@ export function DailyReportPage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Laporan Harian
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Pantau dan kelola laporan aktivitas harian pegawai (RKH)
-          </p>
-        </div>
-        <PermissionGate permission={PERMISSIONS.DAILY_REPORT_CREATE}>
+      <PageHeader
+        title="Laporan Harian"
+        description="Pantau dan kelola laporan aktivitas harian pegawai (RKH)"
+        actions={
+          <PermissionGate permission={PERMISSIONS.DAILY_REPORT_CREATE}>
           <Button
             variant="primary"
             size="sm"
@@ -530,10 +526,11 @@ export function DailyReportPage() {
             className="self-start sm:self-auto"
           >
             <Plus size={16} />
-            Isi Laporan
+            <span className="hidden md:block">Isi Laporan</span>
           </Button>
         </PermissionGate>
-      </header>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5 space-y-4">
         {/* Summary */}

@@ -304,7 +304,7 @@ function ContactForm({
           formData.contact_type === "phone"
             ? "08xx xxxx xxxx"
             : formData.contact_type === "email"
-              ? "email@example.com"
+              ? "fulan@wafa.id"
               : "Alamat lengkap"
         }
         error={error}
@@ -639,7 +639,6 @@ function EmployeeForm({
             placeholder="Pilih"
             searchPlaceholder="Cari..."
           />
-
         </div>
         <Input
           id="nationality"
@@ -662,7 +661,9 @@ function EmployeeForm({
             onChange={(checked) => handleChange("is_active", checked)}
             label={
               <div className="flex flex-col">
-                <span className="font-medium text-(--foreground)">Status Pegawai</span>
+                <span className="font-medium text-(--foreground)">
+                  Status Pegawai
+                </span>
                 <span className="text-xs text-(--muted-foreground)">
                   {formData.is_active ? "Aktif" : "Nonaktif"}
                 </span>
@@ -675,7 +676,9 @@ function EmployeeForm({
             onChange={(checked) => handleChange("is_trainer", checked)}
             label={
               <div className="flex flex-col">
-                <span className="font-medium text-(--foreground)">Trainer Wafa</span>
+                <span className="font-medium text-(--foreground)">
+                  Trainer Wafa
+                </span>
                 <span className="text-xs text-(--muted-foreground)">
                   {formData.is_trainer ? "Ya" : "Tidak"}
                 </span>
@@ -1096,7 +1099,7 @@ export function EmployeeDetailPage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
+      <div className="flex flex-col gap-6 p-4 pt-4 md:p-6 md:pt-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
@@ -1107,7 +1110,7 @@ export function EmployeeDetailPage() {
               <ArrowLeft size={20} />
             </button>
             <div
-              className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white"
+              className="flex h-14 w-14 aspect-square items-center justify-center rounded-full text-lg font-bold text-white"
               style={{
                 background:
                   "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
@@ -1192,7 +1195,9 @@ export function EmployeeDetailPage() {
                     label="Jenis Kelamin"
                     value={
                       employee.gender
-                        ? metadata?.gender_meta.find((g) => g.id === employee.gender)?.name
+                        ? metadata?.gender_meta.find(
+                            (g) => g.id === employee.gender,
+                          )?.name
                         : undefined
                     }
                   />
@@ -1223,7 +1228,9 @@ export function EmployeeDetailPage() {
                     label="Status Pernikahan"
                     value={
                       employee.marital_status
-                        ? metadata?.marital_status_meta.find((m) => m.id === employee.marital_status)?.name
+                        ? metadata?.marital_status_meta.find(
+                            (m) => m.id === employee.marital_status,
+                          )?.name
                         : undefined
                     }
                   />
@@ -1235,7 +1242,6 @@ export function EmployeeDetailPage() {
                     label="Kewarganegaraan"
                     value={employee.nationality}
                   />
-
                 </div>
               </div>
             </div>

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
@@ -474,27 +475,23 @@ export function BranchPage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Cabang
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Kelola data lokasi kantor/cabang + konfigurasi GPS radius
-          </p>
-        </div>
-        <PermissionGate permission={PERMISSIONS.BRANCH_CREATE}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
-          >
-            <Plus size={16} />
-            Tambah Cabang
-          </Button>
-        </PermissionGate>
-      </header>
+      <PageHeader
+        title="Cabang"
+        description="Kelola data lokasi kantor/cabang + konfigurasi GPS radius"
+        actions={
+          <PermissionGate permission={PERMISSIONS.BRANCH_CREATE}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowForm(true)}
+              className="self-start sm:self-auto"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:block">Tambah Cabang</span>
+            </Button>
+          </PermissionGate>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Content */}

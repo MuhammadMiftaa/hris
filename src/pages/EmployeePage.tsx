@@ -1,8 +1,17 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Users, ChevronRight, X, Copy, Check } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Users,
+  ChevronRight,
+  X,
+  Copy,
+  Check,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
@@ -94,7 +103,12 @@ function CredentialModal({
 
   if (!open || !credentials) return null;
   return (
-    <Modal open={open} title="Kredensial Pegawai" onClose={onClose} maxWidth="max-w-md">
+    <Modal
+      open={open}
+      title="Kredensial Pegawai"
+      onClose={onClose}
+      maxWidth="max-w-md"
+    >
       <div className="space-y-4">
         <p className="text-sm text-(--muted-foreground)">
           Pegawai berhasil ditambahkan. Berikut adalah kredensial untuk login:
@@ -103,26 +117,40 @@ function CredentialModal({
           <div>
             <label className="text-xs text-(--muted-foreground)">Email</label>
             <div className="flex items-center justify-between gap-2">
-              <div className="font-mono text-sm text-(--foreground)">{credentials.email}</div>
+              <div className="font-mono text-sm text-(--foreground)">
+                {credentials.email}
+              </div>
               <button
                 onClick={() => handleCopy(credentials.email, "email")}
                 className="rounded-md p-1 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
                 title="Salin email"
               >
-                {copiedField === "email" ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                {copiedField === "email" ? (
+                  <Check size={14} className="text-green-500" />
+                ) : (
+                  <Copy size={14} />
+                )}
               </button>
             </div>
           </div>
           <div>
-            <label className="text-xs text-(--muted-foreground)">Password</label>
+            <label className="text-xs text-(--muted-foreground)">
+              Password
+            </label>
             <div className="flex items-center justify-between gap-2">
-              <div className="font-mono text-sm text-(--foreground)">{credentials.password}</div>
+              <div className="font-mono text-sm text-(--foreground)">
+                {credentials.password}
+              </div>
               <button
                 onClick={() => handleCopy(credentials.password, "password")}
                 className="rounded-md p-1 text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
                 title="Salin password"
               >
-                {copiedField === "password" ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                {copiedField === "password" ? (
+                  <Check size={14} className="text-green-500" />
+                ) : (
+                  <Copy size={14} />
+                )}
               </button>
             </div>
           </div>
@@ -131,7 +159,9 @@ function CredentialModal({
           * Harap simpan kredensial ini karena sistem tidak menampilkannya lagi.
         </p>
         <div className="flex justify-end pt-4 border-t border-(--border)">
-          <Button onClick={onClose} variant="primary">Tutup</Button>
+          <Button onClick={onClose} variant="primary">
+            Tutup
+          </Button>
         </div>
       </div>
     </Modal>
@@ -518,7 +548,6 @@ function EmployeeForm({
               value={formData.nationality}
               onChange={(e) => handleChange("nationality", e.target.value)}
             />
-
           </div>
         </div>
       )}
@@ -622,7 +651,10 @@ export function EmployeePage() {
     useEmployeeMutations(refetch);
 
   const [showForm, setShowForm] = useState(false);
-  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [credentials, setCredentials] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
 
   const handleCreate = async (payload: CreateEmployeePayload) => {
     const result = await createEmployee(payload);
@@ -637,32 +669,28 @@ export function EmployeePage() {
   return (
     <MainLayout>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Pegawai
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Kelola data pegawai beserta kontak &amp; kontrak kerja
-          </p>
-        </div>
-        <PermissionGate permission={PERMISSIONS.EMPLOYEE_CREATE}>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setShowForm(true)}
-          className="self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          Tambah Pegawai
-        </Button>
-        </PermissionGate>
-      </header>
+      <PageHeader
+        title="Pegawai"
+        description="Kelola data pegawai beserta kontak &amp; kontrak kerja"
+        actions={
+          <PermissionGate permission={PERMISSIONS.EMPLOYEE_CREATE}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowForm(true)}
+              className="self-start sm:self-auto"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:block">Tambah Pegawai</span>
+            </Button>
+          </PermissionGate>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {/* Filter Bar */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <div className="relative flex-1 min-w-50 max-w-sm">
             <Search
               size={16}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted-foreground)"
@@ -742,14 +770,14 @@ export function EmployeePage() {
             action={
               !searchQuery && (
                 <PermissionGate permission={PERMISSIONS.EMPLOYEE_CREATE}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setShowForm(true)}
-                >
-                  <Plus size={16} />
-                  Tambah Pegawai
-                </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setShowForm(true)}
+                  >
+                    <Plus size={16} />
+                    Tambah Pegawai
+                  </Button>
                 </PermissionGate>
               )
             }

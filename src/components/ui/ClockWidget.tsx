@@ -1,8 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { LogIn, LogOut, Smartphone, Monitor, CheckCircle2, Camera } from "lucide-react";
+import {
+  LogIn,
+  LogOut,
+  Smartphone,
+  Monitor,
+  CheckCircle2,
+  Camera,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { presignClockPhoto, uploadPhotoToPresigned } from "@/lib/dashboard-api";
-import type { TodayAttendanceStatus, ClockInPayload, ClockOutPayload } from "@/types/dashboard";
+import type {
+  TodayAttendanceStatus,
+  ClockInPayload,
+  ClockOutPayload,
+} from "@/types/dashboard";
 import toast from "react-hot-toast";
 
 export interface ClockWidgetProps {
@@ -184,11 +195,7 @@ export function ClockWidget({
 
       {/* Gradient header background */}
       <div
-        className={cn(
-          "relative bg-gradient-to-br",
-          gradientBg,
-          "px-5 pt-5 pb-8",
-        )}
+        className={cn("relative bg-linear-to-br", gradientBg, "px-5 pt-5 pb-8")}
       >
         {/* Decorative circles */}
         <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
@@ -220,7 +227,7 @@ export function ClockWidget({
 
       {/* Curved connector */}
       <div
-        className={cn("bg-gradient-to-br", gradientBg, "h-6")}
+        className={cn("bg-linear-to-br", gradientBg, "h-6")}
         style={{ clipPath: "ellipse(100% 100% at 50% 0%)" }}
       />
 

@@ -20,9 +20,7 @@ import { StatCard, StatCardSkeleton } from "@/components/ui/StatCard";
 import { ClockWidget, ClockWidgetSkeleton } from "@/components/ui/ClockWidget";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import {
-  MutabaahWidgetSkeleton,
-} from "@/components/ui/MutabaahWidget";
+import { MutabaahWidgetSkeleton } from "@/components/ui/MutabaahWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEmployeeProfile } from "@/hooks/useEmployeeProfile";
 import {
@@ -63,28 +61,28 @@ function ViewToggle({
   setView: (v: "employee" | "hrd") => void;
 }) {
   return (
-    <div className="flex rounded-lg border border-(--border) bg-(--muted)/30 p-1">
+    <div className="flex rounded-lg border border-(--border) bg-(--muted)/30 p-1 w-fit ml-auto">
       <button
         onClick={() => setView("employee")}
         className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+          "rounded-md px-5 py-1.5 text-sm font-medium transition-colors",
           view === "employee"
             ? "bg-(--card) text-(--foreground) shadow-sm"
             : "text-(--muted-foreground) hover:text-(--foreground)",
         )}
       >
-        Pegawai
+        Saya
       </button>
       <button
         onClick={() => setView("hrd")}
         className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+          "rounded-md px-5 py-1.5 text-sm font-medium transition-colors",
           view === "hrd"
             ? "bg-(--card) text-(--foreground) shadow-sm"
             : "text-(--muted-foreground) hover:text-(--foreground)",
         )}
       >
-        HRD
+        Tim
       </button>
     </div>
   );
@@ -135,7 +133,7 @@ function PendingRequestCard({ request }: { request: PendingRequest }) {
       >
         <Icon size={16} style={{ color: config?.color || "#6b7280" }} />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 w-0">
         <div className="text-sm font-medium text-(--foreground) truncate">
           {request.label}
         </div>
@@ -260,7 +258,7 @@ function DayOffCard({ reason }: { reason?: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-(--border) shadow-xl">
       {/* Gradient header */}
-      <div className="relative bg-gradient-to-br from-teal-400 via-cyan-500 to-sky-500 px-6 pt-6 pb-10">
+      <div className="relative bg-linear-to-br from-teal-400 via-cyan-500 to-sky-500 px-6 pt-6 pb-10">
         {/* Decorative */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -right-4 top-10 h-20 w-20 rounded-full bg-white/10" />
@@ -281,7 +279,7 @@ function DayOffCard({ reason }: { reason?: string }) {
 
       {/* Curved connector */}
       <div
-        className="bg-gradient-to-br from-teal-400 via-cyan-500 to-sky-500 h-6"
+        className="bg-linear-to-br from-teal-400 via-cyan-500 to-sky-500 h-6"
         style={{ clipPath: "ellipse(100% 100% at 50% 0%)" }}
       />
 
@@ -969,7 +967,8 @@ export function DashboardPage() {
   };
 
   // Determine work status
-  const isWorkingDay = scheduleLoading || scheduleData?.is_working_day !== false;
+  const isWorkingDay =
+    scheduleLoading || scheduleData?.is_working_day !== false;
   const dayOffReason = scheduleData?.reason;
 
   return (

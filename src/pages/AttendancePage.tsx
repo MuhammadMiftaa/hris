@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui/FormElements";
@@ -44,6 +45,7 @@ import {
   type OverrideType,
   type AttendanceOverride,
 } from "@/types/attendance-override";
+import { MobileActionButton } from "@/components/ui/Button";
 
 // ════════════════════════════════════════════
 // STATUS BADGE
@@ -83,7 +85,7 @@ const STATUS_CONFIG: Record<
       "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   },
   business_trip: {
-    label: "Dinas Luar",
+    label: "Tugas",
     icon: Plane,
     className:
       "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
@@ -253,10 +255,12 @@ function OverrideForm({
           label="Tipe Koreksi"
           value={formData.override_type}
           onChange={(val) => handleChange("override_type", val)}
-          options={metadata?.override_type_meta?.map((t: any) => ({
-            value: t.id,
-            label: t.name,
-          })) || OVERRIDE_TYPE_OPTIONS}
+          options={
+            metadata?.override_type_meta?.map((t: any) => ({
+              value: t.id,
+              label: t.name,
+            })) || OVERRIDE_TYPE_OPTIONS
+          }
           placeholder="Pilih tipe koreksi..."
         />
       </div>
@@ -421,13 +425,15 @@ function OverrideDetailModal({
                 <p className="text-sm font-medium text-(--foreground)">
                   {metadata?.override_type_meta?.find(
                     (o: any) => o.id === ov.override_type,
-                  )?.name || OVERRIDE_TYPE_OPTIONS.find(
-                    (o) => o.value === ov.override_type,
-                  )?.label || ov.override_type}
+                  )?.name ||
+                    OVERRIDE_TYPE_OPTIONS.find(
+                      (o) => o.value === ov.override_type,
+                    )?.label ||
+                    ov.override_type}
                 </p>
               </div>
               {ov.override_type !== "clock_out" && (
-                <div>
+                <div className="row-start-2">
                   <p className="text-xs text-(--muted-foreground)">
                     Masuk Asli → Koreksi
                   </p>
@@ -440,7 +446,7 @@ function OverrideDetailModal({
                 </div>
               )}
               {ov.override_type !== "clock_in" && (
-                <div>
+                <div className="row-start-2">
                   <p className="text-xs text-(--muted-foreground)">
                     Keluar Asli → Koreksi
                   </p>
@@ -1191,7 +1197,7 @@ function AttendanceOverrideTab() {
             variant="primary"
             size="sm"
             onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
+            className="self-end sm:self-auto"
           >
             <Plus size={16} />
             Ajukan Koreksi
@@ -1207,7 +1213,9 @@ function AttendanceOverrideTab() {
           description="Ajukan koreksi presensi jika ada kesalahan data kehadiran"
           icon={<Edit2 className="h-12 w-12" />}
           action={
-            <PermissionGate permission={PERMISSIONS.ATTENDANCE_ADJUSTMENT_CREATE}>
+            <PermissionGate
+              permission={PERMISSIONS.ATTENDANCE_ADJUSTMENT_CREATE}
+            >
               <Button
                 variant="primary"
                 size="sm"
@@ -1320,7 +1328,11 @@ function AttendanceOverrideTab() {
                             </Button>
                             {ov.status === "pending" && (
                               <>
-                                <PermissionGate permission={PERMISSIONS.ATTENDANCE_ADJUSTMENT_APPROVE}>
+                                <PermissionGate
+                                  permission={
+                                    PERMISSIONS.ATTENDANCE_ADJUSTMENT_APPROVE
+                                  }
+                                >
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -1391,36 +1403,29 @@ function AttendanceOverrideTab() {
                     {ov.reason}
                   </p>
                   <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <MobileActionButton
+                      icon={Eye}
+                      label="Detail"
+                      variant="neutral"
                       onClick={() => setDetailOverride(ov)}
-                      className="flex-1"
-                    >
-                      <Eye size={13} />
-                      Detail
-                    </Button>
+                    />
                     {ov.status === "pending" && (
                       <>
-                        <PermissionGate permission={PERMISSIONS.ATTENDANCE_ADJUSTMENT_APPROVE}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                        <PermissionGate
+                          permission={PERMISSIONS.ATTENDANCE_ADJUSTMENT_APPROVE}
+                        >
+                          <MobileActionButton
+                            icon={Check}
+                            label="Setuju"
+                            variant="approve"
                             onClick={() => handleApprove(ov)}
-                            className="flex-1 text-green-700 hover:bg-green-500/10 dark:text-green-400"
-                          >
-                            <Check size={13} />
-                            Setuju
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                          />
+                          <MobileActionButton
+                            icon={Ban}
+                            label="Tolak"
+                            variant="reject"
                             onClick={() => setDetailOverride(ov)}
-                            className="flex-1 text-red-600 hover:bg-red-500/10"
-                          >
-                            <Ban size={13} />
-                            Tolak
-                          </Button>
+                          />
                         </PermissionGate>
                       </>
                     )}
@@ -1471,42 +1476,38 @@ export function AttendancePage() {
 
   return (
     <MainLayout>
-      <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-(--border) bg-(--card) px-4 py-3 sm:px-6 sm:py-3.5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-sm font-bold tracking-wide text-(--foreground) md:text-lg">
-            Presensi & Kehadiran
-          </h1>
-          <p className="text-[10px] text-(--muted-foreground) md:text-xs">
-            Monitor log kehadiran dan kelola koreksi presensi
-          </p>
-        </div>
-        <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50 w-fit">
-          <button
-            onClick={() => setActiveTab("log")}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-              activeTab === "log"
-                ? "bg-(--card) text-(--foreground) shadow-sm"
-                : "text-(--muted-foreground) hover:text-(--foreground)",
-            )}
-          >
-            <ClipboardCheck size={15} />
-            Log Kehadiran
-          </button>
-          <button
-            onClick={() => setActiveTab("override")}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-              activeTab === "override"
-                ? "bg-(--card) text-(--foreground) shadow-sm"
-                : "text-(--muted-foreground) hover:text-(--foreground)",
-            )}
-          >
-            <Edit2 size={15} />
-            Koreksi Presensi
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        title="Presensi & Kehadiran"
+        description="Monitor log kehadiran dan kelola koreksi presensi"
+        actions={
+          <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50 w-fit">
+            <button
+              onClick={() => setActiveTab("log")}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                activeTab === "log"
+                  ? "bg-(--card) text-(--foreground) shadow-sm"
+                  : "text-(--muted-foreground) hover:text-(--foreground)",
+              )}
+            >
+              <ClipboardCheck size={15} />
+              <span className="hidden md:block">Log Kehadiran</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("override")}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                activeTab === "override"
+                  ? "bg-(--card) text-(--foreground) shadow-sm"
+                  : "text-(--muted-foreground) hover:text-(--foreground)",
+              )}
+            >
+              <Edit2 size={15} />
+              <span className="hidden md:block">Koreksi Presensi</span>
+            </button>
+          </div>
+        }
+      />
 
       <div className="mx-auto max-w-350 p-3 sm:p-5">
         {activeTab === "log" ? <AttendanceLogTab /> : <AttendanceOverrideTab />}

@@ -36,7 +36,7 @@ export function MutabaahWidget({
       className={cn(
         "relative overflow-hidden rounded-2xl border transition-all duration-300",
         status.is_submitted
-          ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/8 via-emerald-500/4 to-transparent"
+          ? "border-emerald-500/30 bg-linear-to-br from-emerald-500/8 via-emerald-500/4 to-transparent"
           : "border-(--border) bg-(--card)",
       )}
     >
