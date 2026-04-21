@@ -359,7 +359,7 @@ function EmployeeForm({
             value={formData.branch_id}
             onChange={(val) => handleChange("branch_id", val)}
             options={
-              metadata?.branch_meta.map((b) => ({
+              metadata?.branch_meta?.map((b) => ({
                 value: b.id,
                 label: b.name,
               })) || []
@@ -373,7 +373,7 @@ function EmployeeForm({
             value={formData.department_id}
             onChange={handleDepartmentChange}
             options={
-              metadata?.department_meta.map((d) => ({
+              metadata?.department_meta?.map((d) => ({
                 value: d.id,
                 label: d.name,
               })) || []
@@ -404,7 +404,7 @@ function EmployeeForm({
               value={formData.role_id}
               onChange={(val) => handleChange("role_id", val)}
               options={
-                metadata?.role_meta.map((r) => ({
+                metadata?.role_meta?.map((r) => ({
                   value: r.id,
                   label: r.name,
                 })) || []
@@ -714,7 +714,7 @@ export function EmployeePage() {
             onChange={(val) => setFilterBranch(val)}
             options={[
               { value: "", label: "Semua Cabang" },
-              ...(metadata?.branch_meta.map((b) => ({
+              ...(metadata?.branch_meta?.map((b) => ({
                 value: b.id,
                 label: b.name,
               })) || []),
@@ -728,7 +728,7 @@ export function EmployeePage() {
             onChange={(val) => setFilterDepartment(val)}
             options={[
               { value: "", label: "Semua Departemen" },
-              ...(metadata?.department_meta.map((d) => ({
+              ...(metadata?.department_meta?.map((d) => ({
                 value: d.id,
                 label: d.name,
               })) || []),

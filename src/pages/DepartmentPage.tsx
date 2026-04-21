@@ -659,7 +659,7 @@ function DepartmentContent() {
 
       {/* Forms */}
       <Modal open={showDeptForm || !!editDept} title={editDept ? "Edit Departemen" : "Tambah Departemen"} onClose={() => { setShowDeptForm(false); setEditDept(null); }}>
-        <DepartmentForm onClose={() => { setShowDeptForm(false); setEditDept(null); }} onSubmit={handleDeptSubmit} editDepartment={editDept || undefined} branches={metadata?.branch_meta.map(b=>({id: Number(b.id), name: b.name})) || []} isLoading={deptMutLoading} />
+        <DepartmentForm onClose={() => { setShowDeptForm(false); setEditDept(null); }} onSubmit={handleDeptSubmit} editDepartment={editDept || undefined} branches={metadata?.branch_meta?.map(b=>({id: Number(b.id), name: b.name})) || []} isLoading={deptMutLoading} />
       </Modal>
 
       <Modal open={!!showPosForm || !!editPos} title={editPos ? "Edit Jabatan" : "Tambah Jabatan"} onClose={() => { setShowPosForm(false); setEditPos(null); }}>

@@ -518,7 +518,7 @@ function EmployeeForm({
             value={formData.branch_id}
             onChange={(val) => handleChange("branch_id", val)}
             options={
-              metadata?.branch_meta.map((b) => ({
+              metadata?.branch_meta?.map((b) => ({
                 value: b.id,
                 label: b.name,
               })) || []
@@ -531,7 +531,7 @@ function EmployeeForm({
             value={formData.department_id}
             onChange={(val) => handleChange("department_id", val)}
             options={
-              metadata?.department_meta.map((d) => ({
+              metadata?.department_meta?.map((d) => ({
                 value: d.id,
                 label: d.name,
               })) || []
@@ -546,7 +546,7 @@ function EmployeeForm({
             value={formData.job_positions_id}
             onChange={(val) => handleChange("job_positions_id", val)}
             options={
-              metadata?.job_position_meta.map((p) => ({
+              metadata?.job_position_meta?.map((p) => ({
                 value: p.id,
                 label: p.name,
               })) || []
@@ -559,7 +559,7 @@ function EmployeeForm({
             value={formData.role_id}
             onChange={(val) => handleChange("role_id", val)}
             options={
-              metadata?.role_meta.map((r) => ({
+              metadata?.role_meta?.map((r) => ({
                 value: r.id,
                 label: r.name,
               })) || []
@@ -771,7 +771,7 @@ function ContractForm({
           label="Tipe Kontrak *"
           value={formData.contract_type}
           onChange={(val) => handleChange("contract_type", val)}
-          options={Object.entries(CONTRACT_TYPE_LABELS).map(
+          options={Object.entries(CONTRACT_TYPE_LABELS)?.map(
             ([value, label]) => ({
               value,
               label,
