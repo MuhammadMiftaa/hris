@@ -10,7 +10,14 @@
 
 function toDate(value: string | Date | null | undefined): Date | null {
   if (!value) return null;
-  return value instanceof Date ? value : new Date(value);
+  if (value instanceof Date) return value;
+
+  if (typeof value === "string") {
+    const stripped = value.replace(/Z$/, "").replace(" ", "T");
+    return new Date(stripped);
+  }
+
+  return new Date(value);
 }
 
 // ─── date-only formatters ───────────────────────────────────────────
