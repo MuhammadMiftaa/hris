@@ -42,6 +42,7 @@ import type {
   NotClockedInEmployee,
   ExpiringContract,
 } from "@/types/dashboard";
+import { PermissionGate } from "@/components/ui/PermissionGate";
 
 const REQUEST_TYPE_CONFIG: Record<
   string,
@@ -327,7 +328,8 @@ function AttendanceMutabaahPanel({
       )}
     >
       {/* Clock Widget */}
-      <div>
+      <PermissionGate permission={PERMISSIONS.HOME_CLOCK_IN}>
+        <div>
         {clockWidget.loading && !clockWidget.status ? (
           <ClockWidgetSkeleton />
         ) : (
@@ -341,10 +343,12 @@ function AttendanceMutabaahPanel({
           />
         )}
       </div>
+      </PermissionGate>
 
       {/* Mutaba'ah Widget — always for non-intern, no clock-in dependency */}
       {showMutabaah && !empDashLoading && empDashData?.mutabaah_today && (
-        <div className="flex flex-col justify-center">
+        <PermissionGate permission={PERMISSIONS.MUTABAAH_CREATE}>
+          <div className="flex flex-col justify-center">
           <MutabaahCard
             status={empDashData.mutabaah_today}
             onSubmit={onMutabaahSubmit}
@@ -352,13 +356,16 @@ function AttendanceMutabaahPanel({
             loading={mutabaahLoading}
           />
         </div>
+        </PermissionGate>
       )}
 
       {/* Skeleton for mutabaah loading */}
       {showMutabaah && empDashLoading && (
-        <div className="flex flex-col justify-center">
-          <MutabaahWidgetSkeleton />
-        </div>
+        <PermissionGate permission={PERMISSIONS.MUTABAAH_CREATE}>
+          <div className="flex flex-col justify-center">
+            <MutabaahWidgetSkeleton />
+          </div>
+        </PermissionGate>
       )}
     </div>
   );
@@ -496,7 +503,8 @@ function MutabaahCard({
 
         {/* Cancel link */}
         {canCancel && (
-          <div className="mt-2 text-center">
+          <PermissionGate permission={PERMISSIONS.MUTABAAH_UPDATE}>
+            <div className="mt-2 text-center">
             <button
               onClick={onCancel}
               disabled={loading}
@@ -505,6 +513,7 @@ function MutabaahCard({
               Batalkan pencatatan
             </button>
           </div>
+          </PermissionGate>
         )}
 
         {/* Info when not submitted */}
@@ -882,7 +891,7 @@ export function DashboardPage() {
   const { cachedProfile } = useAuth();
   const { data: profile } = useEmployeeProfile();
   const clockWidget = useClockWidget();
-  const { data: empDashData, loading: empDashLoading } = useEmployeeDashboard();
+    const { data: empDashData, loading: empDashLoading, refetch: refetchDashboard } = useEmployeeDashboard();
   const { data: scheduleData, loading: scheduleLoading } = useTodaySchedule();
   const { hasPermission } = usePermission();
 
@@ -908,7 +917,7 @@ export function DashboardPage() {
     actionLoading: mutabaahLoading,
     submitToday,
     cancelToday,
-  } = useMutabaahActions();
+    } = useMutabaahActions(refetchDashboard);
 
   const handleMutabaahSubmit = async () => {
     // Opsional: passing attendance_log_id jika ada, tapi bukan requirement

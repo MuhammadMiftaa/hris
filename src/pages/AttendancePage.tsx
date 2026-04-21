@@ -571,8 +571,6 @@ function ManualAttendanceForm({
       newErrors.attendance_date = "Tanggal tidak boleh di masa depan";
     if (!formData.clock_in_at) newErrors.clock_in_at = "Jam masuk wajib diisi";
     if (!formData.notes.trim()) newErrors.notes = "Catatan wajib diisi";
-    if (formData.notes.trim().length < 10)
-      newErrors.notes = "Catatan minimal 10 karakter";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
