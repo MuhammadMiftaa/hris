@@ -7,6 +7,7 @@ import type {
   RejectLeavePayload,
   LeaveListParams,
   LeaveBalanceListParams,
+  LeaveMetadataResponse,
 } from "@/types/leave";
 import { apiCall } from "@/lib/api";
 
@@ -35,6 +36,11 @@ export async function fetchLeaveTypes() {
 /** GET /leave-types/:id — Get leave type by ID */
 export async function fetchLeaveTypeById(id: number) {
   return apiCall<LeaveType>(`/leave-types/${id}`);
+}
+
+/** GET /leave-requests/metadata — Get metadata */
+export async function fetchLeaveMetadata() {
+  return apiCall<LeaveMetadataResponse>("/leave-requests/metadata");
 }
 
 // ════════════════════════════════════════════

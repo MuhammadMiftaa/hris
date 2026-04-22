@@ -515,15 +515,6 @@ function MutabaahCard({
           </div>
           </PermissionGate>
         )}
-
-        {/* Info when not submitted */}
-        {!status.is_submitted && (
-          <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/8 px-3 py-2">
-            <p className="text-center text-xs text-amber-600">
-              📖 Jangan lupa catat tilawah setelah membaca
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -938,8 +929,6 @@ export function DashboardPage() {
   const handleClockOut = (payload: ClockOutPayload) => {
     clockWidget.clockOut(payload);
   };
-
-
 
   // Determine work status
   const isWorkingDay =

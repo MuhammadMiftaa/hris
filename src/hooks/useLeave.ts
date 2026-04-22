@@ -9,6 +9,7 @@ import type {
   RejectLeavePayload,
   LeaveListParams,
   LeaveBalanceListParams,
+  LeaveMetadataResponse,
 } from "@/types/leave";
 import {
   fetchLeaveTypes,
@@ -17,6 +18,7 @@ import {
   createLeaveRequest as createRequestApi,
   approveLeaveRequest as approveRequestApi,
   rejectLeaveRequest as rejectRequestApi,
+  fetchLeaveMetadata,
 } from "@/lib/leave-api";
 import {
   getDummyLeaveTypes,
@@ -36,6 +38,60 @@ interface AsyncState<T> {
 // ════════════════════════════════════════════
 // useLeaveTypeList — Fetch all leave types (read-only)
 // ════════════════════════════════════════════
+
+export function useLeaveMetadata() {
+  const { isDemo } = useDemo();
+  const [state, setState] = useState<AsyncState<LeaveMetadataResponse>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  const fetchRef = useRef(0);
+
+  const refetch = useCallback(() => {
+    if (isDemo) {
+      setState({
+        data: {
+          leave_type_meta: getDummyLeaveTypes().map(lt => ({ id: String(lt.id), name: lt.name })),
+          status_meta: [
+            { id: "pending", name: "Menunggu" },
+            { id: "approved_leader", name: "Disetujui Leader" },
+            { id: "approved_hr", name: "Disetujui HR" },
+            { id: "rejected", name: "Ditolak" },
+          ],
+          employee_meta: [{ id: "1", name: "Budi (Demo)" }, { id: "2", name: "Andi (Demo)" }],
+        },
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
+    const id = ++fetchRef.current;
+    setState((s) => ({ ...s, loading: true, error: null }));
+
+    fetchLeaveMetadata()
+      .then((res) => {
+        if (id === fetchRef.current) {
+          setState({ data: res.data, loading: false, error: null });
+        }
+      })
+      .catch((err: unknown) => {
+        if (id === fetchRef.current) {
+          const message =
+            err instanceof Error ? err.message : "Gagal memuat metadata cuti";
+          setState({ data: null, loading: false, error: message });
+        }
+      });
+  }, [isDemo]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { ...state, refetch };
+}
 
 export function useLeaveTypeList() {
   const { isDemo } = useDemo();

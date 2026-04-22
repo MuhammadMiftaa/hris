@@ -4,7 +4,6 @@ import {
   Plus,
   BarChart3,
   X,
-  AlertCircle,
   Eye,
   Check,
   Ban,
@@ -20,17 +19,15 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { ApprovalTimeline } from "@/components/ui/ApprovalTimeline";
 import type { TimelineStep } from "@/components/ui/ApprovalTimeline";
 import {
-  useLeaveTypeList,
   useLeaveBalanceList,
   useLeaveRequestList,
   useLeaveRequestMutations,
+  useLeaveMetadata,
 } from "@/hooks/useLeave";
-import { useEmployeeList } from "@/hooks/useEmployee";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
 import {
   LEAVE_STATUS_OPTIONS,
-  LEAVE_CATEGORY_OPTIONS,
   type LeaveRequestStatus,
   type LeaveRequest,
   type CreateLeavePayload,
@@ -137,7 +134,8 @@ function LeaveRequestForm({
   onSubmit: (payload: CreateLeavePayload) => void;
   isLoading?: boolean;
 }) {
-  const { data: leaveTypes } = useLeaveTypeList();
+  const { data: metadata } = useLeaveMetadata();
+  const leaveTypes = metadata?.leave_type_meta;
   const [formData, setFormData] = useState({
     leave_type_id: "",
     start_date: "",
@@ -151,11 +149,6 @@ function LeaveRequestForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
-
-  const selectedLeaveType = useMemo(
-    () => leaveTypes?.find((lt) => String(lt.id) === formData.leave_type_id),
-    [leaveTypes, formData.leave_type_id],
-  );
 
   const totalDays = useMemo(() => {
     if (!formData.start_date || !formData.end_date) return 0;
@@ -180,10 +173,6 @@ function LeaveRequestForm({
       new Date(formData.end_date) < new Date(formData.start_date)
     ) {
       newErrors.end_date = "Tanggal selesai tidak boleh sebelum tanggal mulai";
-    }
-    if (selectedLeaveType?.requires_document && !formData.document_url.trim()) {
-      newErrors.document_url =
-        "Dokumen pendukung wajib diisi untuk jenis cuti ini";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -212,12 +201,9 @@ function LeaveRequestForm({
           options={
             leaveTypes?.map((lt) => ({
               value: String(lt.id),
-              label: `${lt.name} ${lt.category === "annual" ? `(Maks. ${lt.max_total_duration_per_year} hari/tahun)` : ""}`,
-              group: LEAVE_CATEGORY_OPTIONS.find((c) => c.value === lt.category)
-                ?.label,
+              label: lt.name,
             })) || []
           }
-          grouped
           placeholder="Pilih jenis cuti..."
           searchPlaceholder="Cari jenis cuti..."
         />
@@ -225,26 +211,6 @@ function LeaveRequestForm({
           <p className="text-xs text-(--destructive)">{errors.leave_type_id}</p>
         )}
       </div>
-
-      {selectedLeaveType && (
-        <div className="rounded-lg bg-(--muted)/50 border border-(--border) p-3 text-xs space-y-1">
-          {selectedLeaveType.max_duration_per_request && (
-            <p className="text-(--muted-foreground)">
-              Maksimal per pengajuan:{" "}
-              <strong>
-                {selectedLeaveType.max_duration_per_request}{" "}
-                {selectedLeaveType.max_duration_unit}
-              </strong>
-            </p>
-          )}
-          {selectedLeaveType.requires_document && (
-            <p className="flex items-center gap-1 text-amber-600">
-              <AlertCircle size={12} />
-              Wajib melampirkan: {selectedLeaveType.requires_document_type}
-            </p>
-          )}
-        </div>
-      )}
 
       <div className="grid grid-cols-2 gap-4">
         <Input
@@ -291,7 +257,7 @@ function LeaveRequestForm({
 
       <Input
         id="document_url"
-        label={`URL Dokumen Pendukung${selectedLeaveType?.requires_document ? " *" : ""}`}
+        label="URL Dokumen Pendukung"
         value={formData.document_url}
         onChange={(e) => handleChange("document_url", e.target.value)}
         placeholder="https://..."
@@ -582,7 +548,8 @@ function LeaveRequestTab() {
   );
 
   const { data: requests, loading, refetch } = useLeaveRequestList(params);
-  const { data: employees } = useEmployeeList({ is_active: true });
+  const { data: metadata } = useLeaveMetadata();
+  const employees = metadata?.employee_meta;
   const {
     loading: mutLoading,
     createRequest,
@@ -628,7 +595,7 @@ function LeaveRequestTab() {
               { value: "", label: "Semua Pegawai" },
               ...(employees?.map((e) => ({
                 value: String(e.id),
-                label: e.full_name,
+                label: e.name,
               })) || []),
             ]}
             placeholder="Filter pegawai..."
@@ -902,7 +869,8 @@ function LeaveBalanceTab() {
   );
 
   const { data: balances, loading } = useLeaveBalanceList(params);
-  const { data: employees } = useEmployeeList({ is_active: true });
+  const { data: metadata } = useLeaveMetadata();
+  const employees = metadata?.employee_meta;
 
   return (
     <div className="space-y-4">
@@ -914,7 +882,7 @@ function LeaveBalanceTab() {
             { value: "", label: "Semua Pegawai" },
             ...(employees?.map((e) => ({
               value: String(e.id),
-              label: e.full_name,
+              label: e.name,
             })) || []),
           ]}
           placeholder="Filter pegawai..."
@@ -1056,7 +1024,8 @@ export function LeavePage() {
         title="Cuti"
         description="Kelola pengajuan cuti, saldo, dan konfigurasi jenis cuti"
         actions={
-          <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50 w-fit">
+          <PermissionGate permission={PERMISSIONS.LEAVE_BALANCE_READ}>
+            <div className="flex gap-1 p-1 rounded-lg bg-(--muted)/50 w-fit">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -1076,6 +1045,7 @@ export function LeavePage() {
               );
             })}
           </div>
+          </PermissionGate>
         }
       />
 

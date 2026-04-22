@@ -159,3 +159,9 @@ export interface LeaveTypeMetadata {
   category_meta: MetaItem[];
   duration_unit_meta: MetaItem[];
 }
+
+export interface LeaveMetadataResponse {
+  leave_type_meta: MetaItem[];
+  status_meta: MetaItem[];
+  employee_meta: MetaItem[];
+}

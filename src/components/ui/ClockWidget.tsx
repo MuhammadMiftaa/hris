@@ -2,8 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   LogIn,
   LogOut,
-  Smartphone,
-  Monitor,
   CheckCircle2,
   Camera,
 } from "lucide-react";
@@ -63,7 +61,6 @@ function getGeolocation(): Promise<{ latitude: number; longitude: number }> {
 
 export function ClockWidget({
   status,
-  isMobile,
   onClockIn,
   onClockOut,
   disabled = false,
@@ -179,8 +176,7 @@ export function ClockWidget({
         {/* Device badge */}
         <div className="mb-3 flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-            {isMobile ? <Smartphone size={11} /> : <Monitor size={11} />}
-            {isMobile ? "Mobile" : "Desktop"}
+            Absen
           </span>
           {status && status.late_minutes > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-red-500/90 px-2.5 py-1 text-xs font-semibold text-white">
@@ -315,15 +311,6 @@ export function ClockWidget({
             </div>
           )}
         </div>
-
-        {/* Camera instruction */}
-        {!isComplete && (
-          <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/8 px-3 py-2">
-            <p className="text-center text-xs text-amber-600">
-              📸 Foto wajah akan diambil saat presensi untuk verifikasi
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
