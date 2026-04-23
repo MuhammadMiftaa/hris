@@ -123,6 +123,7 @@ const getDummyAttendanceMetadataFallback = (): AttendanceMetadata => ({
   clock_method_meta: [],
   override_type_meta: [],
   employee_meta: [],
+  branch_meta: [],
 });
 
 export function useAttendanceMetadata() {

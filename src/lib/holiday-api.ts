@@ -4,6 +4,8 @@ import type {
   UpdateHolidayPayload,
   HolidayListParams,
   HolidayMetadata,
+  SyncHolidayPayload,
+  SyncHolidayResponse,
 } from "@/types/holiday";
 import { apiCall } from "@/lib/api";
 
@@ -69,5 +71,13 @@ export async function updateHoliday(
 export async function deleteHoliday(id: number) {
   return apiCall<{ message: string }>(`/holidays/${id}`, {
     method: "DELETE",
+  });
+}
+
+/** POST /holidays/sync — Sync national holidays from external API */
+export async function syncHolidays(payload: SyncHolidayPayload) {
+  return apiCall<SyncHolidayResponse>("/holidays/sync", {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }

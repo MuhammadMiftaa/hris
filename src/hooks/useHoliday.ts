@@ -6,6 +6,7 @@ import type {
   CreateHolidayPayload,
   UpdateHolidayPayload,
   HolidayListParams,
+  SyncHolidayPayload,
 } from "@/types/holiday";
 import {
   fetchHolidays,
@@ -13,6 +14,7 @@ import {
   createHoliday as createHolidayApi,
   updateHoliday as updateHolidayApi,
   deleteHoliday as deleteHolidayApi,
+  syncHolidays as syncHolidaysApi,
 } from "@/lib/holiday-api";
 import { getDummyHolidays } from "@/lib/dummy";
 import toast from "react-hot-toast";
@@ -194,4 +196,52 @@ export function useHolidayMutations(onSuccess?: () => void) {
   );
 
   return { loading, createHoliday, updateHoliday, deleteHoliday };
+}
+
+// ════════════════════════════════════════════
+// useHolidaySyncMutation — Sync holidays from external API
+// ════════════════════════════════════════════
+
+export function useHolidaySyncMutation(onSuccess?: () => void) {
+  const { isDemo } = useDemo();
+  const [loading, setLoading] = useState(false);
+
+  const syncHolidays = useCallback(
+    async (payload: SyncHolidayPayload) => {
+      if (isDemo) {
+        toast("Demo mode — data is read-only", { icon: "🔒" });
+        return null;
+      }
+      setLoading(true);
+      try {
+        const res = await syncHolidaysApi(payload);
+        const data = res.data;
+        if (data.synced > 0) {
+          toast.success(
+            `Berhasil sinkronisasi ${data.synced} hari libur nasional tahun ${data.year}` +
+              (data.skipped > 0 ? ` (${data.skipped} sudah ada)` : ""),
+          );
+        } else {
+          toast(
+            `Semua hari libur nasional tahun ${data.year} sudah tersinkronisasi`,
+            { icon: "ℹ️" },
+          );
+        }
+        onSuccess?.();
+        return data;
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Gagal sinkronisasi hari libur nasional";
+        toast.error(message);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isDemo, onSuccess],
+  );
+
+  return { loading, syncHolidays };
 }

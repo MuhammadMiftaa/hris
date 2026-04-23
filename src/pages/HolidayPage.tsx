@@ -7,6 +7,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateLong } from "@/utils/date";
@@ -17,7 +18,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Button } from "@/components/ui/FormElements";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { SummaryCard } from "@/components/ui/SummaryCard";
-import { useHolidayList, useHolidayMutations, useHolidayMetadata } from "@/hooks/useHoliday";
+import { useHolidayList, useHolidayMutations, useHolidayMetadata, useHolidaySyncMutation } from "@/hooks/useHoliday";
 
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
@@ -27,6 +28,7 @@ import {
   type Holiday,
   type HolidayType,
   type CreateHolidayPayload,
+  type SyncHolidayPayload,
 } from "@/types/holiday";
 
 // ════════════════════════════════════════════
@@ -295,6 +297,117 @@ function HolidayForm({
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
           {editHoliday ? "Simpan" : "Tambah"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+// ════════════════════════════════════════════
+// SYNC HOLIDAY FORM
+// ════════════════════════════════════════════
+
+function SyncHolidayForm({
+  onClose,
+  onSubmit,
+  branches,
+  isLoading,
+}: {
+  onClose: () => void;
+  onSubmit: (payload: SyncHolidayPayload) => void;
+  branches: { id: string | number; name: string }[];
+  isLoading?: boolean;
+}) {
+  const currentYear = new Date().getFullYear();
+  const [formData, setFormData] = useState({
+    year: String(currentYear),
+    branch_id: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    const yearNum = parseInt(formData.year);
+    if (!formData.year || isNaN(yearNum)) {
+      newErrors.year = "Tahun wajib diisi";
+    } else if (yearNum < 2000 || yearNum > 2100) {
+      newErrors.year = "Tahun harus antara 2000 dan 2100";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const payload: SyncHolidayPayload = {
+      year: parseInt(formData.year),
+    };
+    if (formData.branch_id) {
+      payload.branch_id = parseInt(formData.branch_id);
+    }
+    onSubmit(payload);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="rounded-lg bg-(--muted)/30 border border-(--border) p-4">
+        <p className="text-sm text-(--foreground)">
+          Sinkronisasi akan mengambil data hari libur nasional dari sumber resmi
+          pemerintah Indonesia dan menambahkannya ke dalam sistem.
+        </p>
+        <p className="text-xs text-(--muted-foreground) mt-2">
+          Hari libur yang sudah ada tidak akan ditimpa atau diduplikasi.
+        </p>
+      </div>
+
+      <Input
+        id="sync-year"
+        label="Tahun"
+        type="number"
+        value={formData.year}
+        onChange={(e) => handleChange("year", e.target.value)}
+        placeholder="Contoh: 2026"
+        error={errors.year}
+        autoFocus
+      />
+
+      <SearchableSelect
+        label="Cabang (Opsional)"
+        value={formData.branch_id}
+        onChange={(val) => handleChange("branch_id", val)}
+        options={[
+          { value: "", label: "Semua Cabang — berlaku untuk seluruh cabang" },
+          ...branches.map((b) => ({ value: String(b.id), label: b.name })),
+        ]}
+        placeholder="Kosongkan jika berlaku untuk semua cabang"
+        searchPlaceholder="Cari cabang..."
+      />
+
+      <p className="text-xs text-(--muted-foreground)">
+        {formData.branch_id
+          ? "Hari libur akan ditambahkan hanya untuk cabang yang dipilih."
+          : "Hari libur akan ditambahkan sebagai libur nasional untuk semua cabang."}
+      </p>
+
+      <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onClose}
+          disabled={isLoading}
+        >
+          Batal
+        </Button>
+        <Button type="submit" variant="primary" isLoading={isLoading}>
+          <RefreshCw size={16} />
+          Sinkronisasi
         </Button>
       </div>
     </form>
@@ -741,6 +854,7 @@ export function HolidayPage() {
   const [filterBranch, setFilterBranch] = useState("");
 
   const [showForm, setShowForm] = useState(false);
+  const [showSyncForm, setShowSyncForm] = useState(false);
   const [editHoliday, setEditHoliday] = useState<Holiday | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Holiday | null>(null);
 
@@ -754,6 +868,7 @@ export function HolidayPage() {
     updateHoliday,
     deleteHoliday,
   } = useHolidayMutations(refetch);
+  const { loading: syncLoading, syncHolidays } = useHolidaySyncMutation(refetch);
 
   const typeMeta = metadata?.holiday_type_meta ?? [];
   const branchMeta = metadata?.branch_meta ?? [];
@@ -794,6 +909,11 @@ export function HolidayPage() {
     if (result) setDeleteTarget(null);
   };
 
+  const handleSync = async (payload: SyncHolidayPayload) => {
+    const result = await syncHolidays(payload);
+    if (result) setShowSyncForm(false);
+  };
+
   return (
     <MainLayout>
       {/* Sticky Header */}
@@ -801,17 +921,28 @@ export function HolidayPage() {
         title="Hari Libur"
         description="Kelola kalender hari libur nasional dan perusahaan"
         actions={
-          <PermissionGate permission={PERMISSIONS.HOLIDAY_CREATE}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="self-start sm:self-auto"
-          >
-            <Plus size={16} />
-            <span className="hidden sm:block">Tambah Hari Libur</span>
-          </Button>
-        </PermissionGate>
+          <div className="flex gap-2">
+            <PermissionGate permission={PERMISSIONS.HOLIDAY_CREATE}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSyncForm(true)}
+                className="self-start sm:self-auto"
+              >
+                <RefreshCw size={16} />
+                <span className="hidden sm:block">Sinkronisasi</span>
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setShowForm(true)}
+                className="self-start sm:self-auto"
+              >
+                <Plus size={16} />
+                <span className="hidden sm:block">Tambah Hari Libur</span>
+              </Button>
+            </PermissionGate>
+          </div>
         }
       />
 
@@ -998,6 +1129,20 @@ export function HolidayPage() {
             isLoading={mutationLoading}
           />
         )}
+      </Modal>
+
+      {/* Sync Modal */}
+      <Modal
+        open={showSyncForm}
+        title="Sinkronisasi Hari Libur Nasional"
+        onClose={() => setShowSyncForm(false)}
+      >
+        <SyncHolidayForm
+          onClose={() => setShowSyncForm(false)}
+          onSubmit={handleSync}
+          branches={branchMeta}
+          isLoading={syncLoading}
+        />
       </Modal>
 
       {/* Delete Confirmation */}

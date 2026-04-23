@@ -62,3 +62,17 @@ export interface HolidayMetadata {
   holiday_type_meta: MetaItem[];
   branch_meta: MetaItem[];
 }
+
+// ── Sync Holiday ───────────────────────────────────────
+
+export interface SyncHolidayPayload {
+  year: number;
+  branch_id?: number;
+}
+
+export interface SyncHolidayResponse {
+  synced: number;
+  skipped: number;
+  year: number;
+  errors?: string[];
+}

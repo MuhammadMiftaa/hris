@@ -31,8 +31,6 @@ import {
   useManualAttendanceMutations,
 } from "@/hooks/useAttendance";
 import { SummaryCard } from "@/components/ui/SummaryCard";
-import { useEmployeeList } from "@/hooks/useEmployee";
-import { useBranchList } from "@/hooks/useBranch";
 import { useAttendanceMetadata } from "@/hooks/useMetadata";
 import {
   type AttendanceStatus,
@@ -744,14 +742,15 @@ function AttendanceLogTab() {
   );
 
   const { data: logs, loading, refetch } = useAttendanceList(params);
-  const { data: employees } = useEmployeeList({ is_active: true });
-  const { data: branches } = useBranchList();
   const { data: metadata } = useAttendanceMetadata();
   const { createManualAttendance, loading: manualLoading } =
     useManualAttendanceMutations(() => {
       setShowManualForm(false);
       refetch();
     });
+
+  const employees = metadata?.employee_meta ?? [];
+  const branches = metadata?.branch_meta ?? [];
 
   const summary = useMemo(() => {
     if (!logs) return { present: 0, late: 0, absent: 0, leave: 0 };
@@ -844,10 +843,10 @@ function AttendanceLogTab() {
             onChange={setFilterEmployee}
             options={[
               { value: "", label: "Semua Pegawai" },
-              ...(employees?.map((e) => ({
+              ...employees.map((e) => ({
                 value: String(e.id),
-                label: e.full_name,
-              })) || []),
+                label: e.name,
+              })),
             ]}
             placeholder="Filter pegawai..."
             searchPlaceholder="Cari pegawai..."
@@ -869,10 +868,10 @@ function AttendanceLogTab() {
             onChange={setFilterBranch}
             options={[
               { value: "", label: "Semua Cabang" },
-              ...(branches?.map((b) => ({
+              ...branches.map((b) => ({
                 value: String(b.id),
                 label: b.name,
-              })) || []),
+              })),
             ]}
             placeholder="Filter cabang..."
             searchPlaceholder="Cari cabang..."
@@ -1054,7 +1053,7 @@ function AttendanceLogTab() {
         <ManualAttendanceForm
           onClose={() => setShowManualForm(false)}
           onSubmit={(payload) => createManualAttendance(payload)}
-          employees={employees || []}
+          employees={employees.map((e) => ({ id: Number(e.id), full_name: e.name }))}
           isLoading={manualLoading}
         />
       </Modal>
@@ -1082,9 +1081,8 @@ function AttendanceOverrideTab() {
   );
 
   const { data: overrides, loading, refetch } = useOverrideList(params);
-  const { data: employees } = useEmployeeList({ is_active: true });
-  const { data: logs } = useAttendanceList({});
   const { data: metadata } = useAttendanceMetadata();
+  const { data: logs } = useAttendanceList({});
   const {
     loading: mutLoading,
     createOverride,
@@ -1140,9 +1138,9 @@ function AttendanceOverrideTab() {
             onChange={setFilterEmployee}
             options={[
               { value: "", label: "Semua Pegawai" },
-              ...(employees?.map((e) => ({
+              ...(metadata?.employee_meta?.map((e) => ({
                 value: String(e.id),
-                label: e.full_name,
+                label: e.name,
               })) || []),
             ]}
             placeholder="Filter pegawai..."

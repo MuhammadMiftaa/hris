@@ -14,6 +14,7 @@ export interface AttendanceMetadata {
   clock_method_meta: { id: string; name: string }[];
   override_type_meta: { id: string; name: string }[];
   employee_meta: { id: string; name: string }[];
+  branch_meta: { id: string; name: string }[];
 }
 
 export interface AttendanceLog {
