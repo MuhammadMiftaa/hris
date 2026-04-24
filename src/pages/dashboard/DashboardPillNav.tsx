@@ -70,7 +70,7 @@ export function DashboardPillNav({
   };
 
   return (
-    <div className="sticky top-[60px] z-10 bg-(--background)/90 backdrop-blur-md border-b border-(--border) py-2 px-4 flex gap-1.5 overflow-x-auto md:hidden -mx-4 mb-4 scrollbar-hide">
+    <div className="sticky top-[0px] z-10 bg-(--background)/90 backdrop-blur-md border-b border-(--border) py-2 px-4 flex gap-1.5 overflow-x-auto md:hidden -mx-4 mb-4 scrollbar-hide">
       {sections.map((s) => (
         <button
           key={s.id}
