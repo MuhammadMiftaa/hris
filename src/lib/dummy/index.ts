@@ -150,6 +150,8 @@ export {
   getDummyEmployeeDashboard,
   getDummyHRDDashboard,
   getDummyTodayStatus,
+  getDummyRankingsDashboard,
+  getDummyDashboardMetadata,
 } from "./dashboard.dummy";
 
 // Audit Log

@@ -10,6 +10,8 @@ import type {
   TeamMutabaahSummary,
   NotClockedInEmployee,
   ExpiringContract,
+  DashboardRankingsData,
+  DashboardMetadataData,
 } from "@/types/dashboard";
 import type { MutabaahTodayStatus } from "@/types/mutabaah";
 
@@ -271,4 +273,45 @@ export function getDummyTodayStatus(
   clockedIn: boolean = true,
 ): TodayAttendanceStatus {
   return clockedIn ? DUMMY_TODAY_STATUS : DUMMY_TODAY_STATUS_NOT_CLOCKED_IN;
+}
+
+export function getDummyRankingsDashboard(): DashboardRankingsData {
+  return {
+    fastest_arrival: [
+      { rank: 1, employee_id: 1, employee_name: "Ahmad Fauzan", employee_number: "EMP-001", value: -15, value_label: "-15m" },
+      { rank: 2, employee_id: 2, employee_name: "Siti Rahayu", employee_number: "EMP-002", value: -12, value_label: "-12m" },
+      { rank: 3, employee_id: 3, employee_name: "Budi Santoso", employee_number: "EMP-003", value: -10, value_label: "-10m" },
+      { rank: 4, employee_id: 4, employee_name: "Dewi Lestari", employee_number: "EMP-004", value: -8, value_label: "-8m" },
+      { rank: 5, employee_id: 5, employee_name: "Usman Hakim", employee_number: "EMP-005", value: -5, value_label: "-5m" },
+    ],
+    top_tilawah: [
+      { rank: 1, department_id: 1, department_name: "IT Development", value: 95.5, value_label: "95.5%" },
+      { rank: 2, department_id: 2, department_name: "Finance", value: 88.0, value_label: "88.0%" },
+      { rank: 3, department_id: 3, department_name: "HR", value: 85.0, value_label: "85.0%" },
+      { rank: 4, department_id: 4, department_name: "Marketing", value: 80.5, value_label: "80.5%" },
+      { rank: 5, department_id: 5, department_name: "Operations", value: 75.0, value_label: "75.0%" },
+    ],
+    most_late: [
+      { rank: 1, employee_id: 6, employee_name: "Rizki Pratama", employee_number: "EMP-006", value: 125, value_label: "125m" },
+      { rank: 2, employee_id: 7, employee_name: "Dinda Permata", employee_number: "EMP-007", value: 90, value_label: "90m" },
+      { rank: 3, employee_id: 8, employee_name: "Agus Wijaya", employee_number: "EMP-008", value: 45, value_label: "45m" },
+      { rank: 4, employee_id: 9, employee_name: "Siti Nurhaliza", employee_number: "EMP-009", value: 30, value_label: "30m" },
+      { rank: 5, employee_id: 10, employee_name: "Bayu Anggara", employee_number: "EMP-010", value: 15, value_label: "15m" },
+    ],
+  };
+}
+
+export function getDummyDashboardMetadata(): DashboardMetadataData {
+  return {
+    leave_type_meta: [
+      { id: "1", name: "Cuti Tahunan" },
+      { id: "2", name: "Cuti Sakit" },
+      { id: "3", name: "Cuti Khusus" },
+    ],
+    recent_attendance_meta: [
+      { id: "101", name: "24 April 2026 (08:00 - 17:00)" },
+      { id: "100", name: "23 April 2026 (08:05 - 17:15)" },
+      { id: "99", name: "22 April 2026 (07:55 - 16:50)" },
+    ],
+  };
 }

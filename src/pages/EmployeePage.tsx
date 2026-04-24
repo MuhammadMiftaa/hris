@@ -823,7 +823,18 @@ export function EmployeePage() {
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div
+                          {employee.photo_url ? (
+                            <div
+                            className="flex h-10 w-10 aspect-square rounded-full"
+                          >
+                            <img
+                              src={employee.photo_url}
+                              alt={employee.full_name}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                            </div>
+                          ) : (
+                            <div
                             className="flex h-10 w-10 aspect-square items-center justify-center rounded-full text-sm font-bold text-white"
                             style={{
                               background:
@@ -837,6 +848,7 @@ export function EmployeePage() {
                               .toUpperCase()
                               .slice(0, 2)}
                           </div>
+                          )}
                           <div>
                             <div className="font-medium text-(--foreground)">
                               {employee.full_name}
@@ -897,7 +909,16 @@ export function EmployeePage() {
                   onClick={() => navigate(`/employees/${employee.id}`)}
                   className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-(--muted)/30"
                 >
-                  <div
+                  {employee.photo_url ? (<div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <img 
+                      src={employee.photo_url}
+                      alt={employee.full_name}
+                      className="h-10 w-10 rounded-full object-cover" 
+                    />
+                  </div>) : (
+                    <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
                     style={{
                       background:
@@ -911,6 +932,7 @@ export function EmployeePage() {
                       .toUpperCase()
                       .slice(0, 2)}
                   </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-(--foreground) truncate">
                       {employee.full_name}

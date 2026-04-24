@@ -13,6 +13,7 @@ import {
   BookOpen,
   Coffee,
   Sun,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateCompact, formatDateShort, formatDateLong, formatTime, getGreeting } from "@/utils/date";
@@ -22,12 +23,15 @@ import { ClockWidget, ClockWidgetSkeleton } from "@/components/ui/ClockWidget";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MutabaahWidgetSkeleton } from "@/components/ui/MutabaahWidget";
+import { QuickRequestSection } from "@/pages/dashboard/QuickRequestSection";
+import { DashboardPillNav } from "@/pages/dashboard/DashboardPillNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEmployeeProfile } from "@/hooks/useEmployeeProfile";
 import {
   useEmployeeDashboard,
   useHRDDashboard,
   useClockWidget,
+  useDashboardRankings,
 } from "@/hooks/useDashboard";
 import { useMutabaahActions } from "@/hooks/useMutabaah";
 import { useTodaySchedule } from "@/hooks/useTodaySchedule";
@@ -41,6 +45,8 @@ import type {
   ApprovalQueueItem,
   NotClockedInEmployee,
   ExpiringContract,
+  RankingEntry,
+  DepartmentRanking,
 } from "@/types/dashboard";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 
@@ -238,6 +244,180 @@ function ExpiringContractCard({ contract }: { contract: ExpiringContract }) {
       >
         {contract.days_remaining} hari
       </span>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// RANKING WIDGETS
+// ════════════════════════════════════════════
+
+function RankingItem({
+  rank,
+  label,
+  initials,
+  avatarBg,
+  avatarColor,
+  barPercent,
+  barColor,
+  valueLabel,
+}: {
+  rank: number;
+  label: string;
+  initials: string;
+  avatarBg: string;
+  avatarColor: string;
+  barPercent: number;
+  barColor: string;
+  valueLabel: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 py-1.5">
+      <span className="w-4 text-xs font-medium text-(--muted-foreground) text-right shrink-0">
+        {rank}
+      </span>
+      <div
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-medium"
+        style={{ background: avatarBg, color: avatarColor }}
+      >
+        {initials}
+      </div>
+      <span className="flex-1 text-xs truncate text-(--foreground)">
+        {label}
+      </span>
+      <div className="w-16 h-1 rounded-full bg-(--muted) overflow-hidden shrink-0">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${barPercent}%`, background: barColor }}
+        />
+      </div>
+      <span className="w-8 text-[10px] text-(--muted-foreground) text-right shrink-0">
+        {valueLabel}
+      </span>
+    </div>
+  );
+}
+
+function FastestArrivalRanking({ data }: { data: RankingEntry[] }) {
+  if (!data?.length) return null;
+  const maxVal = Math.max(...data.map(d => Math.abs(d.value)), 1);
+
+  return (
+    <div className="rounded-xl border border-(--border) bg-(--card) p-4 flex flex-col h-full">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-emerald-500/10 text-emerald-600">
+          <Zap size={16} />
+        </div>
+        <h3 className="font-semibold text-sm text-(--foreground)">Tercepat Datang</h3>
+      </div>
+      <div className="flex-1 flex flex-col justify-center space-y-1">
+        {data.map((item, i) => (
+          <RankingItem
+            key={item.employee_id}
+            rank={item.rank}
+            label={item.employee_name}
+            initials={item.employee_name.substring(0, 2).toUpperCase()}
+            avatarBg={i === 0 ? "#10b98120" : "var(--muted)"}
+            avatarColor={i === 0 ? "#10b981" : "var(--muted-foreground)"}
+            barPercent={(Math.abs(item.value) / maxVal) * 100}
+            barColor="#10b981"
+            valueLabel={item.value_label}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TopTilawahRanking({ data }: { data: DepartmentRanking[] }) {
+  if (!data?.length) return null;
+  
+  return (
+    <div className="rounded-xl border border-(--border) bg-(--card) p-4 flex flex-col h-full">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-pink-500/10 text-pink-600">
+          <BookOpen size={16} />
+        </div>
+        <h3 className="font-semibold text-sm text-(--foreground)">Tilawah Terbaik</h3>
+      </div>
+      <div className="flex-1 flex flex-col justify-center space-y-1">
+        {data.map((item, i) => (
+          <RankingItem
+            key={item.department_id}
+            rank={item.rank}
+            label={item.department_name}
+            initials={item.department_name.substring(0, 2).toUpperCase()}
+            avatarBg={i === 0 ? "#ec489920" : "var(--muted)"}
+            avatarColor={i === 0 ? "#ec4899" : "var(--muted-foreground)"}
+            barPercent={item.value}
+            barColor="#ec4899"
+            valueLabel={item.value_label}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MostLateRanking({ data }: { data: RankingEntry[] }) {
+  if (!data?.length) return null;
+  const maxVal = Math.max(...data.map(d => d.value), 1);
+
+  return (
+    <div className="rounded-xl border border-(--border) bg-(--card) p-4 flex flex-col h-full">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-amber-500/10 text-amber-600">
+          <AlertTriangle size={16} />
+        </div>
+        <h3 className="font-semibold text-sm text-(--foreground)">Terlambat Terbanyak</h3>
+      </div>
+      <div className="flex-1 flex flex-col justify-center space-y-1">
+        {data.map((item, i) => (
+          <RankingItem
+            key={item.employee_id}
+            rank={item.rank}
+            label={item.employee_name}
+            initials={item.employee_name.substring(0, 2).toUpperCase()}
+            avatarBg={i === 0 ? "#f59e0b20" : "var(--muted)"}
+            avatarColor={i === 0 ? "#f59e0b" : "var(--muted-foreground)"}
+            barPercent={(item.value / maxVal) * 100}
+            barColor="#f59e0b"
+            valueLabel={item.value_label}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DashboardRankingsWidget() {
+  const { data, loading } = useDashboardRankings();
+
+  if (loading || !data) return null; // We can add skeleton later if needed
+
+  return (
+    <div className="space-y-3 mt-8">
+      <h2 className="text-sm font-semibold text-(--foreground)">Peringkat Bulan Ini</h2>
+      
+      {/* Desktop Grid */}
+      <div className="hidden md:grid gap-4 lg:grid-cols-3">
+        <FastestArrivalRanking data={data.fastest_arrival} />
+        <TopTilawahRanking data={data.top_tilawah} />
+        <MostLateRanking data={data.most_late} />
+      </div>
+
+      {/* Mobile Carousel */}
+      <div className="md:hidden overflow-x-auto flex gap-3 snap-x snap-mandatory pb-2 -mx-4 px-4 scrollbar-hide">
+        <div className="snap-start shrink-0 w-[85vw]">
+          <FastestArrivalRanking data={data.fastest_arrival} />
+        </div>
+        <div className="snap-start shrink-0 w-[85vw]">
+          <TopTilawahRanking data={data.top_tilawah} />
+        </div>
+        <div className="snap-start shrink-0 w-[85vw]">
+          <MostLateRanking data={data.most_late} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -556,7 +736,13 @@ function EmployeeDashboardView() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <DashboardPillNav />
+      
+      <div id="pengajuan" className="scroll-mt-20">
+        <QuickRequestSection />
+      </div>
+      
+      <div id="kehadiran" className="scroll-mt-20">
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Ringkasan Kehadiran Bulan Ini
         </h2>
@@ -592,7 +778,7 @@ function EmployeeDashboardView() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+        <div id="cuti" className="scroll-mt-20 rounded-xl border border-(--border) bg-(--card) p-5">
           <h3 className="mb-4 font-semibold text-(--foreground)">Saldo Cuti</h3>
           {(data?.leave_balances?.length || 0) === 0 ? (
             <p className="text-sm text-(--muted-foreground)">
@@ -609,7 +795,7 @@ function EmployeeDashboardView() {
             </div>
           )}
         </div>
-        <div className="rounded-xl border border-(--border) bg-(--card) p-5">
+        <div id="pending" className="scroll-mt-20 rounded-xl border border-(--border) bg-(--card) p-5">
           <h3 className="mb-4 font-semibold text-(--foreground)">
             Pengajuan Pending
           </h3>
@@ -626,6 +812,12 @@ function EmployeeDashboardView() {
           )}
         </div>
       </div>
+
+      <PermissionGate permission={PERMISSIONS.HOME_EMPLOYEE_READ}>
+        <div id="statistik" className="scroll-mt-20">
+          <DashboardRankingsWidget />
+        </div>
+      </PermissionGate>
     </div>
   );
 }
@@ -870,6 +1062,12 @@ function HRDDashboardView() {
           </div>
         </div>
       )}
+
+      <PermissionGate permission={PERMISSIONS.HOME_EMPLOYEE_READ}>
+        <div id="statistik" className="scroll-mt-20">
+          <DashboardRankingsWidget />
+        </div>
+      </PermissionGate>
     </div>
   );
 }
@@ -975,6 +1173,7 @@ export function DashboardPage() {
 
         {/* Dashboard Content */}
         {view === "employee" ? <EmployeeDashboardView /> : <HRDDashboardView />}
+
       </div>
     </MainLayout>
   );

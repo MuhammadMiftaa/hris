@@ -1,6 +1,8 @@
 import type {
   EmployeeDashboardData,
   HRDDashboardData,
+  DashboardRankingsData,
+  DashboardMetadataData,
   ClockInPayload,
   ClockOutPayload,
 } from "@/types/dashboard";
@@ -17,6 +19,16 @@ export async function fetchEmployeeDashboard() {
 /** GET /dashboard/hrd — HRD/Supervisor dashboard data */
 export async function fetchHRDDashboard() {
   return apiCall<HRDDashboardData>("/dashboard/hrd");
+}
+
+/** GET /dashboard/rankings — Rankings data */
+export async function fetchRankingsDashboard() {
+  return apiCall<DashboardRankingsData>("/dashboard/rankings");
+}
+
+/** GET /dashboard/metadata — Metadata for quick request modals */
+export async function fetchDashboardMetadata() {
+  return apiCall<DashboardMetadataData>("/dashboard/metadata");
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

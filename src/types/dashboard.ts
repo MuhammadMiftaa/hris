@@ -146,3 +146,41 @@ export interface ClockOutPayload {
   latitude: number;
   longitude: number;
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Rankings Widget
+// ══════════════════════════════════════════════════════════════════════════════
+
+export interface RankingEntry {
+  rank: number;
+  employee_id: number;
+  employee_name: string;
+  employee_number: string;
+  value: number;
+  value_label: string;
+}
+
+export interface DepartmentRanking {
+  rank: number;
+  department_id: number;
+  department_name: string;
+  value: number;
+  value_label: string;
+}
+
+export interface DashboardRankingsData {
+  fastest_arrival: RankingEntry[];
+  top_tilawah: DepartmentRanking[];
+  most_late: RankingEntry[];
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Dashboard Metadata
+// ══════════════════════════════════════════════════════════════════════════════
+
+import type { MetaItem } from "./meta";
+
+export interface DashboardMetadataData {
+  leave_type_meta: MetaItem[];
+  recent_attendance_meta: MetaItem[];
+}

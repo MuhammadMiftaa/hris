@@ -6,10 +6,13 @@ import type {
   TodayAttendanceStatus,
   ClockInPayload,
   ClockOutPayload,
+  DashboardMetadataData,
 } from "@/types/dashboard";
 import {
   fetchEmployeeDashboard,
   fetchHRDDashboard,
+  fetchRankingsDashboard,
+  fetchDashboardMetadata,
   clockIn as clockInApi,
   clockOut as clockOutApi,
 } from "@/lib/dashboard-api";
@@ -17,6 +20,9 @@ import {
   getDummyEmployeeDashboard,
   getDummyHRDDashboard,
   getDummyTodayStatus,
+
+  getDummyRankingsDashboard,
+  getDummyDashboardMetadata,
 } from "@/lib/dummy";
 import toast from "react-hot-toast";
 
@@ -274,4 +280,111 @@ export function useClockWidget(): ClockWidgetHookReturn {
     clockOut,
     refetch,
   };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// useDashboardRankings — Dashboard Rankings Data (§13)
+// ══════════════════════════════════════════════════════════════════════════════
+
+import type { DashboardRankingsData } from "@/types/dashboard";
+
+export function useDashboardRankings() {
+  const { isDemo } = useDemo();
+  const [state, setState] = useState<AsyncState<DashboardRankingsData>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  const fetchRef = useRef(0);
+
+  const refetch = useCallback(() => {
+    // Demo mode: use dummy data
+    if (isDemo) {
+      setState({
+        data: getDummyRankingsDashboard(),
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
+    // Live mode: fetch from API
+    const id = ++fetchRef.current;
+    setState((s) => ({ ...s, loading: true, error: null }));
+
+    fetchRankingsDashboard()
+      .then((res) => {
+        if (id === fetchRef.current) {
+          setState({ data: res.data, loading: false, error: null });
+        }
+      })
+      .catch((err: unknown) => {
+        if (id === fetchRef.current) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Gagal memuat ranking dashboard";
+          setState({ data: null, loading: false, error: message });
+        }
+      });
+  }, [isDemo]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { ...state, refetch };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD METADATA HOOK
+// ══════════════════════════════════════════════════════════════════════════════
+
+export function useDashboardMetadata() {
+  const [state, setState] = useState<AsyncState<DashboardMetadataData>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+  const { isDemo } = useDemo();
+  const fetchRef = useRef(0);
+
+  const refetch = useCallback(() => {
+    // Demo mode: use dummy data
+    if (isDemo) {
+      setState({
+        data: getDummyDashboardMetadata(),
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
+    // Live mode: fetch from API
+    const id = ++fetchRef.current;
+    setState((s) => ({ ...s, loading: true, error: null }));
+
+    fetchDashboardMetadata()
+      .then((res) => {
+        if (id === fetchRef.current) {
+          setState({ data: res.data, loading: false, error: null });
+        }
+      })
+      .catch((err: unknown) => {
+        if (id === fetchRef.current) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Gagal memuat metadata dashboard";
+          setState({ data: null, loading: false, error: message });
+        }
+      });
+  }, [isDemo]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { ...state, refetch };
 }

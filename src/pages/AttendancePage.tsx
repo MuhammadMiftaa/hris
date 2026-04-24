@@ -12,9 +12,11 @@ import {
   CalendarDays,
   Edit2,
   UserPlus,
-  Eye,
   Check,
   Ban,
+  MapPin,
+  Image as ImageIcon,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTime, formatDateWeekdayShort, formatDateTime } from "@/utils/date";
@@ -24,6 +26,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, Input } from "@/components/ui/FormElements";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { Modal } from "@/components/ui/Modal";
 import {
   useAttendanceList,
   useOverrideList,
@@ -112,49 +115,7 @@ function StatusBadge({ status }: { status: AttendanceStatus }) {
   );
 }
 
-// ════════════════════════════════════════════
-// MODAL WRAPPER
-// ════════════════════════════════════════════
 
-function Modal({
-  open,
-  title,
-  onClose,
-  children,
-}: {
-  open: boolean;
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  if (!open) return null;
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-(--border) bg-(--card) my-8"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          boxShadow:
-            "0 0 40px rgba(212,21,140,0.1), 0 25px 50px rgba(0,0,0,0.5)",
-        }}
-      >
-        <div className="flex items-center justify-between border-b border-(--border) px-5 py-3">
-          <h3 className="text-sm font-bold text-(--foreground)">{title}</h3>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1 text-(--muted-foreground) transition hover:text-(--foreground)"
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="max-h-[70vh] overflow-y-auto p-5">{children}</div>
-      </div>
-    </div>
-  );
-}
 
 // ════════════════════════════════════════════
 // OVERRIDE FORM
@@ -677,6 +638,116 @@ function ManualAttendanceForm({
 }
 
 // ════════════════════════════════════════════
+// LOCATION & PHOTO MODALS
+// ════════════════════════════════════════════
+
+function LocationModal({
+  open,
+  onClose,
+  log,
+}: {
+  open: boolean;
+  onClose: () => void;
+  log: AttendanceLog | null;
+}) {
+  if (!log || (!log.clock_in_lat && !log.clock_out_lat)) return null;
+
+  return (
+    <Modal open={open} title="Lokasi Presensi" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          {log.clock_in_lat && log.clock_in_lng && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-(--foreground)">Lokasi Masuk</h4>
+              <p className="text-xs text-(--muted-foreground)">
+                Lat: {log.clock_in_lat.toFixed(6)}, Lng: {log.clock_in_lng.toFixed(6)}
+              </p>
+              <div className="h-48 w-full rounded-lg overflow-hidden border border-(--border)">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  style={{ border: 0 }}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${log.clock_in_lng - 0.005},${log.clock_in_lat - 0.005},${log.clock_in_lng + 0.005},${log.clock_in_lat + 0.005}&layer=mapnik&marker=${log.clock_in_lat},${log.clock_in_lng}`}
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
+          {log.clock_out_lat && log.clock_out_lng && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-(--foreground)">Lokasi Keluar</h4>
+              <p className="text-xs text-(--muted-foreground)">
+                Lat: {log.clock_out_lat.toFixed(6)}, Lng: {log.clock_out_lng.toFixed(6)}
+              </p>
+              <div className="h-48 w-full rounded-lg overflow-hidden border border-(--border)">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  style={{ border: 0 }}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${log.clock_out_lng - 0.005},${log.clock_out_lat - 0.005},${log.clock_out_lng + 0.005},${log.clock_out_lat + 0.005}&layer=mapnik&marker=${log.clock_out_lat},${log.clock_out_lng}`}
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function PhotoModal({
+  open,
+  onClose,
+  log,
+}: {
+  open: boolean;
+  onClose: () => void;
+  log: AttendanceLog | null;
+}) {
+  if (!log || (!log.clock_in_photo_url && !log.clock_out_photo_url)) return null;
+
+  return (
+    <Modal open={open} title="Foto Presensi" onClose={onClose}>
+      <div className="space-y-6">
+        {log.clock_in_photo_url && (
+          <div className="space-y-2 text-center">
+            <h4 className="text-sm font-semibold text-(--foreground)">Foto Masuk</h4>
+            <div className="w-full max-w-sm mx-auto overflow-hidden rounded-lg border border-(--border)">
+              <img
+                src={log.clock_in_photo_url}
+                alt="Foto Masuk"
+                className="w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://placehold.co/400x300/e2e8f0/64748b?text=Gambar+Gagal+Dimuat";
+                }}
+              />
+            </div>
+          </div>
+        )}
+        {log.clock_out_photo_url && (
+          <div className="space-y-2 text-center pt-4 border-t border-(--border)">
+            <h4 className="text-sm font-semibold text-(--foreground)">Foto Keluar</h4>
+            <div className="w-full max-w-sm mx-auto overflow-hidden rounded-lg border border-(--border)">
+              <img
+                src={log.clock_out_photo_url}
+                alt="Foto Keluar"
+                className="w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://placehold.co/400x300/e2e8f0/64748b?text=Gambar+Gagal+Dimuat";
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+// ════════════════════════════════════════════
 // SKELETON
 // ════════════════════════════════════════════
 
@@ -723,6 +794,10 @@ function AttendanceLogTab() {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showManualForm, setShowManualForm] = useState(false);
+  
+  // Modal states untuk lokasi & foto
+  const [locationLog, setLocationLog] = useState<AttendanceLog | null>(null);
+  const [photoLog, setPhotoLog] = useState<AttendanceLog | null>(null);
 
   const params = useMemo(
     () => ({
@@ -934,7 +1009,8 @@ function AttendanceLogTab() {
                       "Jam Keluar",
                       "Keterlambatan",
                       "Metode",
-                      "Lembur",
+                      "Lokasi",
+                      "Foto",
                     ].map((h) => (
                       <th
                         key={h}
@@ -971,7 +1047,10 @@ function AttendanceLogTab() {
                         <StatusBadge status={log.status} />
                       </td>
                       <td className="px-5 py-3 text-sm text-(--foreground)">
-                        {formatTime(log.clock_in_at)}
+                        <div className="flex flex-col">
+                          <span>{formatTime(log.clock_in_at)}</span>
+                          {log.overtime_minutes > 0 && <span className="text-xs text-purple-600">+{log.overtime_minutes}mnt lembur</span>}
+                        </div>
                       </td>
                       <td className="px-5 py-3 text-sm text-(--foreground)">
                         {formatTime(log.clock_out_at)}
@@ -991,10 +1070,31 @@ function AttendanceLogTab() {
                           : "—"}
                       </td>
                       <td className="px-5 py-3 text-sm">
-                        {log.overtime_minutes > 0 ? (
-                          <span className="text-purple-600 font-medium">
-                            {log.overtime_minutes} mnt
-                          </span>
+                        {log.clock_in_lat || log.clock_out_lat ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 px-2 text-xs"
+                            onClick={() => setLocationLog(log)}
+                          >
+                            <MapPin size={13} className="mr-1" />
+                            Lokasi
+                          </Button>
+                        ) : (
+                          <span className="text-(--muted-foreground)">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 text-sm">
+                        {log.clock_in_photo_url || log.clock_out_photo_url ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 px-2 text-xs"
+                            onClick={() => setPhotoLog(log)}
+                          >
+                            <ImageIcon size={13} className="mr-1" />
+                            Foto
+                          </Button>
                         ) : (
                           <span className="text-(--muted-foreground)">—</span>
                         )}
@@ -1023,21 +1123,47 @@ function AttendanceLogTab() {
                   </div>
                   <StatusBadge status={log.status} />
                 </div>
-                <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-(--muted-foreground)">
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-(--muted-foreground) border-b border-(--border) pb-3 mb-2">
                   <div>
                     <p className="font-medium">Masuk</p>
-                    <p>{formatTime(log.clock_in_at)}</p>
+                    <div className="flex flex-col">
+                      <p className="text-(--foreground)">{formatTime(log.clock_in_at)}</p>
+                      {log.overtime_minutes > 0 && <span className="text-purple-600">+{log.overtime_minutes}mnt lembur</span>}
+                    </div>
                   </div>
                   <div>
-                    <p className="font-medium">Keluar</p>
-                    <p>{formatTime(log.clock_out_at)}</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Terlambat</p>
-                    <p>
-                      {log.late_minutes > 0 ? `${log.late_minutes} mnt` : "—"}
+                    <p className="font-medium flex justify-between">
+                      Keluar
+                      {log.late_minutes > 0 && (
+                        <span className="text-yellow-600 font-medium">Terlambat {log.late_minutes}mnt</span>
+                      )}
                     </p>
+                    <p className="text-(--foreground)">{formatTime(log.clock_out_at)}</p>
                   </div>
+                </div>
+                <div className="flex gap-2">
+                  {(log.clock_in_lat || log.clock_out_lat) && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 flex-1 text-xs"
+                      onClick={() => setLocationLog(log)}
+                    >
+                      <MapPin size={14} className="mr-1.5" />
+                      Lokasi
+                    </Button>
+                  )}
+                  {(log.clock_in_photo_url || log.clock_out_photo_url) && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 flex-1 text-xs"
+                      onClick={() => setPhotoLog(log)}
+                    >
+                      <ImageIcon size={14} className="mr-1.5" />
+                      Foto
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -1057,6 +1183,18 @@ function AttendanceLogTab() {
           isLoading={manualLoading}
         />
       </Modal>
+
+      <LocationModal 
+        open={locationLog !== null}
+        onClose={() => setLocationLog(null)}
+        log={locationLog}
+      />
+
+      <PhotoModal 
+        open={photoLog !== null}
+        onClose={() => setPhotoLog(null)}
+        log={photoLog}
+      />
     </div>
   );
 }
