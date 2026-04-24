@@ -49,6 +49,12 @@ import type {
   DepartmentRanking,
 } from "@/types/dashboard";
 import { PermissionGate } from "@/components/ui/PermissionGate";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselDots,
+} from "@/components/ui/Carousel";
 
 const REQUEST_TYPE_CONFIG: Record<
   string,
@@ -392,35 +398,46 @@ function MostLateRanking({ data }: { data: RankingEntry[] }) {
 
 function DashboardRankingsWidget() {
   const { data, loading } = useDashboardRankings();
-
-  if (loading || !data) return null; // We can add skeleton later if needed
-
+ 
+  if (loading || !data) return null;
+ 
+  const rankingSlides = [
+    <FastestArrivalRanking key="fastest" data={data.fastest_arrival} />,
+    <TopTilawahRanking key="tilawah" data={data.top_tilawah} />,
+    <MostLateRanking key="late" data={data.most_late} />,
+  ].filter(Boolean);
+ 
   return (
     <div className="space-y-3 mt-8">
       <h2 className="text-sm font-semibold text-(--foreground)">Peringkat Bulan Ini</h2>
-      
-      {/* Desktop Grid */}
+ 
+      {/* Desktop Grid — unchanged */}
       <div className="hidden md:grid gap-4 lg:grid-cols-3">
         <FastestArrivalRanking data={data.fastest_arrival} />
         <TopTilawahRanking data={data.top_tilawah} />
         <MostLateRanking data={data.most_late} />
       </div>
-
-      {/* Mobile Carousel */}
-      <div className="md:hidden overflow-x-auto flex gap-3 snap-x snap-mandatory pb-2 -mx-4 px-4 scrollbar-hide">
-        <div className="snap-start shrink-0 w-[85vw]">
-          <FastestArrivalRanking data={data.fastest_arrival} />
-        </div>
-        <div className="snap-start shrink-0 w-[85vw]">
-          <TopTilawahRanking data={data.top_tilawah} />
-        </div>
-        <div className="snap-start shrink-0 w-[85vw]">
-          <MostLateRanking data={data.most_late} />
-        </div>
+ 
+      {/* Mobile Carousel — shadcn Carousel + Instagram-style dots */}
+      <div className="md:hidden">
+        <Carousel
+          opts={{ align: "start", loop: false }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-3">
+            {rankingSlides.map((slide, i) => (
+              <CarouselItem key={i} className="pl-3 basis-[88vw]">
+                {slide}
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselDots />
+        </Carousel>
       </div>
     </div>
   );
 }
+
 
 // ════════════════════════════════════════════
 // DAY OFF CARD
@@ -711,7 +728,7 @@ function EmployeeDashboardView() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
@@ -831,7 +848,7 @@ function HRDDashboardView() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
           {[...Array(5)].map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
@@ -857,7 +874,7 @@ function HRDDashboardView() {
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Pengajuan Menunggu Persetujuan
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
           <StatCard
             icon={CalendarOff}
             label="Cuti"
@@ -900,7 +917,7 @@ function HRDDashboardView() {
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Ringkasan Tim Hari Ini
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Users}
             label="Total Pegawai"
@@ -934,7 +951,7 @@ function HRDDashboardView() {
         <h2 className="mb-3 text-sm font-semibold text-(--foreground)">
           Tilawah Tim Hari Ini
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 grid-cols-2">
           <StatCard
             icon={BookOpen}
             label="Sudah Tilawah"
