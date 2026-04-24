@@ -777,6 +777,10 @@ function EmployeeDashboardView() {
         </div>
       </div>
 
+      <div id="statistik" className="scroll-mt-20">
+        <DashboardRankingsWidget />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <div id="cuti" className="scroll-mt-20 rounded-xl border border-(--border) bg-(--card) p-5">
           <h3 className="mb-4 font-semibold text-(--foreground)">Saldo Cuti</h3>
@@ -812,12 +816,6 @@ function EmployeeDashboardView() {
           )}
         </div>
       </div>
-
-      <PermissionGate permission={PERMISSIONS.HOME_EMPLOYEE_READ}>
-        <div id="statistik" className="scroll-mt-20">
-          <DashboardRankingsWidget />
-        </div>
-      </PermissionGate>
     </div>
   );
 }
@@ -955,6 +953,10 @@ function HRDDashboardView() {
         </div>
       </div>
 
+      <div id="statistik" className="scroll-mt-20">
+        <DashboardRankingsWidget />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-(--border) bg-(--card) overflow-hidden">
           <div className="border-b border-(--border) px-5 py-3">
@@ -1062,12 +1064,6 @@ function HRDDashboardView() {
           </div>
         </div>
       )}
-
-      <PermissionGate permission={PERMISSIONS.HOME_EMPLOYEE_READ}>
-        <div id="statistik" className="scroll-mt-20">
-          <DashboardRankingsWidget />
-        </div>
-      </PermissionGate>
     </div>
   );
 }
