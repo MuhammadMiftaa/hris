@@ -726,7 +726,7 @@ export function ProfilePage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
+      <div className="flex flex-col gap-6 p-4 md:p-6 md:pt-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
