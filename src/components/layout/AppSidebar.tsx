@@ -35,7 +35,7 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   path: string;
-  permission?: string;
+  permission?: string[];
 }
 
 const MAIN_NAV: NavItem[] = [
@@ -43,33 +43,33 @@ const MAIN_NAV: NavItem[] = [
 ];
 
 const MASTER_DATA_NAV: NavItem[] = [
-  { icon: Users, label: "Pegawai", path: "/employees", permission: PERMISSIONS.EMPLOYEE_READ },
-  { icon: Building2, label: "Cabang", path: "/branches", permission: PERMISSIONS.BRANCH_READ },
-  { icon: Network, label: "Departemen", path: "/departments", permission: PERMISSIONS.DEPARTMENT_READ },
-  { icon: Shield, label: "Role", path: "/roles", permission: PERMISSIONS.ROLE_READ },
-  { icon: CalendarOff, label: "Jenis Cuti", path: "/leave-types", permission: PERMISSIONS.LEAVE_TYPE_READ },
+  { icon: Users, label: "Pegawai", path: "/employees", permission: [PERMISSIONS.EMPLOYEE_READ] },
+  { icon: Building2, label: "Cabang", path: "/branches", permission: [PERMISSIONS.BRANCH_READ] },
+  { icon: Network, label: "Departemen", path: "/departments", permission: [PERMISSIONS.DEPARTMENT_READ] },
+  { icon: Shield, label: "Role", path: "/roles", permission: [PERMISSIONS.ROLE_READ] },
+  { icon: CalendarOff, label: "Jenis Cuti", path: "/leave-types", permission: [PERMISSIONS.LEAVE_TYPE_READ] },
 ];
 
 const JADWAL_NAV: NavItem[] = [
-  { icon: Clock, label: "Shift", path: "/shifts", permission: PERMISSIONS.TEMPLATE_SHIFT_READ },
-  { icon: Calendar, label: "Hari Libur", path: "/holidays", permission: PERMISSIONS.HOLIDAY_READ },
+  { icon: Clock, label: "Shift", path: "/shifts", permission: [PERMISSIONS.TEMPLATE_SHIFT_READ] },
+  { icon: Calendar, label: "Hari Libur", path: "/holidays", permission: [PERMISSIONS.HOLIDAY_READ] },
 ];
 
 const KEHADIRAN_NAV: NavItem[] = [
-  { icon: ClipboardCheck, label: "Presensi", path: "/attendance", permission: PERMISSIONS.ATTENDANCE_READ },
-  { icon: CalendarOff, label: "Cuti", path: "/leave", permission: PERMISSIONS.LEAVE_READ },
+  { icon: ClipboardCheck, label: "Presensi", path: "/attendance", permission: [PERMISSIONS.ATTENDANCE_READ, PERMISSIONS.ATTENDANCE_ADJUSTMENT_READ, PERMISSIONS.ATTENDANCE_ADJUSTMENT_CREATE] },
+  { icon: CalendarOff, label: "Cuti", path: "/leave", permission: [PERMISSIONS.LEAVE_READ] },
 ];
 
 const PENGAJUAN_NAV: NavItem[] = [
-  { icon: Send, label: "Pengajuan", path: "/requests", permission: PERMISSIONS.REQUEST_READ },
-  { icon: FileText, label: "Laporan Harian", path: "/daily-reports", permission: PERMISSIONS.DAILY_REPORT_READ },
-  { icon: BookOpen, label: "Mutaba'ah", path: "/mutabaah", permission: PERMISSIONS.MUTABAAH_READ },
+  { icon: Send, label: "Pengajuan", path: "/requests", permission: [PERMISSIONS.REQUEST_READ] },
+  { icon: FileText, label: "Laporan Harian", path: "/daily-reports", permission: [PERMISSIONS.DAILY_REPORT_READ] },
+  { icon: BookOpen, label: "Mutaba'ah", path: "/mutabaah", permission: [PERMISSIONS.MUTABAAH_READ] },
 ];
 
 export function AppSidebar() {
   const { user, logout, cachedProfile } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { hasPermission } = usePermission();
+  const { hasAnyPermission } = usePermission();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -147,7 +147,7 @@ export function AppSidebar() {
     pathPrefix?: string,
   ) => {
     const visibleItems = items.filter(
-      (item) => !item.permission || hasPermission(item.permission),
+      (item) => !item.permission || hasAnyPermission(...item.permission),
     );
     if (visibleItems.length === 0) return null;
     return (

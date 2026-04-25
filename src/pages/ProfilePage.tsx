@@ -98,7 +98,7 @@ function InfoItem({
   return (
     <div className="space-y-1">
       <div className="text-xs text-(--muted-foreground)">{label}</div>
-      <div className="text-sm font-medium text-(--foreground)">
+      <div className="text-sm font-medium text-(--foreground) capitalize">
         {value || "-"}
       </div>
     </div>

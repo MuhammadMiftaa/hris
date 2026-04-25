@@ -157,7 +157,7 @@ function App() {
         path="/attendance"
         element={
           <PrivateRoute>
-            <ProtectedRoute permission={PERMISSIONS.ATTENDANCE_READ}>
+            <ProtectedRoute mode="any" permission={[PERMISSIONS.ATTENDANCE_READ, PERMISSIONS.ATTENDANCE_ADJUSTMENT_READ, PERMISSIONS.ATTENDANCE_ADJUSTMENT_CREATE]}>
               <AttendancePage />
             </ProtectedRoute>
           </PrivateRoute>
