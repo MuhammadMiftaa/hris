@@ -155,6 +155,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     processToken(storedToken, storedRefresh, storedAccount, storedPerms, false);
+
+    // Demo mode: provide synthetic superadmin account when no real auth
+    if (isDemo && !storedAccount) {
+      const demoAccount: LoginAccount = {
+        account_id: 0,
+        email: "demo@wafa.id",
+        is_active: true,
+        last_login_at: null,
+        employee_number: "WFA-001",
+        full_name: "Demo User",
+        photo_url: null,
+        is_trainer: false,
+        branch_id: 1,
+        department_id: 1,
+        job_positions_id: 1,
+        role_name: "Super Admin",
+        role_level: "superadmin",
+      };
+      setUser(demoAccount);
+      setPermissions(["*"]);
+    }
+
     setIsLoading(false);
   }, [processToken]);
 

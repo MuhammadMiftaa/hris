@@ -22,7 +22,7 @@ import {
   useRolePermissions,
 } from "@/hooks/useRole";
 import { useRoleMetadata } from "@/hooks/useMetadata";
-import type { Role, Permission, CreateRolePayload, RoleMetadata } from "@/types/role";
+import type { Role, Permission, CreateRolePayload, RoleMetadata, RoleLevel } from "@/types/role";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
 
@@ -135,14 +135,17 @@ function RoleForm({
   onClose,
   onSubmit,
   editRole,
+  metadata,
   isLoading,
 }: {
   onClose: () => void;
   onSubmit: (payload: CreateRolePayload) => void;
   editRole?: Role;
+  metadata: RoleMetadata | null;
   isLoading?: boolean;
 }) {
   const [name, setName] = useState(editRole?.name || "");
+  const [level, setLevel] = useState<RoleLevel>(editRole?.level || "staff");
   const [description, setDescription] = useState(editRole?.description || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -154,6 +157,7 @@ function RoleForm({
     }
     onSubmit({
       name: name.trim(),
+      level: level,
       description: description.trim() || undefined,
     });
   };
@@ -172,6 +176,32 @@ function RoleForm({
         error={errors.name}
         autoFocus
       />
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="level"
+          className="block text-sm font-medium text-(--foreground) opacity-80"
+        >
+          Level Role
+        </label>
+        <select
+          id="level"
+          value={level}
+          onChange={(e) => setLevel(e.target.value as RoleLevel)}
+          className={cn(
+            "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
+            "border-(--border) placeholder:text-(--muted-foreground)",
+            "transition-colors duration-200",
+            "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
+          )}
+        >
+          {metadata?.level_meta?.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="space-y-1.5">
         <label
@@ -376,7 +406,12 @@ function RoleCard({
             <Shield size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-(--foreground)">{role.name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-(--foreground)">{role.name}</h3>
+              <span className="rounded bg-(--primary)/10 px-2 py-0.5 text-[10px] font-medium text-(--primary) uppercase tracking-wider">
+                {role.level}
+              </span>
+            </div>
             {role.description && (
               <p className="text-sm text-(--muted-foreground) truncate">
                 {role.description}
@@ -587,6 +622,7 @@ export function RolePage() {
         <RoleForm
           onClose={() => setShowForm(false)}
           onSubmit={handleCreate}
+          metadata={metadata}
           isLoading={mutationLoading}
         />
       </Modal>
@@ -602,6 +638,7 @@ export function RolePage() {
             onClose={() => setEditRole(null)}
             onSubmit={handleUpdate}
             editRole={editRole}
+            metadata={metadata}
             isLoading={mutationLoading}
           />
         )}

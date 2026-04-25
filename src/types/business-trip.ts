@@ -20,6 +20,7 @@ export interface BusinessTripRequest {
 }
 
 export interface CreateBusinessTripPayload {
+  employee_id?: number;
   destination: string;
   start_date: string;
   end_date: string;

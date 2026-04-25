@@ -3,13 +3,15 @@ import { useDemo } from "@/contexts/DemoContext";
 import type {
   OvertimeRequest,
   CreateOvertimePayload,
-  UpdateOvertimeStatusPayload,
+  ApproveOvertimePayload,
+  RejectOvertimePayload,
   OvertimeListParams,
 } from "@/types/overtime";
 import {
   fetchOvertimeRequests,
   createOvertimeRequest as createOvertimeApi,
-  updateOvertimeStatus as updateStatusApi,
+  approveOvertimeRequest as approveOvertimeApi,
+  rejectOvertimeRequest as rejectOvertimeApi,
   deleteOvertimeRequest as deleteOvertimeApi,
 } from "@/lib/overtime-api";
 import { getDummyOvertimeRequests } from "@/lib/dummy";
@@ -120,14 +122,13 @@ export function useOvertimeMutations(onSuccess?: () => void) {
         toast("Demo mode — data is read-only", { icon: "🔒" });
         return null;
       }
-      const payload: UpdateOvertimeStatusPayload = {
-        status: "approved",
-        approver_notes: notes,
+      const payload: ApproveOvertimePayload = {
+        notes,
       };
 
       setLoading(true);
       try {
-        const res = await updateStatusApi(id, payload);
+        const res = await approveOvertimeApi(id, payload);
         toast.success("Lembur disetujui");
         onSuccess?.();
         return res.data;
@@ -149,14 +150,13 @@ export function useOvertimeMutations(onSuccess?: () => void) {
         toast("Demo mode — data is read-only", { icon: "🔒" });
         return null;
       }
-      const payload: UpdateOvertimeStatusPayload = {
-        status: "rejected",
-        approver_notes: notes,
+      const payload: RejectOvertimePayload = {
+        notes: notes || "",
       };
 
       setLoading(true);
       try {
-        const res = await updateStatusApi(id, payload);
+        const res = await rejectOvertimeApi(id, payload);
         toast.success("Lembur ditolak");
         onSuccess?.();
         return res.data;

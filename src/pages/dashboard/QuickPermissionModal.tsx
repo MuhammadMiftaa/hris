@@ -4,12 +4,18 @@ import { Button, Input } from "@/components/ui/FormElements";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { usePermissionRequestMutations } from "@/hooks/usePermissionRequest";
 import { PERMISSION_TYPE_OPTIONS, type PermissionType } from "@/types/permission-request";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEmployeeList } from "@/hooks/useEmployee";
 import { Modal } from "@/components/ui/Modal";
 
 export function QuickPermissionModal({ onClose }: { onClose: () => void }) {
   const { createRequest, loading } = usePermissionRequestMutations();
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+  const { data: employees } = useEmployeeList({ is_active: true });
 
   const [formData, setFormData] = useState({
+    employee_id: "",
     permission_type: "out_of_office" as PermissionType,
     date: "",
     leave_time: "",
@@ -30,6 +36,7 @@ export function QuickPermissionModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!validate()) return;
     const result = await createRequest({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       permission_type: formData.permission_type,
       date: formData.date,
       leave_time: formData.leave_time || null,
@@ -42,6 +49,22 @@ export function QuickPermissionModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open title="Ajukan Izin" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {isAdmin && (
+          <SearchableSelect
+            label="Pegawai (Pilih jika mengajukan untuk staf)"
+            value={formData.employee_id}
+            onChange={(val) => setFormData((p) => ({ ...p, employee_id: val }))}
+            options={[
+              { value: "", label: "-- Pengajuan Diri Sendiri --" },
+              ...(employees?.map((e) => ({
+                value: String(e.id),
+                label: e.full_name,
+              })) || []),
+            ]}
+            placeholder="Cari pegawai..."
+          />
+        )}
+
         <SearchableSelect
           label="Tipe Izin"
           value={formData.permission_type}

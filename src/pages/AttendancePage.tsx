@@ -48,6 +48,7 @@ import {
   type AttendanceOverride,
 } from "@/types/attendance-override";
 import { MobileActionButton } from "@/components/ui/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ════════════════════════════════════════════
 // STATUS BADGE
@@ -1265,10 +1266,17 @@ function AttendanceOverrideTab() {
     },
   };
 
-
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
 
   return (
     <div className="space-y-4">
+      {isAdmin && (
+        <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+          <CheckCircle2 size={16} className="shrink-0" />
+          <span>Koreksi oleh Admin/Super Admin akan otomatis disetujui</span>
+        </div>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-3">
           <SearchableSelect

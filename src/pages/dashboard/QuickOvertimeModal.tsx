@@ -5,16 +5,21 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useOvertimeMutations } from "@/hooks/useOvertime";
 import { WORK_LOCATION_OPTIONS, type CreateOvertimePayload } from "@/types/overtime";
 import { useDashboardMetadata } from "@/hooks/useDashboard";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEmployeeList } from "@/hooks/useEmployee";
 import { formatDateLong } from "@/utils/date";
 import { Modal } from "@/components/ui/Modal";
 
 export function QuickOvertimeModal({ onClose }: { onClose: () => void }) {
   const { data: metadata } = useDashboardMetadata();
   const recentAttendances = metadata?.recent_attendance_meta || [];
-  
   const { createOvertime, loading } = useOvertimeMutations();
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+  const { data: employees } = useEmployeeList({ is_active: true });
 
   const [formData, setFormData] = useState({
+    employee_id: "",
     attendance_log_id: "",
     overtime_date: "",
     planned_start: "",
@@ -53,7 +58,6 @@ export function QuickOvertimeModal({ onClose }: { onClose: () => void }) {
     setFormData((p) => ({
       ...p,
       attendance_log_id: logId,
-      // Backend returns attendance_date as Meta.name, e.g. "2026-04-24"
       overtime_date: log ? log.name : p.overtime_date,
     }));
   };
@@ -67,6 +71,7 @@ export function QuickOvertimeModal({ onClose }: { onClose: () => void }) {
         : parseInt(formData.planned_minutes) || 0;
     
     const result = await createOvertime({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       attendance_log_id: parseInt(formData.attendance_log_id),
       overtime_date: formData.overtime_date,
       planned_start: formData.planned_start
@@ -86,6 +91,22 @@ export function QuickOvertimeModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open title="Ajukan Lembur" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {isAdmin && (
+          <SearchableSelect
+            label="Pegawai (Pilih jika mengajukan untuk staf)"
+            value={formData.employee_id}
+            onChange={(val) => setFormData((p) => ({ ...p, employee_id: val }))}
+            options={[
+              { value: "", label: "-- Pengajuan Diri Sendiri --" },
+              ...(employees?.map((e) => ({
+                value: String(e.id),
+                label: e.full_name,
+              })) || []),
+            ]}
+            placeholder="Cari pegawai..."
+          />
+        )}
+
         <SearchableSelect
           label="Pilih Log Presensi *"
           value={formData.attendance_log_id}
@@ -99,8 +120,6 @@ export function QuickOvertimeModal({ onClose }: { onClose: () => void }) {
         {errors.attendance_log_id && (
           <p className="text-xs text-(--destructive)">{errors.attendance_log_id}</p>
         )}
-
-        {/* Removed redundant overtime_date input since it is populated by attendance select */}
 
         <div className="grid grid-cols-2 gap-4">
           <Input

@@ -3,6 +3,8 @@ import { Button, Input } from "@/components/ui/FormElements";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useLeaveRequestMutations } from "@/hooks/useLeave";
 import { useDashboardMetadata } from "@/hooks/useDashboard";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEmployeeList } from "@/hooks/useEmployee";
 import { Modal } from "@/components/ui/Modal";
 import { cn } from "@/lib/utils";
 
@@ -10,8 +12,12 @@ export function QuickLeaveModal({ onClose }: { onClose: () => void }) {
   const { data: metadata } = useDashboardMetadata();
   const leaveTypes = metadata?.leave_type_meta;
   const { createRequest, loading } = useLeaveRequestMutations();
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+  const { data: employees } = useEmployeeList({ is_active: true });
   
   const [formData, setFormData] = useState({
+    employee_id: "",
     leave_type_id: "",
     start_date: "",
     end_date: "",
@@ -57,6 +63,7 @@ export function QuickLeaveModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!validate()) return;
     const result = await createRequest({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       leave_type_id: parseInt(formData.leave_type_id),
       start_date: formData.start_date,
       end_date: formData.end_date,
@@ -70,6 +77,22 @@ export function QuickLeaveModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open title="Ajukan Cuti" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {isAdmin && (
+          <SearchableSelect
+            label="Pegawai (Pilih jika mengajukan untuk staf)"
+            value={formData.employee_id}
+            onChange={(val) => handleChange("employee_id", val)}
+            options={[
+              { value: "", label: "-- Pengajuan Diri Sendiri --" },
+              ...(employees?.map((e) => ({
+                value: String(e.id),
+                label: e.full_name,
+              })) || []),
+            ]}
+            placeholder="Cari pegawai..."
+          />
+        )}
+
         <div className="space-y-1.5">
           <SearchableSelect
             label="Jenis Cuti"

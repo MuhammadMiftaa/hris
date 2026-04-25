@@ -28,6 +28,7 @@ import {
 } from "@/hooks/useBusinessTrip";
 import { useOvertimeList, useOvertimeMutations } from "@/hooks/useOvertime";
 import { useEmployeeList } from "@/hooks/useEmployee";
+import { useAuth } from "@/contexts/AuthContext";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
 import {
@@ -104,7 +105,7 @@ function ApprovalActions({
   onReject: () => void;
 }) {
   return (
-    <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
       <Button
         variant="ghost"
         size="sm"
@@ -114,7 +115,7 @@ function ApprovalActions({
         <Eye size={13} />
         Detail
       </Button>
-      {status === "pending" && (
+      {(status === "pending" || status === "approved_leader") && (
         <>
           <PermissionGate permission={PERMISSIONS.REQUEST_APPROVE}>
             <Button
@@ -705,14 +706,27 @@ function OvertimeDetailModal({
               </p>
               <p className="text-sm text-(--foreground)">{ot.reason}</p>
             </div>
-            {ot.approver_notes && (
+            {ot.approvals && ot.approvals.length > 0 && (
               <div>
                 <p className="text-xs text-(--muted-foreground) mb-1">
-                  Catatan Approver
+                  Riwayat Persetujuan
                 </p>
-                <p className="text-sm text-(--foreground) italic">
-                  "{ot.approver_notes}"
-                </p>
+                <div className="space-y-2">
+                  {ot.approvals.map((approval) => (
+                    <div key={approval.id} className="text-sm">
+                      <span className="font-medium">{approval.approver_name}</span>{" "}
+                      <span className="text-(--muted-foreground)">
+                        ({approval.level === 1 ? "Leader Dept" : "Leader HRGA"}) —{" "}
+                      </span>
+                      <StatusBadge status={approval.status} />
+                      {approval.notes && (
+                        <p className="text-(--foreground) italic mt-1 text-xs">
+                          "{approval.notes}"
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -733,7 +747,7 @@ function OvertimeDetailModal({
           )}
         </div>
         <div className="flex justify-end gap-2 border-t border-(--border) px-5 py-3">
-          {ot.status === "pending" && !rejectMode && (
+          {(ot.status === "pending" || ot.status === "approved_leader") && !rejectMode && (
             <>
               <Button variant="ghost" size="sm" onClick={onClose}>
                 Tutup
@@ -758,7 +772,7 @@ function OvertimeDetailModal({
               </Button>
             </>
           )}
-          {ot.status === "pending" && rejectMode && (
+          {(ot.status === "pending" || ot.status === "approved_leader") && rejectMode && (
             <>
               <Button
                 variant="ghost"
@@ -778,7 +792,7 @@ function OvertimeDetailModal({
               </Button>
             </>
           )}
-          {ot.status !== "pending" && (
+          {!(ot.status === "pending" || ot.status === "approved_leader") && (
             <Button variant="ghost" size="sm" onClick={onClose}>
               Tutup
             </Button>
@@ -797,12 +811,17 @@ function PermissionForm({
   onClose,
   onSubmit,
   isLoading,
+  employees,
+  isAdmin,
 }: {
   onClose: () => void;
   onSubmit: (payload: CreatePermissionPayload) => void;
   isLoading?: boolean;
+  employees?: any[];
+  isAdmin?: boolean;
 }) {
   const [formData, setFormData] = useState({
+    employee_id: "",
     permission_type: "out_of_office" as PermissionType,
     date: "",
     leave_time: "",
@@ -823,6 +842,10 @@ function PermissionForm({
     e.preventDefault();
     if (!validate()) return;
     onSubmit({
+      employee_id:
+        isAdmin && formData.employee_id
+          ? parseInt(formData.employee_id)
+          : undefined,
       permission_type: formData.permission_type,
       date: formData.date,
       leave_time: formData.leave_time || null,
@@ -833,6 +856,21 @@ function PermissionForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isAdmin && (
+        <SearchableSelect
+          label="Pegawai (Pilih jika mengajukan untuk staf)"
+          value={formData.employee_id}
+          onChange={(val) => setFormData((p) => ({ ...p, employee_id: val }))}
+          options={[
+            { value: "", label: "-- Pengajuan Diri Sendiri --" },
+            ...(employees?.map((e) => ({
+              value: String(e.id),
+              label: e.full_name,
+            })) || []),
+          ]}
+          placeholder="Cari pegawai..."
+        />
+      )}
       <SearchableSelect
         label="Tipe Izin"
         value={formData.permission_type}
@@ -919,12 +957,17 @@ function BusinessTripForm({
   onClose,
   onSubmit,
   isLoading,
+  employees,
+  isAdmin,
 }: {
   onClose: () => void;
   onSubmit: (payload: CreateBusinessTripPayload) => void;
   isLoading?: boolean;
+  employees?: any[];
+  isAdmin?: boolean;
 }) {
   const [formData, setFormData] = useState({
+    employee_id: "",
     destination: "",
     start_date: "",
     end_date: "",
@@ -960,6 +1003,7 @@ function BusinessTripForm({
     e.preventDefault();
     if (!validate()) return;
     onSubmit({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       destination: formData.destination.trim(),
       start_date: formData.start_date,
       end_date: formData.end_date,
@@ -971,6 +1015,21 @@ function BusinessTripForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isAdmin && (
+        <SearchableSelect
+          label="Pegawai (Pilih jika mengajukan untuk staf)"
+          value={formData.employee_id}
+          onChange={(val) => setFormData((p) => ({ ...p, employee_id: val }))}
+          options={[
+            { value: "", label: "-- Pengajuan Diri Sendiri --" },
+            ...(employees?.map((e) => ({
+              value: String(e.id),
+              label: e.full_name,
+            })) || []),
+          ]}
+          placeholder="Cari pegawai..."
+        />
+      )}
       <Input
         id="destination"
         label="Tujuan Kota/Daerah *"
@@ -1061,12 +1120,17 @@ function OvertimeForm({
   onClose,
   onSubmit,
   isLoading,
+  employees,
+  isAdmin,
 }: {
   onClose: () => void;
   onSubmit: (payload: CreateOvertimePayload) => void;
   isLoading?: boolean;
+  employees?: any[];
+  isAdmin?: boolean;
 }) {
   const [formData, setFormData] = useState({
+    employee_id: "",
     attendance_log_id: "1",
     overtime_date: "",
     planned_start: "",
@@ -1106,6 +1170,7 @@ function OvertimeForm({
         ? calculatedMinutes
         : parseInt(formData.planned_minutes) || 0;
     onSubmit({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       attendance_log_id: parseInt(formData.attendance_log_id),
       overtime_date: formData.overtime_date,
       planned_start: formData.planned_start
@@ -1122,6 +1187,21 @@ function OvertimeForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isAdmin && (
+        <SearchableSelect
+          label="Pegawai (Pilih jika mengajukan untuk staf)"
+          value={formData.employee_id}
+          onChange={(val) => setFormData((p) => ({ ...p, employee_id: val }))}
+          options={[
+            { value: "", label: "-- Pengajuan Diri Sendiri --" },
+            ...(employees?.map((e) => ({
+              value: String(e.id),
+              label: e.full_name,
+            })) || []),
+          ]}
+          placeholder="Cari pegawai..."
+        />
+      )}
       <Input
         id="overtime_date"
         label="Tanggal Lembur *"
@@ -1250,6 +1330,9 @@ function PermissionTab() {
 
   const { data: requests, loading, refetch } = usePermissionRequestList(params);
   const { data: employees } = useEmployeeList({ is_active: true });
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+
   const {
     loading: mutLoading,
     createRequest,
@@ -1494,6 +1577,8 @@ function PermissionTab() {
           onClose={() => setShowForm(false)}
           onSubmit={handleCreate}
           isLoading={mutLoading}
+          employees={employees || []}
+          isAdmin={isAdmin}
         />
       </Modal>
 
@@ -1532,6 +1617,9 @@ function BusinessTripTab() {
 
   const { data: trips, loading, refetch } = useBusinessTripList(params);
   const { data: employees } = useEmployeeList({ is_active: true });
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+
   const {
     loading: mutLoading,
     createTrip,
@@ -1752,6 +1840,8 @@ function BusinessTripTab() {
           onClose={() => setShowForm(false)}
           onSubmit={handleCreate}
           isLoading={mutLoading}
+          employees={employees || []}
+          isAdmin={isAdmin}
         />
       </Modal>
 
@@ -1790,6 +1880,9 @@ function OvertimeTab() {
 
   const { data: overtimes, loading, refetch } = useOvertimeList(params);
   const { data: employees } = useEmployeeList({ is_active: true });
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+
   const {
     loading: mutLoading,
     createOvertime,
@@ -2002,7 +2095,7 @@ function OvertimeTab() {
                     variant="neutral"
                     onClick={() => setDetailOvertime(ot)}
                   />
-                  {ot.status === "pending" && (
+                  {(ot.status === "pending" || ot.status === "approved_leader") && (
                     <>
                       <PermissionGate permission={PERMISSIONS.REQUEST_APPROVE}>
                         <MobileActionButton
@@ -2036,6 +2129,8 @@ function OvertimeTab() {
           onClose={() => setShowForm(false)}
           onSubmit={handleCreate}
           isLoading={mutLoading}
+          employees={employees || []}
+          isAdmin={isAdmin}
         />
       </Modal>
 
@@ -2289,7 +2384,7 @@ function AllRequestsTab() {
                 variant="neutral"
                 onClick={() => setDetailItem(req)}
               />
-              {req.status === "pending" && (
+              {(req.status === "pending" || req.status === "approved_leader") && (
                 <>
                   <PermissionGate permission={PERMISSIONS.REQUEST_APPROVE}>
                     <MobileActionButton

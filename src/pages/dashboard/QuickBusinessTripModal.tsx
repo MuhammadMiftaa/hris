@@ -1,13 +1,20 @@
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button, Input } from "@/components/ui/FormElements";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useBusinessTripMutations } from "@/hooks/useBusinessTrip";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEmployeeList } from "@/hooks/useEmployee";
 import { Modal } from "@/components/ui/Modal";
 
 export function QuickBusinessTripModal({ onClose }: { onClose: () => void }) {
   const { createTrip, loading } = useBusinessTripMutations();
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+  const { data: employees } = useEmployeeList({ is_active: true });
 
   const [formData, setFormData] = useState({
+    employee_id: "",
     destination: "",
     start_date: "",
     end_date: "",
@@ -43,6 +50,7 @@ export function QuickBusinessTripModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!validate()) return;
     const result = await createTrip({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       destination: formData.destination.trim(),
       start_date: formData.start_date,
       end_date: formData.end_date,
@@ -56,6 +64,22 @@ export function QuickBusinessTripModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open title="Ajukan Dinas Luar" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {isAdmin && (
+          <SearchableSelect
+            label="Pegawai (Pilih jika mengajukan untuk staf)"
+            value={formData.employee_id}
+            onChange={(val) => setFormData((p) => ({ ...p, employee_id: val }))}
+            options={[
+              { value: "", label: "-- Pengajuan Diri Sendiri --" },
+              ...(employees?.map((e) => ({
+                value: String(e.id),
+                label: e.full_name,
+              })) || []),
+            ]}
+            placeholder="Cari pegawai..."
+          />
+        )}
+
         <Input
           id="destination"
           label="Tujuan Kota/Daerah *"

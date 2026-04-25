@@ -1,7 +1,8 @@
 import type {
   OvertimeRequest,
   CreateOvertimePayload,
-  UpdateOvertimeStatusPayload,
+  ApproveOvertimePayload,
+  RejectOvertimePayload,
   OvertimeListParams,
 } from "@/types/overtime";
 import { apiCall } from "@/lib/api";
@@ -46,12 +47,23 @@ export async function createOvertimeRequest(
   });
 }
 
-/** PUT /overtime-requests/:id — Update overtime status (approve/reject) */
-export async function updateOvertimeStatus(
+/** POST /overtime-requests/:id/approve — Approve overtime request */
+export async function approveOvertimeRequest(
   id: number,
-  payload: UpdateOvertimeStatusPayload,
+  payload: ApproveOvertimePayload,
 ) {
-  return apiCall<OvertimeRequest>(`/overtime-requests/${id}`, {
+  return apiCall<OvertimeRequest>(`/overtime-requests/${id}/approve`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** POST /overtime-requests/:id/reject — Reject overtime request */
+export async function rejectOvertimeRequest(
+  id: number,
+  payload: RejectOvertimePayload,
+) {
+  return apiCall<OvertimeRequest>(`/overtime-requests/${id}/reject`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });

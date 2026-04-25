@@ -1,5 +1,18 @@
 export type WorkLocationType = "office" | "home" | "outside";
-export type OvertimeStatus = "pending" | "approved" | "rejected";
+export type OvertimeStatus = "pending" | "approved_leader" | "approved_hr" | "rejected";
+export type ApprovalStatus = "pending" | "approved" | "rejected";
+
+export interface OvertimeApproval {
+  id: number;
+  overtime_request_id: number;
+  approver_id: number;
+  approver_name?: string;
+  level: number;
+  status: ApprovalStatus;
+  notes: string | null;
+  decided_at: string | null;
+  created_at: string;
+}
 
 export interface OvertimeRequest {
   id: number;
@@ -16,15 +29,14 @@ export interface OvertimeRequest {
   reason: string;
   work_location_type: WorkLocationType;
   status: OvertimeStatus;
-  approved_by: number | null;
-  approver_name?: string;
-  approver_notes: string | null;
+  approvals?: OvertimeApproval[];
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 }
 
 export interface CreateOvertimePayload {
+  employee_id?: number;
   attendance_log_id: number;
   overtime_date: string;
   planned_start?: string;
@@ -34,9 +46,12 @@ export interface CreateOvertimePayload {
   work_location_type: WorkLocationType;
 }
 
-export interface UpdateOvertimeStatusPayload {
-  status: OvertimeStatus;
-  approver_notes?: string;
+export interface ApproveOvertimePayload {
+  notes?: string;
+}
+
+export interface RejectOvertimePayload {
+  notes: string;
 }
 
 export interface OvertimeListParams {
@@ -59,6 +74,7 @@ export const OVERTIME_STATUS_OPTIONS: {
   color: string;
 }[] = [
   { value: "pending", label: "Menunggu", color: "yellow" },
-  { value: "approved", label: "Disetujui", color: "green" },
+  { value: "approved_leader", label: "Disetujui Leader", color: "blue" },
+  { value: "approved_hr", label: "Disetujui HR", color: "green" },
   { value: "rejected", label: "Ditolak", color: "red" },
 ];

@@ -73,6 +73,7 @@ export interface LeaveApproval {
 }
 
 export interface CreateLeavePayload {
+  employee_id?: number;
   leave_type_id: number;
   start_date: string;
   end_date: string;

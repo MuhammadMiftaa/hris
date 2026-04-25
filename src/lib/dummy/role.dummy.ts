@@ -13,6 +13,7 @@ export const DUMMY_ROLES: Role[] = [
   {
     id: 1,
     name: "Super Admin",
+    level: "superadmin",
     description: "Akses penuh ke semua modul dan fitur sistem",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
@@ -22,6 +23,7 @@ export const DUMMY_ROLES: Role[] = [
   {
     id: 2,
     name: "HRD Admin",
+    level: "admin",
     description: "Mengelola data pegawai, kehadiran, cuti, dan laporan HR",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
@@ -31,6 +33,7 @@ export const DUMMY_ROLES: Role[] = [
   {
     id: 3,
     name: "Branch Admin",
+    level: "admin",
     description: "Mengelola data cabang dan pegawai di cabang tersebut",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
@@ -40,6 +43,7 @@ export const DUMMY_ROLES: Role[] = [
   {
     id: 4,
     name: "Supervisor",
+    level: "manager",
     description: "Melihat dan menyetujui pengajuan tim",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
@@ -49,6 +53,7 @@ export const DUMMY_ROLES: Role[] = [
   {
     id: 5,
     name: "Staff",
+    level: "staff",
     description: "Akses dasar untuk pegawai biasa",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
@@ -451,6 +456,12 @@ export function getDummyRoleMetadata(): RoleMetadata {
       { id: "edit", name: "Edit" },
       { id: "delete", name: "Hapus" },
       { id: "approve", name: "Approve" },
+    ],
+    level_meta: [
+      { id: "superadmin", name: "Super Admin" },
+      { id: "admin", name: "Admin" },
+      { id: "manager", name: "Manager" },
+      { id: "staff", name: "Staff" },
     ],
   };
 }

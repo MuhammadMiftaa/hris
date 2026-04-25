@@ -4,9 +4,12 @@
 
 import type { MetaItem } from "./meta";
 
+export type RoleLevel = "superadmin" | "admin" | "manager" | "staff";
+
 export interface Role {
   id: number;
   name: string;
+  level: RoleLevel;
   description: string | null;
   created_at: string;
   updated_at: string;
@@ -35,11 +38,13 @@ export interface RolePermission {
 
 export interface CreateRolePayload {
   name: string;
+  level: RoleLevel;
   description?: string;
 }
 
 export interface UpdateRolePayload {
   name?: string;
+  level?: RoleLevel;
   description?: string;
 }
 
@@ -50,6 +55,7 @@ export interface UpdateRolePermissionsPayload {
 export interface RoleMetadata {
   module_meta: MetaItem[];
   action_meta: MetaItem[];
+  level_meta: MetaItem[];
 }
 
 

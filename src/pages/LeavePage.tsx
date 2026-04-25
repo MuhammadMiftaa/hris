@@ -24,6 +24,7 @@ import {
   useLeaveRequestMutations,
   useLeaveMetadata,
 } from "@/hooks/useLeave";
+import { useAuth } from "@/contexts/AuthContext";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
 import {
@@ -129,14 +130,19 @@ function LeaveRequestForm({
   onClose,
   onSubmit,
   isLoading,
+  employees,
+  isAdmin,
 }: {
   onClose: () => void;
   onSubmit: (payload: CreateLeavePayload) => void;
   isLoading?: boolean;
+  employees?: any[];
+  isAdmin?: boolean;
 }) {
   const { data: metadata } = useLeaveMetadata();
   const leaveTypes = metadata?.leave_type_meta;
   const [formData, setFormData] = useState({
+    employee_id: "",
     leave_type_id: "",
     start_date: "",
     end_date: "",
@@ -182,6 +188,7 @@ function LeaveRequestForm({
     e.preventDefault();
     if (!validate()) return;
     onSubmit({
+      employee_id: isAdmin && formData.employee_id ? parseInt(formData.employee_id) : undefined,
       leave_type_id: parseInt(formData.leave_type_id),
       start_date: formData.start_date,
       end_date: formData.end_date,
@@ -193,6 +200,21 @@ function LeaveRequestForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isAdmin && (
+        <SearchableSelect
+          label="Pegawai (Pilih jika mengajukan untuk staf)"
+          value={formData.employee_id}
+          onChange={(val) => handleChange("employee_id", val)}
+          options={[
+            { value: "", label: "-- Pengajuan Diri Sendiri --" },
+            ...(employees?.map((e) => ({
+              value: String(e.id),
+              label: e.name || e.full_name,
+            })) || []),
+          ]}
+          placeholder="Cari pegawai..."
+        />
+      )}
       <div className="space-y-1.5">
         <SearchableSelect
           label="Jenis Cuti"
@@ -550,6 +572,9 @@ function LeaveRequestTab() {
   const { data: requests, loading, refetch } = useLeaveRequestList(params);
   const { data: metadata } = useLeaveMetadata();
   const employees = metadata?.employee_meta;
+  const { user } = useAuth();
+  const isAdmin = user?.role_level === "admin" || user?.role_level === "superadmin";
+
   const {
     loading: mutLoading,
     createRequest,
@@ -800,7 +825,7 @@ function LeaveRequestTab() {
                     variant="neutral"
                     onClick={() => setSelectedRequest(req)}
                   />
-                  {req.status === "pending" && (
+                  {isPending(req.status) && (
                     <>
                       <PermissionGate permission={PERMISSIONS.LEAVE_UPDATE}>
                         <MobileActionButton
@@ -834,6 +859,8 @@ function LeaveRequestTab() {
           onClose={() => setShowForm(false)}
           onSubmit={handleCreate}
           isLoading={mutLoading}
+          employees={employees || []}
+          isAdmin={isAdmin}
         />
       </Modal>
 

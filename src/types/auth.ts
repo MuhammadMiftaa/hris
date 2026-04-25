@@ -15,6 +15,7 @@ export interface LoginAccount {
   department_id: number | null;
   job_positions_id: number | null;
   role_name: string;
+  role_level: string;
 }
 
 export interface LoginResponse {

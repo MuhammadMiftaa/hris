@@ -21,6 +21,7 @@ export interface PermissionRequest {
 }
 
 export interface CreatePermissionPayload {
+  employee_id?: number;
   permission_type: PermissionType;
   date: string;
   leave_time?: string | null;
