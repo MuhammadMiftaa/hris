@@ -43,6 +43,7 @@ export interface ShiftTemplate {
   id: number;
   name: string;
   is_flexible: boolean;
+  can_wfa: boolean;
   details: ShiftTemplateDetail[]; // child records per hari
   created_at: string;
   updated_at: string;
@@ -65,12 +66,14 @@ export interface CreateShiftDetailPayload {
 export interface CreateShiftPayload {
   name: string;
   is_flexible?: boolean;
+  can_wfa?: boolean;
   details: CreateShiftDetailPayload[]; // 7 entries (Sen–Min)
 }
 
 export interface UpdateShiftPayload {
   name?: string;
   is_flexible?: boolean;
+  can_wfa?: boolean;
   details?: CreateShiftDetailPayload[]; // partial update
 }
 

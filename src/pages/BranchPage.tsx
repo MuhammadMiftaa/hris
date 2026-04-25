@@ -275,14 +275,6 @@ function BranchForm({
         error={errors.radius_meters}
       />
 
-      <div className="pt-2">
-        <Toggle
-          checked={formData.allow_wfh}
-          onChange={(checked) => handleChange("allow_wfh", checked)}
-          label="Izinkan Work From Home (WFH)"
-        />
-      </div>
-
       <div className="flex justify-end gap-2 pt-4">
         <Button
           type="button"

@@ -13,6 +13,7 @@ import {
   ChevronUp,
   Copy,
   Eye,
+  Coffee
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateShort } from "@/utils/date";
@@ -560,6 +561,7 @@ function ShiftForm({
 }) {
   const [name, setName] = useState(editShift?.name || "");
   const [isFlexible, setIsFlexible] = useState(editShift?.is_flexible ?? false);
+  const [canWfa, setCanWfa] = useState(editShift?.can_wfa ?? false);
   const [details, setDetails] = useState<CreateShiftDetailPayload[]>(() => {
     if (editShift?.details && editShift.details.length > 0) {
       // Sort by day order and convert
@@ -694,6 +696,7 @@ function ShiftForm({
     const payload: CreateShiftPayload = {
       name: name.trim(),
       is_flexible: isFlexible,
+      can_wfa: canWfa,
       details: details,
     };
 
@@ -714,7 +717,7 @@ function ShiftForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Header: Name + Flexible toggle */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <Input
           id="name"
           label="Nama Shift"
@@ -726,7 +729,7 @@ function ShiftForm({
           placeholder="Contoh: Shift Reguler"
           error={errors.name}
         />
-        <div className="flex items-end pb-1">
+        <div className="flex items-end pb-1 gap-6">
           <label className="flex items-center gap-3 cursor-pointer">
             <div
               className={cn(
@@ -743,6 +746,23 @@ function ShiftForm({
               />
             </div>
             <span className="text-sm text-(--foreground)">Fleksibel</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div
+              className={cn(
+                "relative h-6 w-11 rounded-full transition-colors",
+                canWfa ? "bg-(--primary)" : "bg-(--muted)",
+              )}
+              onClick={() => setCanWfa(!canWfa)}
+            >
+              <div
+                className={cn(
+                  "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                  canWfa ? "translate-x-5" : "translate-x-0.5",
+                )}
+              />
+            </div>
+            <span className="text-sm text-(--foreground)">Bisa WFA</span>
           </label>
         </div>
       </div>
@@ -975,6 +995,7 @@ function SkeletonShiftTable() {
                 "Jam Pulang",
                 "Break",
                 "Fleksibel",
+                "Bisa WFA",
                 "Aksi",
               ].map((h) => (
                 <th key={h} className="px-5 py-3 text-left">
@@ -1000,6 +1021,9 @@ function SkeletonShiftTable() {
                 </td>
                 <td className="px-5 py-4">
                   <Skeleton className="h-4 w-32" />
+                </td>
+                <td className="px-5 py-4">
+                  <Skeleton className="h-5 w-12 rounded-full" />
                 </td>
                 <td className="px-5 py-4">
                   <Skeleton className="h-5 w-12 rounded-full" />
@@ -1396,6 +1420,9 @@ function TemplateShiftTab({
                     <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
                       Fleksibel
                     </th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
+                      Bisa WFA
+                    </th>
                     <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
                       Aksi
                     </th>
@@ -1459,6 +1486,19 @@ function TemplateShiftTab({
                           </span>
                         </td>
                         <td className="px-5 py-4">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                              shift.can_wfa
+                                ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                                : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+                            )}
+                          >
+                            {shift.can_wfa && <Coffee size={12} />}
+                            {shift.can_wfa ? "Ya" : "Tidak"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
                           <div className="flex justify-end gap-1">
                             <button
                               onClick={() => setDetailShift(shift)}
@@ -1502,7 +1542,7 @@ function TemplateShiftTab({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <p className="font-semibold text-(--foreground)">
                           {shift.name}
                         </p>
@@ -1516,6 +1556,17 @@ function TemplateShiftTab({
                         >
                           {shift.is_flexible && <Zap size={12} />}
                           {shift.is_flexible ? "Fleksibel" : "Tetap"}
+                        </span>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                            shift.can_wfa
+                              ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                              : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+                          )}
+                        >
+                          {shift.can_wfa && <Coffee size={12} />}
+                          {shift.can_wfa ? "Bisa WFA" : "Di Kantor"}
                         </span>
                       </div>
                       <p className="text-xs text-(--muted-foreground) mb-2">
