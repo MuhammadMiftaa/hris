@@ -25,6 +25,7 @@ import { useRoleMetadata } from "@/hooks/useMetadata";
 import type { Role, Permission, CreateRolePayload, RoleMetadata, RoleLevel } from "@/types/role";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 // ════════════════════════════════════════════
 // MODAL WRAPPER
@@ -176,32 +177,18 @@ function RoleForm({
         error={errors.name}
         autoFocus
       />
-
-      <div className="space-y-1.5">
-        <label
-          htmlFor="level"
-          className="block text-sm font-medium text-(--foreground) opacity-80"
-        >
-          Level Role
-        </label>
-        <select
-          id="level"
-          value={level}
-          onChange={(e) => setLevel(e.target.value as RoleLevel)}
-          className={cn(
-            "w-full rounded-lg border bg-(--input) px-4 py-2.5 text-sm text-(--foreground)",
-            "border-(--border) placeholder:text-(--muted-foreground)",
-            "transition-colors duration-200",
-            "focus:border-(--ring) focus:outline-none focus:ring-1 focus:ring-(--ring)",
-          )}
-        >
-          {metadata?.level_meta?.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      
+      <SearchableSelect
+        label="Level Role"
+        value={level}
+        onChange={(val) => setLevel(val as RoleLevel)}
+        options={metadata?.level_meta?.map((item) => ({
+          value: item.id,
+          label: item.name,
+        })) || []}
+        placeholder="Pilih level role..."
+        searchPlaceholder="Cari level role..."
+      />
 
       <div className="space-y-1.5">
         <label
