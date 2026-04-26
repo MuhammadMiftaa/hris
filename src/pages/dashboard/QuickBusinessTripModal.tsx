@@ -6,6 +6,7 @@ import { useBusinessTripMutations } from "@/hooks/useBusinessTrip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEmployeeList } from "@/hooks/useEmployee";
 import { Modal } from "@/components/ui/Modal";
+import { DocumentUploader } from "@/components/ui/DocumentUploader";
 
 export function QuickBusinessTripModal({ onClose }: { onClose: () => void }) {
   const { createTrip, loading } = useBusinessTripMutations();
@@ -140,14 +141,13 @@ export function QuickBusinessTripModal({ onClose }: { onClose: () => void }) {
             <p className="text-xs text-(--destructive)">{errors.purpose}</p>
           )}
         </div>
-        <Input
-          id="document_url"
-          label="URL Surat Tugas (opsional)"
+        <DocumentUploader
           value={formData.document_url}
-          onChange={(e) =>
-            setFormData((p) => ({ ...p, document_url: e.target.value }))
+          onChange={(key) =>
+            setFormData((p) => ({ ...p, document_url: key }))
           }
-          placeholder="https://..."
+          documentType="business_trip"
+          label="Surat Tugas (opsional)"
         />
         <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
           <Button

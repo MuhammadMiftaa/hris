@@ -38,14 +38,11 @@ export function useOvertimeList(params?: OvertimeListParams) {
   });
 
   const fetchRef = useRef(0);
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
-
   const refetch = useCallback(() => {
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyOvertimeRequests(paramsRef.current),
+        data: getDummyOvertimeRequests(params),
         loading: false,
         error: null,
       });
@@ -56,7 +53,7 @@ export function useOvertimeList(params?: OvertimeListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchOvertimeRequests(paramsRef.current)
+    fetchOvertimeRequests(params)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -69,17 +66,12 @@ export function useOvertimeList(params?: OvertimeListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo]);
+  }, [isDemo, params]);
 
+  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch]);
-
-  // Refetch when params change
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params?.employee_id, params?.status]);
+  }, [refetch, paramsJson]);
 
   return { ...state, refetch };
 }

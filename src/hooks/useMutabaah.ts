@@ -47,13 +47,10 @@ export function useMutabaahList(params?: MutabaahListParams) {
   });
 
   const fetchRef = useRef(0);
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
-
   const refetch = useCallback(() => {
     if (isDemo) {
       setState({
-        data: getDummyMutabaahLogs(paramsRef.current),
+        data: getDummyMutabaahLogs(params),
         loading: false,
         error: null,
       });
@@ -63,7 +60,7 @@ export function useMutabaahList(params?: MutabaahListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchMutabaahLogs(paramsRef.current)
+    fetchMutabaahLogs(params)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -78,21 +75,12 @@ export function useMutabaahList(params?: MutabaahListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo]);
+  }, [isDemo, params]);
 
+  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch]);
-
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    params?.employee_id,
-    params?.start_date,
-    params?.end_date,
-    params?.is_submitted,
-  ]);
+  }, [refetch, paramsJson]);
 
   return { ...state, refetch };
 }

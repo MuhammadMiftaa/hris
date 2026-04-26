@@ -77,11 +77,12 @@ export function useEmployeeList(params?: EmployeeListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params?.branch_id, params?.department_id, params?.is_active, params?.search]);
+  }, [isDemo, params]);
 
+  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch]);
+  }, [refetch, paramsJson]);
 
   return { ...state, refetch };
 }

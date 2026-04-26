@@ -171,7 +171,7 @@ export interface DepartmentRanking {
 export interface DashboardRankingsData {
   fastest_arrival: RankingEntry[];
   top_tilawah: DepartmentRanking[];
-  most_late: RankingEntry[];
+  fastest_mutabaah: RankingEntry[];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

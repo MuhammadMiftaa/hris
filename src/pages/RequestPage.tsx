@@ -53,6 +53,8 @@ import {
   type CreateOvertimePayload,
 } from "@/types/overtime";
 import { MobileActionButton } from "@/components/ui/Button";
+import { DocumentUploader } from "@/components/ui/DocumentUploader";
+import { useDocumentDownload } from "@/hooks/useDocument";
 
 // ════════════════════════════════════════════
 // STATUS BADGES
@@ -424,6 +426,7 @@ function BusinessTripDetailModal({
 }) {
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectNotes, setRejectNotes] = useState("");
+  const { downloadFile } = useDocumentDownload();
 
 
 
@@ -496,14 +499,12 @@ function BusinessTripDetailModal({
                 <p className="text-xs text-(--muted-foreground) mb-1">
                   Surat Tugas
                 </p>
-                <a
-                  href={trip.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-(--primary) hover:underline"
+                <button
+                  onClick={() => downloadFile(trip.document_url!, "business_trip", `SuratTugas_${trip.employee_name}.pdf`)}
+                  className="text-sm text-(--primary) hover:underline text-left"
                 >
-                  Lihat Dokumen →
-                </a>
+                  Unduh Dokumen ↓
+                </button>
               </div>
             )}
             {trip.approver_notes && (
@@ -1090,14 +1091,11 @@ function BusinessTripForm({
           <p className="text-xs text-(--destructive)">{errors.purpose}</p>
         )}
       </div>
-      <Input
-        id="document_url"
-        label="URL Surat Tugas (opsional)"
+      <DocumentUploader
         value={formData.document_url}
-        onChange={(e) =>
-          setFormData((p) => ({ ...p, document_url: e.target.value }))
-        }
-        placeholder="https://..."
+        onChange={(key) => setFormData((p) => ({ ...p, document_url: key }))}
+        documentType="business_trip"
+        label="Surat Tugas (opsional)"
       />
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
         <Button
@@ -1322,8 +1320,8 @@ function PermissionTab() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as RequestStatus | undefined,
-      permission_type: filterType as PermissionType | undefined,
+      status: (filterStatus as RequestStatus) || undefined,
+      permission_type: (filterType as PermissionType) || undefined,
     }),
     [filterEmployee, filterStatus, filterType],
   );
@@ -1610,7 +1608,7 @@ function BusinessTripTab() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as TripStatus | undefined,
+      status: (filterStatus as TripStatus) || undefined,
     }),
     [filterEmployee, filterStatus],
   );
@@ -1642,6 +1640,7 @@ function BusinessTripTab() {
     setDetailTrip(null);
   };
 
+  const { downloadFile } = useDocumentDownload();
 
 
   return (
@@ -1720,6 +1719,7 @@ function BusinessTripTab() {
                       "Periode",
                       "Hari",
                       "Keperluan",
+                      "Dokumen",
                       "Status",
                       "Aksi",
                     ].map((h) => (
@@ -1758,7 +1758,16 @@ function BusinessTripTab() {
                         {trip.purpose}
                       </td>
                       <td className="px-5 py-3">
-                        <StatusBadge status={trip.status} />
+                        {trip.document_url ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); downloadFile(trip.document_url!, "business_trip"); }}
+                            className="text-sm text-(--primary) hover:underline whitespace-nowrap"
+                          >
+                            📎 Unduh
+                          </button>
+                        ) : (
+                          <span className="text-sm text-(--muted-foreground)">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3">
                         <ApprovalActions
@@ -1799,6 +1808,14 @@ function BusinessTripTab() {
                 <p className="text-xs text-(--foreground) line-clamp-2 mb-3">
                   {trip.purpose}
                 </p>
+                {trip.document_url && (
+                  <button
+                    onClick={() => downloadFile(trip.document_url!, "business_trip")}
+                    className="text-xs text-(--primary) hover:underline mb-3"
+                  >
+                    📎 Unduh Dokumen
+                  </button>
+                )}
                 <div className="flex gap-2">
                   <MobileActionButton
                     icon={Eye}
@@ -1873,7 +1890,7 @@ function OvertimeTab() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as OvertimeStatus | undefined,
+      status: (filterStatus as OvertimeStatus) || undefined,
     }),
     [filterEmployee, filterStatus],
   );

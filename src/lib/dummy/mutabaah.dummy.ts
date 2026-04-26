@@ -313,16 +313,6 @@ export function getDummyMutabaahDailyReport(): MutabaahDailyReport[] {
       submitted_at: getTimestamp(getDateString(0), "07:30"),
     },
     {
-      employee_id: 4,
-      employee_name: "Aisyah Rahmawati",
-      employee_number: "EMP-004",
-      department_name: "Human Resource & General Affair",
-      is_trainer: false,
-      target_pages: 5,
-      is_submitted: false,
-      submitted_at: null,
-    },
-    {
       employee_id: 5,
       employee_name: "Muhammad Rizki",
       employee_number: "EMP-005",
@@ -371,16 +361,6 @@ export function getDummyMutabaahDailyReport(): MutabaahDailyReport[] {
       target_pages: 5,
       is_submitted: true,
       submitted_at: getTimestamp(getDateString(0), "08:20"),
-    },
-    {
-      employee_id: 10,
-      employee_name: "Nurul Hidayah",
-      employee_number: "EMP-010",
-      department_name: "Akademik",
-      is_trainer: false,
-      target_pages: 5,
-      is_submitted: false,
-      submitted_at: null,
     },
   ];
 }

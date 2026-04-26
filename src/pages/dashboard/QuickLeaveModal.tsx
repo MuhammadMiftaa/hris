@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEmployeeList } from "@/hooks/useEmployee";
 import { Modal } from "@/components/ui/Modal";
 import { cn } from "@/lib/utils";
+import { DocumentUploader } from "@/components/ui/DocumentUploader";
 
 export function QuickLeaveModal({ onClose }: { onClose: () => void }) {
   const { data: metadata } = useDashboardMetadata();
@@ -154,12 +155,11 @@ export function QuickLeaveModal({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <Input
-          id="document_url"
-          label="URL Dokumen Pendukung"
+        <DocumentUploader
           value={formData.document_url}
-          onChange={(e) => handleChange("document_url", e.target.value)}
-          placeholder="https://..."
+          onChange={(key) => handleChange("document_url", key)}
+          documentType="leave"
+          label="Dokumen Pendukung"
           error={errors.document_url}
         />
 

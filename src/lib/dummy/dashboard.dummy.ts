@@ -170,28 +170,14 @@ const DUMMY_APPROVAL_COUNTS = {
 };
 
 const DUMMY_TEAM_ATTENDANCE: TeamAttendanceSummary = {
-  total_employees: 45,
+  total_employees: 43,
   present_today: 38,
   late_today: 3,
-  not_clocked_in: 4,
+  not_clocked_in: 2,
   on_leave: 2,
 };
 
 const DUMMY_NOT_CLOCKED_IN: NotClockedInEmployee[] = [
-  {
-    employee_id: 5,
-    employee_name: "Dewi Lestari",
-    employee_number: "EMP-005",
-    department_name: "Finance & Accounting",
-    shift_start: "08:00",
-  },
-  {
-    employee_id: 6,
-    employee_name: "Rizki Pratama",
-    employee_number: "EMP-006",
-    department_name: "IT Development",
-    shift_start: "08:00",
-  },
   {
     employee_id: 8,
     employee_name: "Dinda Permata",
@@ -291,12 +277,12 @@ export function getDummyRankingsDashboard(): DashboardRankingsData {
       { rank: 4, department_id: 4, department_name: "Marketing", value: 80.5, value_label: "80.5%" },
       { rank: 5, department_id: 5, department_name: "Operations", value: 75.0, value_label: "75.0%" },
     ],
-    most_late: [
-      { rank: 1, employee_id: 6, employee_name: "Rizki Pratama", employee_number: "EMP-006", value: 125, value_label: "125m" },
-      { rank: 2, employee_id: 7, employee_name: "Dinda Permata", employee_number: "EMP-007", value: 90, value_label: "90m" },
-      { rank: 3, employee_id: 8, employee_name: "Agus Wijaya", employee_number: "EMP-008", value: 45, value_label: "45m" },
-      { rank: 4, employee_id: 9, employee_name: "Siti Nurhaliza", employee_number: "EMP-009", value: 30, value_label: "30m" },
-      { rank: 5, employee_id: 10, employee_name: "Bayu Anggara", employee_number: "EMP-010", value: 15, value_label: "15m" },
+    fastest_mutabaah: [
+      { rank: 1, employee_id: 1, employee_name: "Ahmad Fauzan", employee_number: "EMP-001", value: 5, value_label: "07:57" },
+      { rank: 2, employee_id: 3, employee_name: "Usman Hakim", employee_number: "EMP-003", value: 12, value_label: "08:04" },
+      { rank: 3, employee_id: 5, employee_name: "Muhammad Rizki", employee_number: "EMP-005", value: 15, value_label: "08:07" },
+      { rank: 4, employee_id: 2, employee_name: "Fatimah Azzahra", employee_number: "EMP-002", value: 20, value_label: "08:12" },
+      { rank: 5, employee_id: 8, employee_name: "Zahra Putri", employee_number: "EMP-008", value: 30, value_label: "08:22" },
     ],
   };
 }

@@ -36,14 +36,11 @@ export function useBusinessTripList(params?: BusinessTripListParams) {
   });
 
   const fetchRef = useRef(0);
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
-
   const refetch = useCallback(() => {
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyBusinessTrips(paramsRef.current),
+        data: getDummyBusinessTrips(params),
         loading: false,
         error: null,
       });
@@ -54,7 +51,7 @@ export function useBusinessTripList(params?: BusinessTripListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchBusinessTrips(paramsRef.current)
+    fetchBusinessTrips(params)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -67,17 +64,12 @@ export function useBusinessTripList(params?: BusinessTripListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo]);
+  }, [isDemo, params]);
 
+  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch]);
-
-  // Refetch when params change
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params?.employee_id, params?.status]);
+  }, [refetch, paramsJson]);
 
   return { ...state, refetch };
 }

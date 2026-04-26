@@ -803,7 +803,7 @@ function AttendanceLogTab() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as AttendanceStatus | undefined,
+      status: (filterStatus as AttendanceStatus) || undefined,
       branch_id: filterBranch ? parseInt(filterBranch) : undefined,
       start_date: filterStartDate || undefined,
       end_date: filterEndDate || undefined,
@@ -1214,7 +1214,7 @@ function AttendanceOverrideTab() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as AttendanceOverride["status"] | undefined,
+      status: (filterStatus as AttendanceOverride["status"]) || undefined,
     }),
     [filterEmployee, filterStatus],
   );

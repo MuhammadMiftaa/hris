@@ -365,17 +365,17 @@ function TopTilawahRanking({ data }: { data: DepartmentRanking[] }) {
   );
 }
 
-function MostLateRanking({ data }: { data: RankingEntry[] }) {
+function FastestMutabaahRanking({ data }: { data: RankingEntry[] }) {
   if (!data?.length) return null;
-  const maxVal = Math.max(...data.map(d => d.value), 1);
+  const maxVal = Math.max(...data.map(d => Math.abs(d.value)), 1);
 
   return (
     <div className="rounded-xl border border-(--border) bg-(--card) p-4 flex flex-col h-full">
       <div className="flex items-center gap-2 mb-4">
-        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-amber-500/10 text-amber-600">
-          <AlertTriangle size={16} />
+        <div className="flex items-center justify-center h-8 w-8 rounded-md bg-teal-500/10 text-teal-600">
+          <BookOpen size={16} />
         </div>
-        <h3 className="font-semibold text-sm text-(--foreground)">Terlambat Terbanyak</h3>
+        <h3 className="font-semibold text-sm text-(--foreground)">Tercepat Mutaba'ah</h3>
       </div>
       <div className="flex-1 flex flex-col justify-center space-y-1">
         {data.map((item, i) => (
@@ -384,10 +384,10 @@ function MostLateRanking({ data }: { data: RankingEntry[] }) {
             rank={item.rank}
             label={item.employee_name}
             initials={item.employee_name.substring(0, 2).toUpperCase()}
-            avatarBg={i === 0 ? "#f59e0b20" : "var(--muted)"}
-            avatarColor={i === 0 ? "#f59e0b" : "var(--muted-foreground)"}
-            barPercent={(item.value / maxVal) * 100}
-            barColor="#f59e0b"
+            avatarBg={i === 0 ? "#14b8a620" : "var(--muted)"}
+            avatarColor={i === 0 ? "#14b8a6" : "var(--muted-foreground)"}
+            barPercent={(Math.abs(item.value) / maxVal) * 100}
+            barColor="#14b8a6"
             valueLabel={item.value_label}
           />
         ))}
@@ -404,7 +404,7 @@ function DashboardRankingsWidget() {
   const rankingSlides = [
     <FastestArrivalRanking key="fastest" data={data.fastest_arrival} />,
     <TopTilawahRanking key="tilawah" data={data.top_tilawah} />,
-    <MostLateRanking key="late" data={data.most_late} />,
+    <FastestMutabaahRanking key="mutabaah" data={data.fastest_mutabaah} />,
   ].filter(Boolean);
  
   return (
@@ -415,7 +415,7 @@ function DashboardRankingsWidget() {
       <div className="hidden md:grid gap-4 lg:grid-cols-3">
         <FastestArrivalRanking data={data.fastest_arrival} />
         <TopTilawahRanking data={data.top_tilawah} />
-        <MostLateRanking data={data.most_late} />
+        <FastestMutabaahRanking data={data.fastest_mutabaah} />
       </div>
  
       {/* Mobile Carousel — shadcn Carousel + Instagram-style dots */}

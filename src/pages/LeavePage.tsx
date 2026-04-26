@@ -24,6 +24,7 @@ import {
   useLeaveRequestMutations,
   useLeaveMetadata,
 } from "@/hooks/useLeave";
+import { useDocumentDownload } from "@/hooks/useDocument";
 import { useAuth } from "@/contexts/AuthContext";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
@@ -34,6 +35,7 @@ import {
   type CreateLeavePayload,
 } from "@/types/leave";
 import { MobileActionButton } from "@/components/ui/Button";
+import { DocumentUploader } from "@/components/ui/DocumentUploader";
 
 // ════════════════════════════════════════════
 // STATUS BADGE
@@ -277,12 +279,11 @@ function LeaveRequestForm({
         />
       </div>
 
-      <Input
-        id="document_url"
-        label="URL Dokumen Pendukung"
+      <DocumentUploader
         value={formData.document_url}
-        onChange={(e) => handleChange("document_url", e.target.value)}
-        placeholder="https://..."
+        onChange={(key) => handleChange("document_url", key)}
+        documentType="leave"
+        label="Dokumen Pendukung"
         error={errors.document_url}
       />
 
@@ -322,6 +323,7 @@ function LeaveDetailModal({
 }) {
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectNotes, setRejectNotes] = useState("");
+  const { downloadFile } = useDocumentDownload();
 
   const CATEGORY_LABELS: Record<string, string> = {
     annual: "Cuti Tahunan",
@@ -416,14 +418,12 @@ function LeaveDetailModal({
               <p className="text-xs text-(--muted-foreground) mb-1">
                 Dokumen Pendukung
               </p>
-              <a
-                href={request.document_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-(--primary) hover:underline"
+              <button
+                onClick={() => downloadFile(request.document_url!, "leave", `Dokumen_${request.employee_name}.pdf`)}
+                className="text-sm text-(--primary) hover:underline text-left"
               >
-                Lihat Dokumen →
-              </a>
+                Unduh Dokumen ↓
+              </button>
             </div>
           )}
 
@@ -563,7 +563,7 @@ function LeaveRequestTab() {
   const params = useMemo(
     () => ({
       employee_id: filterEmployee ? parseInt(filterEmployee) : undefined,
-      status: filterStatus as LeaveRequestStatus | undefined,
+      status: (filterStatus as LeaveRequestStatus) || undefined,
       year: filterYear ? parseInt(filterYear) : undefined,
     }),
     [filterEmployee, filterStatus, filterYear],
@@ -597,6 +597,7 @@ function LeaveRequestTab() {
     setSelectedRequest(null);
   };
 
+  const { downloadFile } = useDocumentDownload();
 
 
   const CATEGORY_LABELS: Record<string, string> = {
@@ -694,6 +695,7 @@ function LeaveRequestTab() {
                       "Periode",
                       "Hari",
                       "Alasan",
+                      "Dokumen",
                       "Status",
                       "Aksi",
                     ].map((h) => (
@@ -739,6 +741,18 @@ function LeaveRequestTab() {
                       </td>
                       <td className="px-5 py-3 text-sm text-(--muted-foreground) max-w-xs truncate">
                         {req.reason || "—"}
+                      </td>
+                      <td className="px-5 py-3">
+                        {req.document_url ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); downloadFile(req.document_url!, "leave"); }}
+                            className="text-sm text-(--primary) hover:underline whitespace-nowrap"
+                          >
+                            📎 Unduh
+                          </button>
+                        ) : (
+                          <span className="text-sm text-(--muted-foreground)">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3">
                         <LeaveStatusBadge status={req.status} />
@@ -818,6 +832,14 @@ function LeaveRequestTab() {
                     <p>{req.total_days} hari</p>
                   </div>
                 </div>
+                {req.document_url && (
+                  <button
+                    onClick={() => downloadFile(req.document_url!, "leave")}
+                    className="text-xs text-(--primary) hover:underline mb-3"
+                  >
+                    📎 Unduh Dokumen
+                  </button>
+                )}
                 <div className="flex gap-2">
                   <MobileActionButton
                     icon={Eye}
