@@ -36,12 +36,15 @@ export function usePermissionRequestList(params?: PermissionListParams) {
   });
 
   const fetchRef = useRef(0);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
 
   const refetch = useCallback(() => {
+    const p = paramsRef.current;
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyPermissionRequests(params),
+        data: getDummyPermissionRequests(p),
         loading: false,
         error: null,
       });
@@ -52,7 +55,7 @@ export function usePermissionRequestList(params?: PermissionListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchPermissionRequests(params)
+    fetchPermissionRequests(p)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -65,12 +68,21 @@ export function usePermissionRequestList(params?: PermissionListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params]);
+  }, [isDemo]);
 
-  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch, paramsJson]);
+  }, [refetch]);
+
+  // Refetch when params change
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.employee_id,
+    params?.status,
+    params?.permission_type,
+  ]);
 
   return { ...state, refetch };
 }

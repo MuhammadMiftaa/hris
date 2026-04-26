@@ -48,12 +48,15 @@ export function useEmployeeList(params?: EmployeeListParams) {
   });
 
   const fetchRef = useRef(0);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
 
   const refetch = useCallback(() => {
+    const p = paramsRef.current;
     // Demo mode: use dummy data with client-side filtering
     if (isDemo) {
       setState({
-        data: getDummyEmployees(params),
+        data: getDummyEmployees(p),
         loading: false,
         error: null,
       });
@@ -64,7 +67,7 @@ export function useEmployeeList(params?: EmployeeListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchEmployees(params)
+    fetchEmployees(p)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -77,12 +80,22 @@ export function useEmployeeList(params?: EmployeeListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params]);
+  }, [isDemo]);
 
-  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch, paramsJson]);
+  }, [refetch]);
+
+  // Refetch when params change
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.is_active,
+    params?.department_id,
+    params?.branch_id,
+    params?.search,
+  ]);
 
   return { ...state, refetch };
 }

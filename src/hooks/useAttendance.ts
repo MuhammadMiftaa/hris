@@ -40,11 +40,15 @@ export function useAttendanceList(params?: AttendanceListParams) {
   });
 
   const fetchRef = useRef(0);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+
   const refetch = useCallback(() => {
+    const p = paramsRef.current;
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyAttendanceLogs(params),
+        data: getDummyAttendanceLogs(p),
         loading: false,
         error: null,
       });
@@ -55,7 +59,7 @@ export function useAttendanceList(params?: AttendanceListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchAttendanceLogs(params)
+    fetchAttendanceLogs(p)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -68,12 +72,23 @@ export function useAttendanceList(params?: AttendanceListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params]);
+  }, [isDemo]);
 
-  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch, paramsJson]);
+  }, [refetch]);
+
+  // Refetch when params change
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.employee_id,
+    params?.status,
+    params?.branch_id,
+    params?.start_date,
+    params?.end_date,
+  ]);
 
   return { ...state, refetch };
 }
@@ -91,11 +106,15 @@ export function useOverrideList(params?: OverrideListParams) {
   });
 
   const fetchRef = useRef(0);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+
   const refetch = useCallback(() => {
+    const p = paramsRef.current;
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyAttendanceOverrides(params),
+        data: getDummyAttendanceOverrides(p),
         loading: false,
         error: null,
       });
@@ -106,7 +125,7 @@ export function useOverrideList(params?: OverrideListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchAttendanceOverrides(params)
+    fetchAttendanceOverrides(p)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -119,12 +138,20 @@ export function useOverrideList(params?: OverrideListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params]);
+  }, [isDemo]);
 
-  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch, paramsJson]);
+  }, [refetch]);
+
+  // Refetch when params change
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.employee_id,
+    params?.status,
+  ]);
 
   return { ...state, refetch };
 }

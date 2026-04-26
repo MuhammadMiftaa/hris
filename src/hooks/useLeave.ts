@@ -153,11 +153,15 @@ export function useLeaveBalanceList(params?: LeaveBalanceListParams) {
   });
 
   const fetchRef = useRef(0);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+
   const refetch = useCallback(() => {
+    const p = paramsRef.current;
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyLeaveBalances(params),
+        data: getDummyLeaveBalances(p),
         loading: false,
         error: null,
       });
@@ -168,7 +172,7 @@ export function useLeaveBalanceList(params?: LeaveBalanceListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchLeaveBalances(params)
+    fetchLeaveBalances(p)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -181,12 +185,20 @@ export function useLeaveBalanceList(params?: LeaveBalanceListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params]);
+  }, [isDemo]);
 
-  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch, paramsJson]);
+  }, [refetch]);
+
+  // Refetch when params change
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.employee_id,
+    params?.year,
+  ]);
 
   return { ...state, refetch };
 }
@@ -204,11 +216,15 @@ export function useLeaveRequestList(params?: LeaveListParams) {
   });
 
   const fetchRef = useRef(0);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+
   const refetch = useCallback(() => {
+    const p = paramsRef.current;
     // Demo mode: use dummy data
     if (isDemo) {
       setState({
-        data: getDummyLeaveRequests(params),
+        data: getDummyLeaveRequests(p),
         loading: false,
         error: null,
       });
@@ -219,7 +235,7 @@ export function useLeaveRequestList(params?: LeaveListParams) {
     const id = ++fetchRef.current;
     setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchLeaveRequests(params)
+    fetchLeaveRequests(p)
       .then((res) => {
         if (id === fetchRef.current) {
           setState({ data: res.data, loading: false, error: null });
@@ -232,12 +248,22 @@ export function useLeaveRequestList(params?: LeaveListParams) {
           setState({ data: null, loading: false, error: message });
         }
       });
-  }, [isDemo, params]);
+  }, [isDemo]);
 
-  const paramsJson = JSON.stringify(params);
   useEffect(() => {
     refetch();
-  }, [refetch, paramsJson]);
+  }, [refetch]);
+
+  // Refetch when params change
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.employee_id,
+    params?.status,
+    params?.leave_type_id,
+    params?.year,
+  ]);
 
   return { ...state, refetch };
 }
