@@ -1110,7 +1110,11 @@ export function EmployeeDetailPage() {
                   "linear-gradient(135deg, #9d167c 0%, #d10071 60%, #dd0d89 100%)",
               }}
             >
-              {employee.full_name
+              {employee.photo_url ? (<img
+                src={employee.photo_url}
+                alt="Profile"
+                className="h-full w-full object-cover rounded-full"
+              /> ): employee.full_name
                 .split(" ")
                 .map((n) => n[0])
                 .join("")
