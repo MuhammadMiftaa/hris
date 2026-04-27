@@ -23,6 +23,7 @@ import {
 } from "@/hooks/useDailyReport";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 import { useEmployeeList } from "@/hooks/useEmployee";
+import { useEmployeeDashboard } from "@/hooks/useDashboard";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
 import type {
@@ -443,6 +444,8 @@ export function DailyReportPage() {
     updateReport,
   } = useDailyReportMutations(refetch);
 
+  const { data: empDashData } = useEmployeeDashboard();
+
   // Client-side search
   const filtered = useMemo(() => {
     if (!reports) return [];
@@ -466,7 +469,13 @@ export function DailyReportPage() {
   }, [filtered]);
 
   const handleCreate = async (payload: CreateDailyReportPayload) => {
-    const result = await createReport(payload);
+    const finalPayload = { ...payload };
+    const logId = empDashData?.mutabaah_today?.attendance_log_id;
+    if (logId) {
+      finalPayload.attendance_log_id = logId;
+    }
+
+    const result = await createReport(finalPayload);
     if (result) {
       setShowForm(false);
       setEditReport(null);

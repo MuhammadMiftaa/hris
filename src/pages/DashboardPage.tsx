@@ -1133,8 +1133,11 @@ export function DashboardPage() {
     await cancelToday(logId);
   };
 
-  const handleClockIn = (payload: ClockInPayload) => {
-    clockWidget.clockIn(payload);
+  const handleClockIn = async (payload: ClockInPayload) => {
+    const success = await clockWidget.clockIn(payload);
+    if (success) {
+      refetchDashboard();
+    }
   };
 
   const handleClockOut = (payload: ClockOutPayload) => {
