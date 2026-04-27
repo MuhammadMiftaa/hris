@@ -12,9 +12,14 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
-export interface ApiError {
+export class ApiError extends Error {
   statusCode: number;
-  message: string;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.name = "ApiError";
+    this.statusCode = statusCode;
+  }
 }
 
 // ============================================
@@ -87,11 +92,10 @@ export async function apiCall<T>(
   }
 
   if (!response.ok || data.status === false) {
-    const error: ApiError = {
-      statusCode: data.statusCode || response.status,
-      message: data.message || "Something went wrong",
-    };
-    throw error;
+    throw new ApiError(
+      data.message || "Something went wrong",
+      data.statusCode || response.status,
+    );
   }
 
   return data as ApiResponse<T>;

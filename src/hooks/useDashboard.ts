@@ -235,9 +235,17 @@ export function useClockWidget(): ClockWidgetHookReturn {
         refetch();
         return true;
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Gagal melakukan clock in";
-        toast.error(message);
+        if (err instanceof ApiError) {
+          if (err.statusCode === 403) {
+            toast.error("Tidak memiliki akses")
+          } else {
+            toast.error(err.message)
+          }
+        } else if (err instanceof Error) {
+          toast.error("Koneksi bermasalah")
+        } else {
+          toast.error("Terjadi kesalahan")
+        }
         return false;
       } finally {
         setLoading(false);
@@ -261,9 +269,17 @@ export function useClockWidget(): ClockWidgetHookReturn {
         refetch();
         return true;
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Gagal melakukan clock out";
-        toast.error(message);
+        if (err instanceof ApiError) {
+          if (err.statusCode === 403) {
+            toast.error("Tidak memiliki akses")
+          } else {
+            toast.error(err.message)
+          }
+        } else if (err instanceof Error) {
+          toast.error("Koneksi bermasalah")
+        } else {
+          toast.error("Terjadi kesalahan")
+        }
         return false;
       } finally {
         setLoading(false);
@@ -287,6 +303,7 @@ export function useClockWidget(): ClockWidgetHookReturn {
 // ══════════════════════════════════════════════════════════════════════════════
 
 import type { DashboardRankingsData } from "@/types/dashboard";
+import { ApiError } from "@/lib/api";
 
 export function useDashboardRankings() {
   const { isDemo } = useDemo();
