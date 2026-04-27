@@ -65,7 +65,7 @@ export function QuickAttendanceCorrectionModal({ onClose }: { onClose: () => voi
           }
           options={recentAttendances.map((a) => ({
             value: String(a.id),
-            label: formatDateLong(a.name),
+            label: a.name,
           }))}
           placeholder="Pilih log presensi..."
         />

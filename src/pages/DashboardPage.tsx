@@ -1123,7 +1123,7 @@ export function DashboardPage() {
 
   const handleMutabaahSubmit = async () => {
     // Opsional: passing attendance_log_id jika ada, tapi bukan requirement
-    const attendanceLogId = empDashData?.mutabaah_today?.attendance_log_id ?? 0;
+    const attendanceLogId = empDashData?.mutabaah_today?.attendance_log_id ?? undefined;
     await submitToday(attendanceLogId);
   };
 
