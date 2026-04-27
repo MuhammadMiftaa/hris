@@ -69,7 +69,7 @@ export const ATTENDANCE_STATUS_OPTIONS: {
   { value: "absent", label: "Absen", color: "red" },
   { value: "half_day", label: "Setengah Hari", color: "orange" },
   { value: "leave", label: "Cuti", color: "blue" },
-  { value: "business_trip", label: "Dinas Luar", color: "purple" },
+  { value: "business_trip", label: "Tugas", color: "purple" },
   { value: "holiday", label: "Libur", color: "gray" },
 ];
 

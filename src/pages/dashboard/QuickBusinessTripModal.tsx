@@ -63,7 +63,7 @@ export function QuickBusinessTripModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal open title="Ajukan Dinas Luar" onClose={onClose}>
+    <Modal open title="Ajukan Tugas" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {isAdmin && (
           <SearchableSelect

@@ -43,8 +43,8 @@ export function QuickRequestSection() {
       icon: Plane,
       iconBg: "bg-[#e6f1fb] dark:bg-[#185fa5]/20",
       iconColor: "text-[#185fa5] dark:text-[#e6f1fb]",
-      label: "Dinas Luar",
-      sublabel: "Perjalanan dinas",
+      label: "Tugas",
+      sublabel: "Tugas luar kota",
       permission: PERMISSIONS.REQUEST_CREATE,
     },
     {

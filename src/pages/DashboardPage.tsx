@@ -409,7 +409,7 @@ function DashboardRankingsWidget() {
  
   return (
     <div className="space-y-3 mt-8">
-      <h2 className="text-sm font-semibold text-(--foreground)">Peringkat Bulan Ini</h2>
+      <h2 className="text-sm font-semibold text-(--foreground)">Peringkat Hari Ini</h2>
  
       {/* Desktop Grid — unchanged */}
       <div className="hidden md:grid gap-4 lg:grid-cols-3">
