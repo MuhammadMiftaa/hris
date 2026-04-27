@@ -5,7 +5,6 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useOverrideMutations } from "@/hooks/useAttendance";
 import { OVERRIDE_TYPE_OPTIONS, type OverrideType } from "@/types/attendance-override";
 import { useDashboardMetadata } from "@/hooks/useDashboard";
-import { formatDateLong } from "@/utils/date";
 import { Modal } from "@/components/ui/Modal";
 
 export function QuickAttendanceCorrectionModal({ onClose }: { onClose: () => void }) {
