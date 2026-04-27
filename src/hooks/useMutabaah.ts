@@ -135,7 +135,7 @@ export function useMutabaahActions(onSuccess?: () => void) {
   }, [refetchToday]);
 
   const submitToday = useCallback(
-    async (attendanceLogId: number) => {
+    async (attendanceLogId?: number) => {
       if (isDemo) {
         toast("Demo mode — data is read-only", { icon: "🔒" });
         return null;
@@ -143,7 +143,7 @@ export function useMutabaahActions(onSuccess?: () => void) {
       setActionLoading(true);
       try {
         const res = await submitMutabaahApi({
-          attendance_log_id: attendanceLogId,
+          attendance_log_id: attendanceLogId ?? undefined,
         });
         toast.success("Tilawah berhasil dicatat");
         refetchToday();

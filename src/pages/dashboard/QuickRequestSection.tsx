@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 import { QuickLeaveModal } from "./QuickLeaveModal";
 import { QuickPermissionModal } from "./QuickPermissionModal";
 import { QuickBusinessTripModal } from "./QuickBusinessTripModal";
-import { QuickOvertimeModal } from "./QuickOvertimeModal";
+import { QuickAttendanceCorrectionModal } from "./QuickAttendanceCorrectionModal";
 import { PermissionGate } from "@/components/ui/PermissionGate";
 import { PERMISSIONS } from "@/constants/permission";
 
 export function QuickRequestSection() {
   const [activeModal, setActiveModal] = useState<
-    "leave" | "permission" | "trip" | "overtime" | null
+    "leave" | "permission" | "trip" | "correction" | null
   >(null);
 
   const cards = [
@@ -48,13 +48,13 @@ export function QuickRequestSection() {
       permission: PERMISSIONS.REQUEST_CREATE,
     },
     {
-      key: "overtime" as const,
+      key: "correction" as const,
       icon: ClipboardList,
       iconBg: "bg-[#eaf3de] dark:bg-[#3b6d11]/20",
       iconColor: "text-[#3b6d11] dark:text-[#eaf3de]",
-      label: "Lembur",
-      sublabel: "Overtime kerja",
-      permission: PERMISSIONS.REQUEST_CREATE,
+      label: "Koreksi",
+      sublabel: "Koreksi presensi",
+      permission: PERMISSIONS.ATTENDANCE_ADJUSTMENT_CREATE,
     },
   ];
 
@@ -91,8 +91,8 @@ export function QuickRequestSection() {
       {activeModal === "trip" && (
         <QuickBusinessTripModal onClose={() => setActiveModal(null)} />
       )}
-      {activeModal === "overtime" && (
-        <QuickOvertimeModal onClose={() => setActiveModal(null)} />
+      {activeModal === "correction" && (
+        <QuickAttendanceCorrectionModal onClose={() => setActiveModal(null)} />
       )}
     </div>
   );

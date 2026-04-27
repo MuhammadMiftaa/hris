@@ -865,7 +865,7 @@ function ScheduleForm({
       shift_template_id: parseInt(formData.shift_template_id),
       effective_date: formData.effective_date,
       end_date: formData.end_date || null,
-      ...(editSchedule && { is_active: formData.is_active }),
+      is_active: formData.is_active,
     };
 
     onSubmit(payload);
@@ -950,15 +950,13 @@ function ScheduleForm({
         </div>
       </div>
 
-      {editSchedule && (
-        <div className="pt-2">
-          <Toggle
-            checked={formData.is_active}
-            onChange={(checked) => handleChange("is_active", checked)}
-            label="Jadwal Aktif"
-          />
-        </div>
-      )}
+      <div className="pt-2">
+        <Toggle
+          checked={formData.is_active}
+          onChange={(checked) => handleChange("is_active", checked)}
+          label="Jadwal Aktif"
+        />
+      </div>
 
       <div className="flex justify-end gap-2 pt-4 border-t border-(--border)">
         <Button

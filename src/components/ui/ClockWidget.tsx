@@ -33,29 +33,89 @@ function getGeolocation(): Promise<{ latitude: number; longitude: number }> {
       reject(new Error("Geolocation tidak didukung browser ini"));
       return;
     }
+
+    const handleSuccess = (pos: GeolocationPosition) =>
+      resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+
+    const handleError = (err: GeolocationPositionError) => {
+      switch (err.code) {
+        case err.PERMISSION_DENIED:
+          reject(new Error("Izin akses lokasi ditolak. Aktifkan GPS Anda."));
+          break;
+        case err.POSITION_UNAVAILABLE:
+          reject(new Error("Lokasi tidak tersedia."));
+          break;
+        default:
+          reject(new Error("Gagal mendapatkan lokasi."));
+      }
+    };
+
+    // Phase 1: High accuracy (10s timeout)
     navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        }),
+      handleSuccess,
       (err) => {
-        switch (err.code) {
-          case err.PERMISSION_DENIED:
-            reject(new Error("Izin akses lokasi ditolak. Aktifkan GPS Anda."));
-            break;
-          case err.POSITION_UNAVAILABLE:
-            reject(new Error("Lokasi tidak tersedia."));
-            break;
-          case err.TIMEOUT:
-            reject(new Error("Timeout saat mendapatkan lokasi."));
-            break;
-          default:
-            reject(new Error("Gagal mendapatkan lokasi."));
+        if (err.code === err.TIMEOUT) {
+          // Phase 2: Fallback to low accuracy (20s timeout)
+          console.warn("GPS high accuracy timeout, falling back to low accuracy...");
+          navigator.geolocation.getCurrentPosition(
+            handleSuccess,
+            handleError,
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 },
+          );
+        } else {
+          handleError(err);
         }
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
+  });
+}
+
+/** Compress image to ~500KB using canvas */
+async function compressImage(file: File, maxSizeKB = 500): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+
+      // Scale down if needed (max 1280px on longest side)
+      const MAX_DIM = 1280;
+      let { width, height } = img;
+      if (width > MAX_DIM || height > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(file); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Try quality levels until under target size
+      let quality = 0.7;
+      const tryCompress = () => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            if (blob.size > maxSizeKB * 1024 && quality > 0.3) {
+              quality -= 0.1;
+              tryCompress();
+            } else {
+              resolve(new File([blob], file.name, { type: "image/jpeg" }));
+            }
+          },
+          "image/jpeg",
+          quality,
+        );
+      };
+      tryCompress();
+    };
+    img.onerror = () => reject(new Error("Gagal memproses gambar"));
+    img.src = url;
   });
 }
 
@@ -113,25 +173,29 @@ export function ClockWidget({
       }
 
       try {
-        // 1. Get presigned URL
-        toast.loading("Memproses foto...", { id: "clock-process" });
-        const presignRes = await presignClockPhoto(processingAction);
+        toast.loading("Memproses...", { id: "clock-process" });
+
+        // Phase 1: Compress image + Get presigned URL (parallel)
+        const [compressed, presignRes] = await Promise.all([
+          compressImage(file),
+          presignClockPhoto(processingAction),
+        ]);
         const { upload_url, object_key } = presignRes.data;
 
-        // 2. Upload photo
-        await uploadPhotoToPresigned(upload_url, file);
-
-        // 3. Get GPS location
-        toast.loading("Mendapatkan lokasi GPS...", { id: "clock-process" });
-        const { latitude, longitude } = await getGeolocation();
+        // Phase 2: Upload compressed photo + Get GPS (parallel)
+        toast.loading("Upload foto & mendapatkan lokasi...", { id: "clock-process" });
+        const [, geoResult] = await Promise.all([
+          uploadPhotoToPresigned(upload_url, compressed),
+          getGeolocation(),
+        ]);
 
         toast.dismiss("clock-process");
 
-        // 4. Call clock in/out with payload
+        // Phase 3: Call clock in/out with payload
         const payload = {
           photo_key: object_key,
-          latitude,
-          longitude,
+          latitude: geoResult.latitude,
+          longitude: geoResult.longitude,
         };
 
         if (processingAction === "clock_in") {

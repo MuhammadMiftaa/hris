@@ -6,7 +6,7 @@ export interface MutabaahLog {
   id: number;
   employee_id: number;
   employee_name?: string;
-  attendance_log_id: number;
+  attendance_log_id: number | null;
   log_date: string;
   is_submitted: boolean;
   submitted_at: string | null;
@@ -30,7 +30,7 @@ export function deriveMutabaahStatus(
 }
 
 export interface MutabaahSubmitPayload {
-  attendance_log_id: number;
+  attendance_log_id?: number;
 }
 
 export interface MutabaahCancelPayload {
