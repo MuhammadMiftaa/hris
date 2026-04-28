@@ -66,7 +66,7 @@ function getGeolocation(): Promise<{ latitude: number; longitude: number }> {
           handleError(err);
         }
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 },
     );
   });
 }
